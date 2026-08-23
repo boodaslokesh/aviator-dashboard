@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Aviator Intelligence Command Center</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Alpine.js CDN -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #07101d;
@@ -29,17 +34,17 @@
       touch-action: manipulation;
     }
 
-    body { display: flex; flex-direction: column; padding: 0.3rem; gap: 0.3rem; }
+    body { display: flex; flex-direction: column; padding: 0.4rem; gap: 0.4rem; position: relative; }
 
     header {
       background: #0d1a2e;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.35rem 0.5rem;
+      border-radius: 10px;
+      padding: 0.5rem 0.7rem;
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 0.45rem;
     }
 
     .top-bar {
@@ -49,33 +54,33 @@
       width: 100%;
     }
 
-    .brand { display: flex; align-items: center; gap: 0.4rem; font-weight: 800; font-size: 0.85rem; color: var(--accent); }
-    .mark { width: 22px; height: 22px; border-radius: 5px; background: linear-gradient(135deg, var(--success), var(--blue)); color: #07101d; display: grid; place-items: center; font-size: 0.75rem; font-weight: 900; }
+    .brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 800; font-size: 0.95rem; color: var(--accent); }
+    .mark { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, var(--success), var(--blue)); color: #07101d; display: grid; place-items: center; font-size: 0.85rem; font-weight: 900; }
 
     select.view-selector {
       background: #142641;
       color: var(--text);
       border: 1px solid var(--blue);
-      padding: 0.2rem 0.4rem;
-      border-radius: 5px;
-      font-size: 0.75rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
       font-weight: 700;
       outline: none;
     }
 
     .controls {
       display: grid;
-      grid-template-columns: 0.9fr 1.3fr 1.3fr auto auto;
-      gap: 0.25rem;
+      grid-template-columns: 1fr 1.4fr 1.4fr auto auto;
+      gap: 0.35rem;
       align-items: center;
     }
 
-    .field-group { display: flex; flex-direction: column; gap: 0.1rem; }
-    .field-group label { font-size: 0.55rem; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+    .field-group { display: flex; flex-direction: column; gap: 0.15rem; }
+    .field-group label { font-size: 0.62rem; color: var(--muted); font-weight: 700; text-transform: uppercase; }
 
     .time-inputs {
       display: flex;
-      gap: 0.12rem;
+      gap: 0.18rem;
       align-items: center;
     }
 
@@ -83,62 +88,64 @@
       background: #081426;
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 0.2rem 0.1rem;
-      border-radius: 4px;
-      font-size: 0.62rem;
+      padding: 0.35rem 0.2rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
       outline: none;
       width: 100%;
       text-align: center;
     }
 
     input.ctrl-input {
-      width: 28px;
+      width: 34px;
       flex-shrink: 0;
     }
 
     button {
       border: 0;
-      padding: 0.3rem 0.45rem;
-      border-radius: 4px;
+      padding: 0.45rem 0.7rem;
+      border-radius: 6px;
       font-weight: 700;
-      font-size: 0.68rem;
+      font-size: 0.78rem;
       cursor: pointer;
       white-space: nowrap;
       height: 100%;
+      transition: opacity 0.1s;
     }
+    button:active { opacity: 0.8; }
 
     button.btn-sync { background: linear-gradient(135deg, var(--success), #76caff); color: #07101d; }
     button.btn-refresh { background: #1c3151; color: var(--text); border: 1px solid var(--border); }
 
     main {
       flex: 1;
-      height: calc(100vh - 85px);
+      height: calc(100vh - 95px);
       min-height: 0;
       position: relative;
     }
 
-    .view-panel { display: none; height: 100%; min-height: 0; }
+    .view-panel { display: none; height: 100%; min-height: 0; overflow-y: auto; }
     .view-panel.active { display: flex; flex-direction: column; }
 
-    .metrics-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.3rem; flex-shrink: 0; margin-bottom: 0.3rem; }
-    .metric { background: var(--card-bg); border: 1px solid var(--border); border-radius: 5px; padding: 0.3rem 0.4rem; }
-    .metric .label { color: var(--muted); font-size: 0.58rem; font-weight: 700; text-transform: uppercase; }
-    .metric .value { font-size: clamp(0.9rem, 1.8vh, 1.1rem); font-weight: 800; }
-    .metric .note { font-size: 0.55rem; color: var(--muted); }
+    .metrics-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem; flex-shrink: 0; margin-bottom: 0.4rem; }
+    .metric { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0.5rem; }
+    .metric .label { color: var(--muted); font-size: 0.62rem; font-weight: 700; text-transform: uppercase; }
+    .metric .value { font-size: clamp(1rem, 2vh, 1.25rem); font-weight: 800; }
+    .metric .note { font-size: 0.6rem; color: var(--muted); }
 
-    .panel-block { background: #0d1a2e; border: 1px solid var(--border); border-radius: 6px; padding: 0.35rem; display: flex; flex-direction: column; min-height: 0; flex: 1; }
-    .panel-block h2 { font-size: 0.75rem; color: var(--accent); margin-bottom: 0.25rem; }
+    .panel-block { background: #0d1a2e; border: 1px solid var(--border); border-radius: 8px; padding: 0.45rem; display: flex; flex-direction: column; min-height: 0; flex: 1; }
+    .panel-block h2 { font-size: 0.8rem; color: var(--accent); margin-bottom: 0.3rem; }
 
     .table-wrap { flex: 1; min-height: 0; overflow-y: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: clamp(0.58rem, 1.15vh, 0.65rem); }
-    th { color: #8fa5c7; text-align: left; font-size: 0.55rem; text-transform: uppercase; background: #0e1c31; position: sticky; top: 0; padding: 0.2rem 0.3rem; }
-    td { padding: 0.18rem 0.3rem; border-bottom: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: clamp(0.65rem, 1.25vh, 0.72rem); }
+    th { color: #8fa5c7; text-align: left; font-size: 0.6rem; text-transform: uppercase; background: #0e1c31; position: sticky; top: 0; padding: 0.3rem 0.4rem; }
+    td { padding: 0.25rem 0.4rem; border-bottom: 1px solid var(--border); }
     td.num, th.num { text-align: right; }
 
     .dashboard-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 0.35rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0.4rem;
       flex: 1;
       height: 100%;
       min-height: 0;
@@ -148,56 +155,50 @@
     .target-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.35rem;
+      border-radius: 8px;
+      padding: 0.45rem;
       display: flex;
       flex-direction: column;
       height: 100%;
       min-height: 0;
     }
 
-    .target-header { font-size: 0.78rem; font-weight: 700; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 0.15rem; flex-shrink: 0; }
+    .target-header { font-size: 0.85rem; font-weight: 700; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 0.2rem; flex-shrink: 0; }
     
     .multipliers-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(2, 1fr);
-      gap: 0.25rem;
+      gap: 0.3rem;
       flex: 1;
-      margin-top: 0.2rem;
+      margin-top: 0.3rem;
       min-height: 0;
     }
 
     .strategy-box {
       background: rgba(7, 16, 29, 0.6);
       border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 0.2rem 0.3rem;
-      font-size: clamp(0.58rem, 1.1vh, 0.68rem);
+      border-radius: 6px;
+      padding: 0.3rem 0.4rem;
+      font-size: clamp(0.62rem, 1.2vh, 0.72rem);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       min-height: 0;
     }
 
-    .strategy-title { font-weight: 700; font-size: clamp(0.62rem, 1.2vh, 0.72rem); display: flex; justify-content: space-between; align-items: center; }
-    .badge { padding: 0.05rem 0.2rem; border-radius: 3px; font-size: 0.52rem; font-weight: 700; text-transform: uppercase; }
+    .strategy-title { font-weight: 700; font-size: clamp(0.68rem, 1.3vh, 0.78rem); display: flex; justify-content: space-between; align-items: center; }
+    .badge { padding: 0.08rem 0.25rem; border-radius: 4px; font-size: 0.58rem; font-weight: 700; text-transform: uppercase; }
     .badge.success { background: rgba(79, 219, 182, 0.2); color: var(--success); }
     .badge.danger { background: rgba(255, 113, 139, 0.2); color: var(--danger); }
 
-    .stat-row { display: flex; justify-content: space-between; color: var(--muted); white-space: nowrap; line-height: 1.1; }
+    .stat-row { display: flex; justify-content: space-between; color: var(--muted); white-space: nowrap; line-height: 1.2; }
     .stat-value { color: var(--text); font-weight: 600; }
-    .reached-section { background: rgba(79, 219, 182, 0.08); border: 1px dashed rgba(79, 219, 182, 0.3); border-radius: 3px; padding: 0.1rem 0.2rem; margin: 0.08rem 0; }
+    .reached-section { background: rgba(79, 219, 182, 0.08); border: 1px dashed rgba(79, 219, 182, 0.3); border-radius: 4px; padding: 0.15rem 0.3rem; margin: 0.1rem 0; }
     .positive { color: var(--success); } .negative { color: var(--danger); } .neutral { color: var(--amber); }
-
-    .raw-terminal {
-      white-space: pre-wrap; word-break: break-word; color: #b9c9e2; background: #040912;
-      border: 1px solid var(--border); padding: 0.4rem; border-radius: 6px; flex: 1; min-height: 0;
-      overflow-y: auto; font: 0.6rem/1.35 monospace;
-    }
   </style>
 </head>
-<body>
+<body x-data="aviatorApp()" x-init="window.streakApp = $data">
 
   <header>
     <div class="top-bar">
@@ -207,17 +208,17 @@
         <option value="overviewView">📊 1. Daily Overview</option>
         <option value="targetView">🎯 2. Target Analytics</option>
         <option value="cashoutView">📊 3. Cashout Performance</option>
-        <option value="roundsView">📄 4. Raw Round Data</option>
+        <option value="streakView">📈 4. Sequence & Streak Analytics</option>
       </select>
     </div>
 
     <div class="controls">
       <div class="field-group">
         <label>Date</label>
-        <select id="dateSelect" class="ctrl-dropdown"></select>
+        <select id="dateSelect" class="ctrl-dropdown" @change="syncAllData()"></select>
       </div>
 
-      <!-- FROM FIELD: Hour Dropdown + Min Input + Sec Input -->
+      <!-- FROM FIELD -->
       <div class="field-group">
         <label>From (Hr/Min/Sec)</label>
         <div class="time-inputs">
@@ -227,7 +228,7 @@
         </div>
       </div>
 
-      <!-- TO FIELD: Hour Dropdown + Min Input + Sec Input -->
+      <!-- TO FIELD -->
       <div class="field-group">
         <label>To (Hr/Min/Sec)</label>
         <div class="time-inputs">
@@ -282,12 +283,104 @@
       </article>
     </section>
 
-    <!-- PAGE 4: Raw Round Data Feed -->
-    <section class="view-panel" id="roundsView">
-      <article class="panel-block">
-        <h2>Downloaded Raw Rounds Feed</h2>
-        <div class="raw-terminal" id="rawTerminalOutput">Tap 'Sync' to load raw feed.</div>
-      </article>
+    <!-- PAGE 4: Sequence & Streak Analytics -->
+    <section class="view-panel p-2.5 space-y-3 bg-slate-950 text-slate-100" id="streakView">
+        
+        <!-- Metrics Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+                <p class="text-[11px] text-slate-400 font-medium">Total Records</p>
+                <h3 class="text-xl font-bold text-white mt-1" x-text="allRecords.length">0</h3>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+                <p class="text-[11px] text-slate-400 font-medium">Highest Multiplier</p>
+                <h3 class="text-lg font-bold text-amber-400 mt-1 truncate" x-text="highestMultiplier">1.00x</h3>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+                <p class="text-[11px] text-slate-400 font-medium">Peak Active Hour</p>
+                <h3 class="text-base font-bold text-emerald-400 mt-1 truncate" x-text="peakHour">N/A</h3>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+                <p class="text-[11px] text-slate-400 font-medium">Longest 1.x Streak</p>
+                <h3 class="text-lg font-bold text-rose-400 mt-1 truncate" x-text="maxStreak1x + ' in a row'">0</h3>
+            </div>
+        </div>
+
+        <!-- Detailed Streak Sequences Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
+            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Drought & Below-Threshold Streaks</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                <div class="bg-slate-950 border border-slate-800/80 rounded-lg p-3">
+                    <span class="text-xs text-amber-400 font-semibold block">Streak Below 10.00x</span>
+                    <p class="text-sm font-bold text-slate-200 mt-1" x-text="streakBelow10.count + ' games in a row'"></p>
+                    <p class="text-[10px] text-slate-500 mt-1 truncate" x-text="streakBelow10.timeframe"></p>
+                </div>
+                <div class="bg-slate-950 border border-slate-800/80 rounded-lg p-3">
+                    <span class="text-xs text-emerald-400 font-semibold block">Streak Below 20.00x</span>
+                    <p class="text-sm font-bold text-slate-200 mt-1" x-text="streakBelow20.count + ' games in a row'"></p>
+                    <p class="text-[10px] text-slate-500 mt-1 truncate" x-text="streakBelow20.timeframe"></p>
+                </div>
+                <div class="bg-slate-950 border border-slate-800/80 rounded-lg p-3">
+                    <span class="text-xs text-indigo-400 font-semibold block">Streak Below 30.00x</span>
+                    <p class="text-sm font-bold text-slate-200 mt-1" x-text="streakBelow30.count + ' games in a row'"></p>
+                    <p class="text-[10px] text-slate-500 mt-1 truncate" x-text="streakBelow30.timeframe"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hourly Counts Summary Bar -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Hourly Count Breakdown</h4>
+            <div class="flex gap-2.5 overflow-x-auto pb-1.5 scrollbar-thin">
+                <template x-for="(count, hourRange) in hourlyCounts" :key="hourRange">
+                    <div class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-center min-w-[125px] flex-shrink-0">
+                        <span class="text-[11px] font-medium text-slate-400 block" x-text="hourRange"></span>
+                        <span class="text-xs font-bold text-amber-400 mt-0.5 block" x-text="count + ' entries'"></span>
+                    </div>
+                </template>
+                <template x-if="Object.keys(hourlyCounts).length === 0">
+                    <div class="text-slate-500 text-xs py-1">No data loaded yet.</div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Dataset Logs Table -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+            <div class="px-3.5 py-3 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+                <h2 class="font-semibold text-xs text-slate-200">Dataset Logs (Latest First)</h2>
+                <span class="text-xs text-slate-400 font-mono" x-text="allRecords.length + ' rows'"></span>
+            </div>
+            <div class="overflow-y-auto max-h-[300px]">
+                <table class="w-full text-left border-collapse font-mono text-xs">
+                    <thead class="bg-slate-950 sticky top-0 text-[11px] font-semibold text-slate-400 uppercase border-b border-slate-800">
+                        <tr>
+                            <th class="py-2.5 px-3.5">#</th>
+                            <th class="py-2.5 px-3.5">Date</th>
+                            <th class="py-2.5 px-3.5">Timestamp</th>
+                            <th class="py-2.5 px-3.5 text-right">Multiplier</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60">
+                        <template x-for="(row, index) in allRecords" :key="index">
+                            <tr class="hover:bg-slate-800/45 transition">
+                                <td class="py-2.5 px-3.5 text-slate-500" x-text="allRecords.length - index"></td>
+                                <td class="py-2.5 px-3.5 text-slate-300" x-text="row.date"></td>
+                                <td class="py-2.5 px-3.5 text-slate-200 font-semibold" x-text="row.time"></td>
+                                <td class="py-2.5 px-3.5 text-right font-bold" 
+                                    :class="row.multiplier >= 10 ? 'text-amber-400' : (row.multiplier >= 3 ? 'text-emerald-400' : 'text-slate-300')"
+                                    x-text="row.rawMultiplier">
+                                </td>
+                            </tr>
+                        </template>
+                        <template x-if="allRecords.length === 0">
+                            <tr>
+                                <td colspan="4" class="py-8 text-center text-slate-500 text-xs">No records available.</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </section>
   </main>
 
@@ -354,7 +447,6 @@
       el.value = val.toString().padStart(2, '0');
     }
 
-    // Formats into hh:mm:ss AM/PM
     function getFormattedTimeString(hourVal, minVal, secVal) {
       let [hh, ampm] = hourVal.split(':');
       let mm = minVal.toString().padStart(2, '0');
@@ -408,20 +500,21 @@
 
       if (!dateVal) return;
 
-      fetchTargetAnalytics(dateVal);
-      fetchLiveIntelligence(dateVal, fromVal, toVal);
-      fetchRawRoundsData(dateVal);
+      try {
+        await Promise.all([
+          fetchTargetAnalytics(dateVal),
+          fetchLiveIntelligence(dateVal, fromVal, toVal),
+          window.streakApp && typeof window.streakApp.loadRawDataForStreaks === 'function' ? window.streakApp.loadRawDataForStreaks(dateVal) : Promise.resolve()
+        ]);
+      } catch (e) {
+        console.error("Sync error:", e);
+      }
     }
 
     async function fetchTargetAnalytics(dateStr) {
       const container = document.getElementById('targetContainer');
-      container.innerHTML = '<div style="text-align:center; padding:1.5rem; width:100%; color:var(--muted)">Fetching target metrics...</div>';
-
       try {
-        const response = await fetch(`${TARGET_PROFIT_API}?date=${encodeURIComponent(dateStr)}&t=${Date.now()}`, {
-          cache: 'no-store',
-          headers: { 'Cache-Control': 'no-cache' }
-        });
+        const response = await fetch(`${TARGET_PROFIT_API}?date=${encodeURIComponent(dateStr)}`);
         const data = await response.json();
         renderTargetGrid(data);
       } catch (err) {
@@ -491,7 +584,7 @@
                 </div>
               </div>
 
-              <div style="border-top: 1px dashed var(--border); padding-top: 0.1rem; margin-top: 0.1rem;">
+              <div style="border-top: 1px dashed var(--border); padding-top: 0.15rem; margin-top: 0.15rem;">
                 <div class="stat-row">
                   <span>Final Profit:</span>
                   <span class="stat-value ${finalProfitClass}">${item.finalProfit >= 0 ? '+' : ''}${item.finalProfit}</span>
@@ -513,12 +606,12 @@
 
     async function fetchLiveIntelligence(dateStr, fromTime, toTime) {
       try {
-        const q = `date=${encodeURIComponent(dateStr)}&t=${Date.now()}`;
+        const q = `date=${encodeURIComponent(dateStr)}`;
         const rangeQ = `${q}&fromTime=${encodeURIComponent(fromTime)}&toTime=${encodeURIComponent(toTime)}`;
 
         const [dailyRes, rangedRes] = await Promise.all([
-          fetch(`${GET_DATA_API}?${q}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.json()),
-          fetch(`${GET_DATA_API}?${rangeQ}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).then(r => r.json())
+          fetch(`${GET_DATA_API}?${q}`).then(r => r.json()),
+          fetch(`${GET_DATA_API}?${rangeQ}`).then(r => r.json())
         ]);
 
         if (Array.isArray(dailyRes)) renderDailyOverview(dailyRes);
@@ -576,26 +669,167 @@
       document.getElementById('overviewRangeTableBody').innerHTML = rowsHtml;
     }
 
-    async function fetchRawRoundsData(dateStr) {
-      const output = document.getElementById('rawTerminalOutput');
-      output.textContent = 'Loading live raw rounds feed...';
+    function aviatorApp() {
+      return {
+        allRecords: [],
+        highestMultiplier: '1.00x',
+        maxStreak1x: 0,
+        streakBelow10: { count: 0, timeframe: 'None' },
+        streakBelow20: { count: 0, timeframe: 'None' },
+        streakBelow30: { count: 0, timeframe: 'None' },
 
-      try {
-        // Cache busting parameter and no-cache directive to prevent mobile delay
-        const response = await fetch(`${RAW_API}?date=${encodeURIComponent(dateStr)}&t=${Date.now()}`, {
-          cache: 'no-store',
-          headers: { 'Cache-Control': 'no-cache' }
-        });
-        const text = await response.text();
-        
-        // Asynchronous non-blocking UI update prevents mobile CPU thread lockup
-        setTimeout(() => {
-          output.textContent = text;
-          output.scrollTop = output.scrollHeight;
-        }, 0);
+        async loadRawDataForStreaks(dateStr) {
+          try {
+            const response = await fetch(`${RAW_API}?date=${encodeURIComponent(dateStr)}`);
+            const text = await response.text();
+            this.parseStreakData(text);
+          } catch (err) {
+            console.error("Error loading streaks data:", err);
+          }
+        },
 
-      } catch (err) {
-        output.textContent = `Error loading raw rounds: ${err.message}`;
+        parseStreakData(rawText) {
+          const lines = rawText.split('\n');
+          let parsed = [];
+
+          lines.forEach(line => {
+            const parts = line.split(',');
+            if (parts.length >= 3) {
+              const date = parts[0].trim();
+              const time = parts[1].trim();
+              const rawMultiplier = parts[2].trim();
+              const multiplierNum = parseFloat(rawMultiplier.replace('x', '')) || 0;
+              const timestampObj = this.parseTimestamp(`${date} ${time}`);
+
+              parsed.push({ date, time, rawMultiplier, multiplier: multiplierNum, timestampObj });
+            }
+          });
+
+          parsed.sort((a, b) => b.timestampObj - a.timestampObj);
+          this.allRecords = parsed;
+          this.runAnalytics();
+        },
+
+        runAnalytics() {
+          if (this.allRecords.length === 0) return;
+
+          let maxObj = this.allRecords.reduce((max, r) => r.multiplier > max.multiplier ? r : max, this.allRecords[0]);
+          this.highestMultiplier = `${maxObj.rawMultiplier} (${maxObj.time})`;
+
+          let chrono = [...this.allRecords].reverse();
+
+          let s1x = 0, max1x = 0;
+          chrono.forEach(r => {
+            if (r.multiplier >= 1.0 && r.multiplier < 2.0) {
+              s1x++;
+              if (s1x > max1x) max1x = s1x;
+            } else {
+              s1x = 0;
+            }
+          });
+          this.maxStreak1x = max1x;
+
+          this.streakBelow10 = this.calculateBelowStreak(chrono, 10.0);
+          this.streakBelow20 = this.calculateBelowStreak(chrono, 20.0);
+          this.streakBelow30 = this.calculateBelowStreak(chrono, 30.0);
+        },
+
+        calculateBelowStreak(data, threshold) {
+          let currentCount = 0;
+          let maxCount = 0;
+          let startTime = '';
+          let endTime = '';
+          let bestStart = '';
+          let bestEnd = '';
+
+          data.forEach(r => {
+            if (r.multiplier < threshold) {
+              if (currentCount === 0) startTime = r.time;
+              currentCount++;
+              endTime = r.time;
+
+              if (currentCount > maxCount) {
+                maxCount = currentCount;
+                bestStart = startTime;
+                bestEnd = endTime;
+              }
+            } else {
+              currentCount = 0;
+            }
+          });
+
+          return {
+            count: maxCount,
+            timeframe: maxCount > 0 ? `${bestStart} to ${bestEnd}` : 'No drought recorded'
+          };
+        },
+
+        parseTimestamp(str) {
+          try {
+            const [datePart, timePart, period] = str.replace(',', '').split(' ');
+            const [day, month, year] = datePart.split('/');
+            let [hours, minutes, seconds] = timePart.split(':');
+            
+            if (period === 'PM' && hours !== '12') hours = String(parseInt(hours, 10) + 12);
+            if (period === 'AM' && hours === '12') hours = '00';
+
+            return new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}`);
+          } catch (e) {
+            return new Date(0);
+          }
+        },
+
+        get hourlyCounts() {
+          let counts = {};
+          for (let h = 0; h < 24; h++) {
+            let startH = h % 12 === 0 ? 12 : h % 12;
+            let startPeriod = h < 12 ? 'AM' : 'PM';
+            let nextH = (h + 1) % 12 === 0 ? 12 : (h + 1) % 12;
+            let nextPeriod = (h + 1) < 24 && (h + 1) !== 12 ? startPeriod : (startPeriod === 'AM' ? 'PM' : 'AM');
+            
+            let label = `${String(startH).padStart(2, '0')}:00 ${startPeriod} - ${String(nextH).padStart(2, '0')}:00 ${nextPeriod}`;
+            counts[label] = 0;
+          }
+
+          this.allRecords.forEach(r => {
+            try {
+              const [timePart, period] = r.time.split(' ');
+              let [hh] = timePart.split(':');
+              let hourNum = parseInt(hh, 10);
+              if (period === 'PM' && hourNum !== 12) hourNum += 12;
+              if (period === 'AM' && hourNum === 12) hourNum = 0;
+
+              let startH = hourNum % 12 === 0 ? 12 : hourNum % 12;
+              let startPeriod = hourNum < 12 ? 'AM' : 'PM';
+              let nextH = (hourNum + 1) % 12 === 0 ? 12 : (hourNum + 1) % 12;
+              let nextPeriod = (hourNum + 1) < 24 && (hourNum + 1) !== 12 ? startPeriod : (startPeriod === 'AM' ? 'PM' : 'AM');
+
+              let label = `${String(startH).padStart(2, '0')}:00 ${startPeriod} - ${String(nextH).padStart(2, '0')}:00 ${nextPeriod}`;
+              if (counts[label] !== undefined) {
+                counts[label]++;
+              }
+            } catch (e) {}
+          });
+
+          let filtered = {};
+          for (const [k, v] of Object.entries(counts)) {
+            if (v > 0) filtered[k] = v;
+          }
+          return Object.keys(filtered).length > 0 ? filtered : counts;
+        },
+
+        get peakHour() {
+          const counts = this.hourlyCounts;
+          let maxHour = 'N/A';
+          let maxVal = -1;
+          for (const [hour, count] of Object.entries(counts)) {
+            if (count > maxVal) {
+              maxVal = count;
+              maxHour = hour;
+            }
+          }
+          return maxVal > 0 ? `${maxHour} (${maxVal})` : 'N/A';
+        }
       }
     }
 
