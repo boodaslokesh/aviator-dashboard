@@ -65,7 +65,7 @@
 
     .controls {
       display: grid;
-      grid-template-columns: 0.9fr 1.3fr 1.3fr auto auto;
+      grid-template-columns: 1fr 1.2fr 1.2fr auto auto;
       gap: 0.25rem;
       align-items: center;
     }
@@ -75,7 +75,7 @@
 
     .time-inputs {
       display: flex;
-      gap: 0.12rem;
+      gap: 0.15rem;
       align-items: center;
     }
 
@@ -92,7 +92,7 @@
     }
 
     input.ctrl-input {
-      width: 28px;
+      width: 32px;
       flex-shrink: 0;
     }
 
@@ -217,23 +217,21 @@
         <select id="dateSelect" class="ctrl-dropdown"></select>
       </div>
 
-      <!-- FROM FIELD: Hour Dropdown + Min Input + Sec Input -->
+      <!-- FROM FIELD: Hour Dropdown + Minute Input -->
       <div class="field-group">
-        <label>From (Hr/Min/Sec)</label>
+        <label>From (Hr / Min)</label>
         <div class="time-inputs">
           <select id="fromHourSelect" class="ctrl-dropdown"></select>
           <input id="fromMinInput" type="number" class="ctrl-input" min="0" max="59" value="00" placeholder="MM" onblur="padInput(this)">
-          <input id="fromSecInput" type="number" class="ctrl-input" min="0" max="59" value="00" placeholder="SS" onblur="padInput(this)">
         </div>
       </div>
 
-      <!-- TO FIELD: Hour Dropdown + Min Input + Sec Input -->
+      <!-- TO FIELD: Hour Dropdown + Minute Input -->
       <div class="field-group">
-        <label>To (Hr/Min/Sec)</label>
+        <label>To (Hr / Min)</label>
         <div class="time-inputs">
           <select id="toHourSelect" class="ctrl-dropdown"></select>
           <input id="toMinInput" type="number" class="ctrl-input" min="0" max="59" value="59" placeholder="MM" onblur="padInput(this)">
-          <input id="toSecInput" type="number" class="ctrl-input" min="0" max="59" value="59" placeholder="SS" onblur="padInput(this)">
         </div>
       </div>
 
@@ -321,6 +319,7 @@
       }
     }
 
+    // Populate Hour Dropdown (12:00 AM through 11:00 PM)
     function initHourDropdowns() {
       const fromSel = document.getElementById('fromHourSelect');
       const toSel = document.getElementById('toHourSelect');
@@ -354,23 +353,19 @@
       el.value = val.toString().padStart(2, '0');
     }
 
-    // Formats into hh:mm:ss AM/PM
-    function getFormattedTimeString(hourVal, minVal, secVal) {
+    // Construct full "hh:mm:ss AM/PM" query string from hour dropdown & minute input
+    function getFormattedTimeString(hourVal, minVal, defaultSec = "00") {
       let [hh, ampm] = hourVal.split(':');
       let mm = minVal.toString().padStart(2, '0');
-      let ss = secVal.toString().padStart(2, '0');
-      return `${hh}:${mm}:${ss} ${ampm}`;
+      return `${hh}:${mm}:${defaultSec} ${ampm}`;
     }
 
     function resetToTodayDate() {
       initDateDropdown();
       document.getElementById('fromHourSelect').value = "12:AM";
       document.getElementById('fromMinInput').value = "00";
-      document.getElementById('fromSecInput').value = "00";
-
       document.getElementById('toHourSelect').value = "11:PM";
       document.getElementById('toMinInput').value = "59";
-      document.getElementById('toSecInput').value = "59";
       syncAllData();
     }
 
@@ -398,13 +393,11 @@
       
       const fromHour = document.getElementById('fromHourSelect').value;
       const fromMin = document.getElementById('fromMinInput').value;
-      const fromSec = document.getElementById('fromSecInput').value;
-      const fromVal = getFormattedTimeString(fromHour, fromMin, fromSec);
+      const fromVal = getFormattedTimeString(fromHour, fromMin, "00");
 
       const toHour = document.getElementById('toHourSelect').value;
       const toMin = document.getElementById('toMinInput').value;
-      const toSec = document.getElementById('toSecInput').value;
-      const toVal = getFormattedTimeString(toHour, toMin, toSec);
+      const toVal = getFormattedTimeString(toHour, toMin, "59");
 
       if (!dateVal) return;
 
