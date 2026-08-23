@@ -144,45 +144,39 @@
     .metric .value { font-size: clamp(1rem, 2vh, 1.25rem); font-weight: 800; }
     .metric .note { font-size: 0.6rem; color: var(--muted); }
 
-    /* Compact Strip for Last 15 Records */
+    /* Ultra-compact inline text strip for recent records (No boxes, no scroll) */
     .recent-strip-container {
       background: #0d1a2e;
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 0.3rem 0.4rem;
+      padding: 0.35rem 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.5rem;
       flex-shrink: 0;
       margin-bottom: 0.2rem;
+      overflow: hidden;
     }
     .recent-label {
-      font-size: 0.58rem;
+      font-size: 0.6rem;
       color: var(--muted);
       font-weight: 700;
       text-transform: uppercase;
       white-space: nowrap;
     }
-    .recent-scroll {
-      display: flex;
-      gap: 0.25rem;
-      overflow-x: auto;
-      scrollbar-width: none;
-      align-items: center;
+    .recent-inline-text {
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       width: 100%;
-      padding-bottom: 0.05rem;
+      letter-spacing: 0.03em;
     }
-    .recent-scroll::-webkit-scrollbar { display: none; }
-    .recent-chip {
-      background: rgba(7, 16, 29, 0.7);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 0.12rem 0.3rem;
-      text-align: center;
-      flex-shrink: 0;
-    }
-    .recent-chip .rc-val { font-size: 0.7rem; font-weight: 800; }
-    .recent-chip .rc-time { font-size: 0.5rem; color: var(--muted); }
+    .val-high { color: var(--amber); }
+    .val-mid { color: var(--success); }
+    .val-norm { color: var(--text); }
 
     .panel-block { background: #0d1a2e; border: 1px solid var(--border); border-radius: 8px; padding: 0.45rem; display: flex; flex-direction: column; }
     .panel-block h2 { font-size: 0.8rem; color: var(--accent); margin-bottom: 0.3rem; }
@@ -213,7 +207,6 @@
     .multipliers-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(2, 1fr);
       gap: 0.3rem;
       margin-top: 0.3rem;
     }
@@ -295,11 +288,11 @@
         <div class="metric"><div class="label">Profitable</div><div class="value" id="profStratsVal">-</div><div class="note">Daily Profit Ratio</div></div>
       </div>
 
-      <!-- COMPACT RECENT STRIP (Last 15 records in a single slim line) -->
+      <!-- INLINE LINE STRIP FOR NEXT UPCOMING / PREVIOUS RECORDS (Single line, no boxes, no scrolling) -->
       <div class="recent-strip-container">
-        <span class="recent-label">Latest</span>
-        <div class="recent-scroll" id="recentRecordsStrip">
-          <span style="font-size: 0.65rem; color: var(--muted);">Syncing records...</span>
+        <span class="recent-label">Next</span>
+        <div class="recent-inline-text" id="recentRecordsStrip">
+          Syncing records...
         </div>
       </div>
 
@@ -525,7 +518,7 @@
     const money = n => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(n || 0);
 
     function strategyEntries(data) {
-      const displayOrder = [20, 10, 2, 3, 4, 5, 6, 7, 8, 9, 15, 30, 50, 70, 100, 200];
+      const displayOrder = [20, 10, 2, 3, 4, 5, 6, 7, 8, 9, 15, 30, 40, 45, 50, 70, 100, 200, 500, 1000];
       return data.filter(x => Object.keys(x)[0]?.startsWith('Cashout at')).map(x => {
         const name = Object.keys(x)[0], d = x[name];
         const m = name.match(/Cashout at ([\d.]+)x/);
@@ -772,27 +765,19 @@
           const strip = document.getElementById('recentRecordsStrip');
           if (!strip) return;
 
-          const latest15 = this.allRecords.slice(0, 15);
-          if (latest15.length === 0) {
-            strip.innerHTML = `<span style="font-size: 0.65rem; color: var(--muted);">No records available.</span>`;
+          // Display the next 10 items in a single non-scrolling text line
+          const latest10 = this.allRecords.slice(0, 10);
+          if (latest10.length === 0) {
+            strip.innerHTML = `No records available.`;
             return;
           }
 
-          strip.innerHTML = latest15.map(r => {
-            let colorStyle = 'color: var(--text); border-color: var(--border);';
-            if (r.multiplier >= 10) colorStyle = 'color: var(--amber); border-color: rgba(255,198,90,0.4);';
-            else if (r.multiplier >= 3) colorStyle = 'color: var(--success); border-color: rgba(79,219,182,0.3);';
-
-            const timeParts = r.time.split(' ');
-            const shortTime = timeParts[0] + (timeParts[1] ? ' ' + timeParts[1] : '');
-
-            return `
-              <div class="recent-chip" style="border: 1px solid; ${colorStyle}">
-                <div class="rc-val">${r.rawMultiplier}</div>
-                <div class="rc-time">${shortTime}</div>
-              </div>
-            `;
-          }).join('');
+          strip.innerHTML = latest10.map(r => {
+            let cls = 'val-norm';
+            if (r.multiplier >= 10) cls = 'val-high';
+            else if (r.multiplier >= 3) cls = 'val-mid';
+            return `<span class="${cls}">${r.rawMultiplier}</span>`;
+          }).join('&nbsp;&nbsp;|&nbsp;&nbsp;');
         },
 
         runAnalytics() {
