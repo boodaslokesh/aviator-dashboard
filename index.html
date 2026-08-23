@@ -138,11 +138,51 @@
     .view-panel { display: none; flex-direction: column; gap: 0.5rem; padding-bottom: 1.5rem; }
     .view-panel.active { display: flex; }
 
-    .metrics-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem; flex-shrink: 0; margin-bottom: 0.4rem; }
+    .metrics-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem; flex-shrink: 0; margin-bottom: 0.2rem; }
     .metric { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0.5rem; }
     .metric .label { color: var(--muted); font-size: 0.62rem; font-weight: 700; text-transform: uppercase; }
     .metric .value { font-size: clamp(1rem, 2vh, 1.25rem); font-weight: 800; }
     .metric .note { font-size: 0.6rem; color: var(--muted); }
+
+    /* Compact Strip for Last 15 Records */
+    .recent-strip-container {
+      background: #0d1a2e;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-shrink: 0;
+      margin-bottom: 0.2rem;
+    }
+    .recent-label {
+      font-size: 0.58rem;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .recent-scroll {
+      display: flex;
+      gap: 0.25rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      align-items: center;
+      width: 100%;
+      padding-bottom: 0.05rem;
+    }
+    .recent-scroll::-webkit-scrollbar { display: none; }
+    .recent-chip {
+      background: rgba(7, 16, 29, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.12rem 0.3rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .recent-chip .rc-val { font-size: 0.7rem; font-weight: 800; }
+    .recent-chip .rc-time { font-size: 0.5rem; color: var(--muted); }
 
     .panel-block { background: #0d1a2e; border: 1px solid var(--border); border-radius: 8px; padding: 0.45rem; display: flex; flex-direction: column; }
     .panel-block h2 { font-size: 0.8rem; color: var(--accent); margin-bottom: 0.3rem; }
@@ -200,7 +240,7 @@
     .positive { color: var(--success); } .negative { color: var(--danger); } .neutral { color: var(--amber); }
   </style>
 </head>
-<body x-data="aviatorApp()" x-init="window.streakApp = $data">
+<body x-data="aviatorApp()" x-init="window.streakApp = $data; loadInitialData();">
 
   <header>
     <div class="top-bar">
@@ -255,13 +295,13 @@
         <div class="metric"><div class="label">Profitable</div><div class="value" id="profStratsVal">-</div><div class="note">Daily Profit Ratio</div></div>
       </div>
 
-      <!-- NEW: Last 10 Processed Records Strip -->
-      <article class="panel-block" style="margin-bottom: 0.2rem;">
-        <h2>Last Processed Records</h2>
-        <div style="display: flex; gap: 0.3rem; overflow-x: auto; padding-bottom: 0.2rem;" id="recentRecordsStrip">
-          <div style="font-size: 0.7rem; color: var(--muted); padding: 0.2rem;">Loading records...</div>
+      <!-- COMPACT RECENT STRIP (Last 15 records in a single slim line) -->
+      <div class="recent-strip-container">
+        <span class="recent-label">Latest</span>
+        <div class="recent-scroll" id="recentRecordsStrip">
+          <span style="font-size: 0.65rem; color: var(--muted);">Syncing records...</span>
         </div>
-      </article>
+      </div>
 
       <article class="panel-block">
         <h2>Time-Range Strategy Results</h2>
@@ -496,6 +536,12 @@
       });
     }
 
+    function loadInitialData() {
+      initDateDropdown();
+      initHourDropdowns();
+      syncAllData();
+    }
+
     async function syncAllData() {
       const dateVal = document.getElementById('dateSelect').value.trim();
       
@@ -726,19 +772,24 @@
           const strip = document.getElementById('recentRecordsStrip');
           if (!strip) return;
 
-          const latest10 = this.allRecords.slice(0, 10);
-          if (latest10.length === 0) {
-            strip.innerHTML = `<div style="font-size: 0.7rem; color: var(--muted); padding: 0.2rem;">No recent records found.</div>`;
+          const latest15 = this.allRecords.slice(0, 15);
+          if (latest15.length === 0) {
+            strip.innerHTML = `<span style="font-size: 0.65rem; color: var(--muted);">No records available.</span>`;
             return;
           }
 
-          strip.innerHTML = latest10.map(r => {
-            const colorClass = r.multiplier >= 10 ? 'color: var(--amber); border-color: rgba(255,198,90,0.4);' : (r.multiplier >= 3 ? 'color: var(--success); border-color: rgba(79,219,182,0.3);' : 'color: var(--text); border-color: var(--border);');
-            const timeOnly = r.time.split(' ')[0] + ' ' + (r.time.split(' ')[1] || '');
+          strip.innerHTML = latest15.map(r => {
+            let colorStyle = 'color: var(--text); border-color: var(--border);';
+            if (r.multiplier >= 10) colorStyle = 'color: var(--amber); border-color: rgba(255,198,90,0.4);';
+            else if (r.multiplier >= 3) colorStyle = 'color: var(--success); border-color: rgba(79,219,182,0.3);';
+
+            const timeParts = r.time.split(' ');
+            const shortTime = timeParts[0] + (timeParts[1] ? ' ' + timeParts[1] : '');
+
             return `
-              <div style="background: rgba(7, 16, 29, 0.7); border: 1px solid; ${colorClass} border-radius: 6px; padding: 0.3rem 0.5rem; text-align: center; min-width: 65px; flex-shrink: 0;">
-                <div style="font-size: 0.75rem; font-weight: 800;">${r.rawMultiplier}</div>
-                <div style="font-size: 0.55rem; color: var(--muted); margin-top: 1px;">${timeOnly}</div>
+              <div class="recent-chip" style="border: 1px solid; ${colorStyle}">
+                <div class="rc-val">${r.rawMultiplier}</div>
+                <div class="rc-time">${shortTime}</div>
               </div>
             `;
           }).join('');
@@ -866,10 +917,6 @@
         }
       }
     }
-
-    initDateDropdown();
-    initHourDropdowns();
-    syncAllData();
   </script>
 </body>
 </html>
