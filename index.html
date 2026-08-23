@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Aviator Intelligence Command Center</title>
+  <style>
+    :root {
+      --bg: #07101d;
+      --card-bg: #0e1c31;
+      --accent: #38bdf8;
+      --text: #eef5ff;
+      --muted: #9aacc8;
+      --success: #4fdbb6;
+      --danger: #ff718b;
+      --border: #1c2d48;
+      --amber: #ffc65a;
+      --blue: #55a6ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+    html, body {
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      background: radial-gradient(900px 430px at 100% -50px, #1d3e74 0%, transparent 64%), var(--bg);
+      color: var(--text);
+      touch-action: manipulation;
+    }
+
+    body { display: flex; flex-direction: column; padding: 0.3rem; gap: 0.3rem; }
+
+    header {
+      background: #0d1a2e;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.35rem 0.5rem;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .brand { display: flex; align-items: center; gap: 0.4rem; font-weight: 800; font-size: 0.85rem; color: var(--accent); }
+    .mark { width: 22px; height: 22px; border-radius: 5px; background: linear-gradient(135deg, var(--success), var(--blue)); color: #07101d; display: grid; place-items: center; font-size: 0.75rem; font-weight: 900; }
+
+    select.view-selector {
+      background: #142641;
+      color: var(--text);
+      border: 1px solid var(--blue);
+      padding: 0.2rem 0.4rem;
+      border-radius: 5px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      outline: none;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr 1.1fr auto auto;
+      gap: 0.25rem;
+      align-items: center;
+    }
+
+    .field-group { display: flex; flex-direction: column; gap: 0.1rem; }
+    .field-group label { font-size: 0.55rem; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+
+    select.ctrl-dropdown {
+      background: #081426;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.2rem;
+      border-radius: 4px;
+      font-size: 0.62rem;
+      outline: none;
+      width: 100%;
+      text-align: center;
+    }
+
+    button {
+      border: 0;
+      padding: 0.3rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.68rem;
+      cursor: pointer;
+      white-space: nowrap;
+      height: 100%;
+    }
+
+    button.btn-sync { background: linear-gradient(135deg, var(--success), #76caff); color: #07101d; }
+    button.btn-refresh { background: #1c3151; color: var(--text); border: 1px solid var(--border); }
+
+    main {
+      flex: 1;
+      height: calc(100vh - 85px);
+      min-height: 0;
+      position: relative;
+    }
+
+    .view-panel { display: none; height: 100%; min-height: 0; }
+    .view-panel.active { display: flex; flex-direction: column; }
+
+    .metrics-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.3rem; flex-shrink: 0; margin-bottom: 0.3rem; }
+    .metric { background: var(--card-bg); border: 1px solid var(--border); border-radius: 5px; padding: 0.3rem 0.4rem; }
+    .metric .label { color: var(--muted); font-size: 0.58rem; font-weight: 700; text-transform: uppercase; }
+    .metric .value { font-size: clamp(0.9rem, 1.8vh, 1.1rem); font-weight: 800; }
+    .metric .note { font-size: 0.55rem; color: var(--muted); }
+
+    .panel-block { background: #0d1a2e; border: 1px solid var(--border); border-radius: 6px; padding: 0.35rem; display: flex; flex-direction: column; min-height: 0; flex: 1; }
+    .panel-block h2 { font-size: 0.75rem; color: var(--accent); margin-bottom: 0.25rem; }
+
+    .table-wrap { flex: 1; min-height: 0; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: clamp(0.58rem, 1.15vh, 0.65rem); }
+    th { color: #8fa5c7; text-align: left; font-size: 0.55rem; text-transform: uppercase; background: #0e1c31; position: sticky; top: 0; padding: 0.2rem 0.3rem; }
+    td { padding: 0.18rem 0.3rem; border-bottom: 1px solid var(--border); }
+    td.num, th.num { text-align: right; }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.35rem;
+      flex: 1;
+      height: 100%;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    .target-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.35rem;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .target-header { font-size: 0.78rem; font-weight: 700; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 0.15rem; flex-shrink: 0; }
+    
+    .multipliers-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 0.25rem;
+      flex: 1;
+      margin-top: 0.2rem;
+      min-height: 0;
+    }
+
+    .strategy-box {
+      background: rgba(7, 16, 29, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.2rem 0.3rem;
+      font-size: clamp(0.58rem, 1.1vh, 0.68rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 0;
+    }
+
+    .strategy-title { font-weight: 700; font-size: clamp(0.62rem, 1.2vh, 0.72rem); display: flex; justify-content: space-between; align-items: center; }
+    .badge { padding: 0.05rem 0.2rem; border-radius: 3px; font-size: 0.52rem; font-weight: 700; text-transform: uppercase; }
+    .badge.success { background: rgba(79, 219, 182, 0.2); color: var(--success); }
+    .badge.danger { background: rgba(255, 113, 139, 0.2); color: var(--danger); }
+
+    .stat-row { display: flex; justify-content: space-between; color: var(--muted); white-space: nowrap; line-height: 1.1; }
+    .stat-value { color: var(--text); font-weight: 600; }
+    .reached-section { background: rgba(79, 219, 182, 0.08); border: 1px dashed rgba(79, 219, 182, 0.3); border-radius: 3px; padding: 0.1rem 0.2rem; margin: 0.08rem 0; }
+    .positive { color: var(--success); } .negative { color: var(--danger); } .neutral { color: var(--amber); }
+
+    .raw-terminal {
+      white-space: pre-wrap; word-break: break-word; color: #b9c9e2; background: #040912;
+      border: 1px solid var(--border); padding: 0.4rem; border-radius: 6px; flex: 1; min-height: 0;
+      overflow-y: auto; font: 0.6rem/1.35 monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="top-bar">
+      <div class="brand"><div class="mark">A</div> Aviator Live</div>
+      
+      <select class="view-selector" id="viewSelector" onchange="switchView(this.value)">
+        <option value="overviewView">📊 1. Daily Overview</option>
+        <option value="targetView">🎯 2. Target Analytics</option>
+        <option value="cashoutView">📊 3. Cashout Performance</option>
+        <option value="roundsView">📄 4. Raw Round Data</option>
+      </select>
+    </div>
+
+    <div class="controls">
+      <div class="field-group">
+        <label>Date</label>
+        <select id="dateSelect" class="ctrl-dropdown"></select>
+      </div>
+      <div class="field-group">
+        <label>From</label>
+        <select id="fromTime" class="ctrl-dropdown"></select>
+      </div>
+      <div class="field-group">
+        <label>To</label>
+        <select id="toTime" class="ctrl-dropdown"></select>
+      </div>
+      <button class="btn-refresh" onclick="resetToTodayDate()" title="Set Today's Date">🔄 Today</button>
+      <button class="btn-sync" onclick="syncAllData()">⚡ Sync</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- PAGE 1: Daily Overview -->
+    <section class="view-panel active" id="overviewView">
+      <div class="metrics-row">
+        <div class="metric"><div class="label">Rounds</div><div class="value" id="totRoundsVal">-</div><div class="note" id="totRoundsDate">Date</div></div>
+        <div class="metric"><div class="label">Best Strategy</div><div class="value positive" id="bestStratVal">-</div><div class="note" id="bestStratNote">-</div></div>
+        <div class="metric"><div class="label">Drawdown</div><div class="value negative" id="worstStratVal">-</div><div class="note" id="worstStratNote">-</div></div>
+        <div class="metric"><div class="label">Profitable</div><div class="value" id="profStratsVal">-</div><div class="note">Daily Profit Ratio</div></div>
+      </div>
+      <article class="panel-block">
+        <h2>Time-Range Strategy Results</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Strategy</th><th class="num">Window P/L</th><th class="num">Hits</th><th class="num">Daily P/L</th></tr></thead>
+            <tbody id="overviewRangeTableBody"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <!-- PAGE 2: Target Analytics Grid -->
+    <section class="view-panel" id="targetView">
+      <div class="dashboard-grid" id="targetContainer">
+        <div style="text-align:center; padding:1.5rem; width:100%; color:var(--muted); font-size:0.75rem">Tap 'Sync' to load Target Analytics...</div>
+      </div>
+    </section>
+
+    <!-- PAGE 3: Cashout Performance -->
+    <section class="view-panel" id="cashoutView">
+      <article class="panel-block">
+        <h2>Cashout Performance</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Strategy</th><th class="num">Hits</th><th class="num">Hit Rate</th><th class="num">Total P/L</th></tr></thead>
+            <tbody id="cashoutTableBody"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <!-- PAGE 4: Raw Round Data Feed -->
+    <section class="view-panel" id="roundsView">
+      <article class="panel-block">
+        <h2>Downloaded Raw Rounds Feed</h2>
+        <div class="raw-terminal" id="rawTerminalOutput">Tap 'Sync' to load raw feed.</div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const TARGET_PROFIT_API = 'https://aviator-data-results-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/profit';
+    const GET_DATA_API = 'https://aviator-data-results-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/get-data';
+    const RAW_API = 'https://download-aviator-data-latest-f1wq2z.5sc6y6-3.usa-e2.cloudhub.io/downloadData';
+
+    function switchView(viewId) {
+      document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+    }
+
+    function initDateDropdown() {
+      const select = document.getElementById('dateSelect');
+      select.innerHTML = '';
+      const now = new Date();
+
+      for (let i = 0; i < 14; i++) {
+        const d = new Date(now);
+        d.setDate(now.getDate() - i);
+        
+        const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', day: '2-digit', month: '2-digit', year: 'numeric' }).formatToParts(d);
+        const p = type => parts.find(x => x.type === type).value;
+        const dateStr = `${p('day')}/${p('month')}/${p('year')}`;
+
+        const opt = document.createElement('option');
+        opt.value = dateStr;
+        opt.textContent = i === 0 ? `Today (${dateStr})` : dateStr;
+        select.appendChild(opt);
+      }
+    }
+
+    // Generate HH:mm:00 AM/PM Options for EVERY MINUTE (1,440 options per select)
+    function initTimeDropdowns() {
+      const fromSelect = document.getElementById('fromTime');
+      const toSelect = document.getElementById('toTime');
+      fromSelect.innerHTML = '';
+      toSelect.innerHTML = '';
+
+      const fragmentFrom = document.createDocumentFragment();
+      const fragmentTo = document.createDocumentFragment();
+
+      for (let h = 0; h < 24; h++) {
+        for (let m = 0; m < 60; m++) {
+          const ampm = h >= 12 ? 'PM' : 'AM';
+          const hh = (h % 12 || 12).toString().padStart(2, '0');
+          const mm = m.toString().padStart(2, '0');
+          const timeString = `${hh}:${mm}:00 ${ampm}`;
+
+          const optF = document.createElement('option');
+          optF.value = timeString;
+          optF.textContent = timeString;
+          fragmentFrom.appendChild(optF);
+
+          const optT = document.createElement('option');
+          optT.value = timeString;
+          optT.textContent = timeString;
+          fragmentTo.appendChild(optT);
+        }
+      }
+
+      // Add final minute bound
+      const endOptF = document.createElement('option');
+      endOptF.value = "11:59:59 PM";
+      endOptF.textContent = "11:59:59 PM";
+      fragmentFrom.appendChild(endOptF);
+
+      const endOptT = document.createElement('option');
+      endOptT.value = "11:59:59 PM";
+      endOptT.textContent = "11:59:59 PM";
+      fragmentTo.appendChild(endOptT);
+
+      fromSelect.appendChild(fragmentFrom);
+      toSelect.appendChild(fragmentTo);
+
+      fromSelect.value = "12:00:00 AM";
+      toSelect.value = "11:59:59 PM";
+    }
+
+    function resetToTodayDate() {
+      initDateDropdown();
+      document.getElementById('fromTime').value = "12:00:00 AM";
+      document.getElementById('toTime').value = "11:59:59 PM";
+      syncAllData();
+    }
+
+    function formatTime(dateTimeStr) {
+      if (!dateTimeStr) return 'N/A';
+      return dateTimeStr.includes(', ') ? dateTimeStr.split(', ')[1] : dateTimeStr;
+    }
+
+    const money = n => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(n || 0);
+
+    function strategyEntries(data) {
+      const displayOrder = [20, 10, 2, 3, 4, 5, 6, 7, 8, 9, 15, 30, 50, 70, 100, 200];
+      return data.filter(x => Object.keys(x)[0]?.startsWith('Cashout at')).map(x => {
+        const name = Object.keys(x)[0], d = x[name];
+        const m = name.match(/Cashout at ([\d.]+)x/);
+        return { name, multiplier: m ? +m[1] : 0, ...d };
+      }).sort((a, b) => {
+        const ai = displayOrder.indexOf(a.multiplier), bi = displayOrder.indexOf(b.multiplier);
+        return (ai < 0 ? 999 + a.multiplier : ai) - (bi < 0 ? 999 + b.multiplier : bi);
+      });
+    }
+
+    async function syncAllData() {
+      const dateVal = document.getElementById('dateSelect').value.trim();
+      const fromVal = document.getElementById('fromTime').value.trim();
+      const toVal = document.getElementById('toTime').value.trim();
+
+      if (!dateVal) return;
+
+      fetchTargetAnalytics(dateVal);
+      fetchLiveIntelligence(dateVal, fromVal, toVal);
+      fetchRawRoundsData(dateVal);
+    }
+
+    async function fetchTargetAnalytics(dateStr) {
+      const container = document.getElementById('targetContainer');
+      container.innerHTML = '<div style="text-align:center; padding:1.5rem; width:100%; color:var(--muted)">Fetching target metrics...</div>';
+
+      try {
+        const response = await fetch(`${TARGET_PROFIT_API}?date=${encodeURIComponent(dateStr)}`);
+        const data = await response.json();
+        renderTargetGrid(data);
+      } catch (err) {
+        container.innerHTML = `<div style="text-align:center; padding:1.5rem; width:100%; color:var(--danger)">Failed fetching Target Analytics endpoint.</div>`;
+      }
+    }
+
+    function renderTargetGrid(data) {
+      const container = document.getElementById('targetContainer');
+      container.innerHTML = '';
+
+      for (let i = 0; i < data.length; i += 2) {
+        const title = data[i];
+        const strategies = data[i + 1];
+
+        if (!strategies) continue;
+
+        const card = document.createElement('div');
+        card.className = 'target-card';
+
+        let html = `<div class="target-header">${title}</div>`;
+        html += `<div class="multipliers-grid">`;
+
+        Object.keys(strategies).forEach(multiplier => {
+          const item = strategies[multiplier];
+          const isSuccess = item.message.toLowerCase().includes('sucessfully') || item.message.toLowerCase().includes('successfully');
+          const finalProfitClass = item.finalProfit >= 0 ? 'positive' : 'negative';
+
+          html += `
+            <div class="strategy-box">
+              <div>
+                <div class="strategy-title">
+                  <span>${multiplier}</span>
+                  <span class="badge ${isSuccess ? 'success' : 'danger'}">
+                    ${isSuccess ? 'Reached' : 'Failed'}
+                  </span>
+                </div>
+
+                ${isSuccess ? `
+                  <div class="reached-section">
+                    <div class="stat-row">
+                      <span>Hit Amt:</span>
+                      <span class="stat-value positive">+${item.profitReachedAmount}</span>
+                    </div>
+                    <div class="stat-row">
+                      <span>Hit Rd:</span>
+                      <span class="stat-value">#${item.profitReachedtRound}</span>
+                    </div>
+                    <div class="stat-row">
+                      <span>Hit Time:</span>
+                      <span class="stat-value">${formatTime(item.profitReachedTime)}</span>
+                    </div>
+                  </div>
+                ` : ''}
+
+                <div class="stat-row">
+                  <span>Peak Profit:</span>
+                  <span class="stat-value positive">+${item.highestProfitReached}</span>
+                </div>
+                <div class="stat-row">
+                  <span>Peak Round:</span>
+                  <span class="stat-value">#${item.highestProfitRound}</span>
+                </div>
+                <div class="stat-row">
+                  <span>Peak Time:</span>
+                  <span class="stat-value">${formatTime(item.maxProfitTime)}</span>
+                </div>
+              </div>
+
+              <div style="border-top: 1px dashed var(--border); padding-top: 0.1rem; margin-top: 0.1rem;">
+                <div class="stat-row">
+                  <span>Final Profit:</span>
+                  <span class="stat-value ${finalProfitClass}">${item.finalProfit >= 0 ? '+' : ''}${item.finalProfit}</span>
+                </div>
+                <div class="stat-row">
+                  <span>Total Rounds:</span>
+                  <span class="stat-value">${item.totalRounds}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+        card.innerHTML = html;
+        container.appendChild(card);
+      }
+    }
+
+    async function fetchLiveIntelligence(dateStr, fromTime, toTime) {
+      try {
+        const q = `date=${encodeURIComponent(dateStr)}`;
+        const rangeQ = `${q}&fromTime=${encodeURIComponent(fromTime)}&toTime=${encodeURIComponent(toTime)}`;
+
+        const [dailyRes, rangedRes] = await Promise.all([
+          fetch(`${GET_DATA_API}?${q}`).then(r => r.json()),
+          fetch(`${GET_DATA_API}?${rangeQ}`).then(r => r.json())
+        ]);
+
+        if (Array.isArray(dailyRes)) renderDailyOverview(dailyRes);
+        if (Array.isArray(rangedRes)) renderTimeRangeAnalysis(rangedRes);
+
+      } catch (err) {
+        console.error("Error fetching live data:", err);
+      }
+    }
+
+    function renderDailyOverview(data) {
+      const first = data[0] || {};
+      const rounds = first['Total Rounds'] || 0;
+      const rows = strategyEntries(data);
+      const best = rows.reduce((a, b) => !a || b.profit > a.profit ? b : a, null);
+      const worst = rows.reduce((a, b) => !a || b.profit < a.profit ? b : a, null);
+
+      document.getElementById('totRoundsVal').innerText = money(rounds);
+      document.getElementById('totRoundsDate').innerText = `${first.Date || 'Selected'}`;
+
+      document.getElementById('bestStratVal').innerText = best ? `${best.multiplier}x` : '—';
+      document.getElementById('bestStratNote').innerText = best ? `₹${money(best.profit)} profit` : 'No data';
+
+      document.getElementById('worstStratVal').innerText = worst ? `${worst.multiplier}x` : '—';
+      document.getElementById('worstStratNote').innerText = worst ? `₹${money(worst.profit)} loss` : 'No data';
+
+      document.getElementById('profStratsVal').innerText = `${rows.filter(x => x.profit > 0).length}/${rows.length}`;
+
+      document.getElementById('cashoutTableBody').innerHTML = rows.map(r => `
+        <tr>
+          <td><b>${r.multiplier}x</b></td>
+          <td class="num">${money(r.hits)}</td>
+          <td class="num">${rounds ? (r.hits / rounds * 100).toFixed(1) : 0}%</td>
+          <td class="num ${r.profit > 0 ? 'positive' : r.profit < 0 ? 'negative' : 'neutral'}">${r.profit > 0 ? '+' : ''}₹${money(r.profit)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderTimeRangeAnalysis(data) {
+      const rows = strategyEntries(data);
+
+      const rowsHtml = rows.map(r => {
+        const key = Object.keys(r).find(k => k.startsWith('Profit/Loss Calculation'));
+        const pl = key ? r[key] : null;
+        return `
+          <tr>
+            <td><b>${r.multiplier}x</b></td>
+            <td class="num ${pl > 0 ? 'positive' : pl < 0 ? 'negative' : 'neutral'}">${pl === null ? '—' : (pl > 0 ? '+' : '') + '₹' + money(pl)}</td>
+            <td class="num">${money(r.hits)}</td>
+            <td class="num ${r.profit > 0 ? 'positive' : r.profit < 0 ? 'negative' : 'neutral'}">${r.profit > 0 ? '+' : ''}₹${money(r.profit)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('overviewRangeTableBody').innerHTML = rowsHtml;
+    }
+
+    async function fetchRawRoundsData(dateStr) {
+      const output = document.getElementById('rawTerminalOutput');
+      output.textContent = 'Loading live raw rounds feed...';
+
+      try {
+        const response = await fetch(`${RAW_API}?date=${encodeURIComponent(dateStr)}`);
+        const text = await response.text();
+        const parts = text.match(/\d{2}\/\d{2}\/\d{4},\s*\d{2}:\d{2}:\d{2}\s*[AP]M,?\s*\d+(?:\.\d+)?x/g);
+        output.textContent = parts ? parts.join('\n') : text;
+
+        requestAnimationFrame(() => {
+          output.scrollTop = output.scrollHeight;
+        });
+
+      } catch (err) {
+        output.textContent = `Error loading raw rounds: ${err.message}`;
+      }
+    }
+
+    initDateDropdown();
+    initTimeDropdowns();
+    syncAllData();
+  </script>
+</body>
+</html>
