@@ -144,7 +144,6 @@
     .metric .value { font-size: clamp(1rem, 2vh, 1.25rem); font-weight: 800; }
     .metric .note { font-size: 0.6rem; color: var(--muted); }
 
-    /* Ultra-compact inline text strip for recent records (No boxes, no scroll) */
     .recent-strip-container {
       background: #0d1a2e;
       border: 1px solid var(--border);
@@ -152,30 +151,42 @@
       padding: 0.35rem 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
       flex-shrink: 0;
       margin-bottom: 0.2rem;
       overflow: hidden;
+      width: 100%;
     }
     .recent-label {
-      font-size: 0.6rem;
+      font-size: 0.55rem;
       color: var(--muted);
       font-weight: 700;
       text-transform: uppercase;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .recent-inline-text {
-      font-size: 0.75rem;
-      font-weight: 700;
+      font-size: 0.65rem;
+      font-weight: 600;
       font-family: monospace;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       width: 100%;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.02em;
     }
-    .val-high { color: var(--amber); }
-    .val-mid { color: var(--success); }
+    .item-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .item-time {
+      font-size: 0.5rem;
+      color: var(--muted);
+      font-weight: 400;
+    }
+    .val-high { color: var(--amber); font-weight: 700; }
+    .val-mid { color: var(--success); font-weight: 700; }
     .val-norm { color: var(--text); }
 
     .panel-block { background: #0d1a2e; border: 1px solid var(--border); border-radius: 8px; padding: 0.45rem; display: flex; flex-direction: column; }
@@ -253,7 +264,6 @@
         <select id="dateSelect" class="ctrl-dropdown" @change="syncAllData()"></select>
       </div>
 
-      <!-- FROM FIELD -->
       <div class="field-group">
         <label>From (Hr/Min/Sec)</label>
         <div class="time-inputs">
@@ -263,7 +273,6 @@
         </div>
       </div>
 
-      <!-- TO FIELD -->
       <div class="field-group">
         <label>To (Hr/Min/Sec)</label>
         <div class="time-inputs">
@@ -288,7 +297,6 @@
         <div class="metric"><div class="label">Profitable</div><div class="value" id="profStratsVal">-</div><div class="note">Daily Profit Ratio</div></div>
       </div>
 
-      <!-- INLINE LINE STRIP FOR NEXT UPCOMING / PREVIOUS RECORDS (Single line, no boxes, no scrolling) -->
       <div class="recent-strip-container">
         <span class="recent-label">Next</span>
         <div class="recent-inline-text" id="recentRecordsStrip">
@@ -329,8 +337,6 @@
 
     <!-- PAGE 4: Sequence & Streak Analytics -->
     <section class="view-panel p-1 space-y-3 bg-slate-950 text-slate-100" id="streakView">
-        
-        <!-- Metrics Grid -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
             <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
                 <p class="text-[11px] text-slate-400 font-medium">Total Records</p>
@@ -350,7 +356,6 @@
             </div>
         </div>
 
-        <!-- Detailed Streak Sequences Card -->
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
             <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Drought & Below-Threshold Streaks</h4>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
@@ -372,7 +377,6 @@
             </div>
         </div>
 
-        <!-- Hourly Counts Summary Bar -->
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
             <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Hourly Count Breakdown</h4>
             <div class="flex gap-2.5 overflow-x-auto pb-1.5 scrollbar-thin">
@@ -388,7 +392,6 @@
             </div>
         </div>
 
-        <!-- Dataset Logs Table Card -->
         <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
             <div class="px-3.5 py-3 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
                 <h2 class="font-semibold text-xs text-slate-200">Dataset Logs (Latest First)</h2>
@@ -518,12 +521,13 @@
     const money = n => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(n || 0);
 
     function strategyEntries(data) {
-      const displayOrder = [20, 10, 2, 3, 4, 5, 6, 7, 8, 9, 15, 30, 40, 45, 50, 70, 100, 200, 500, 1000];
+      // Configured display order matching requested targets (15x, 30x, 40x, 45x, 50x included)
+      const displayOrder = [2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 40, 45, 50, 70, 100, 200];
       return data.filter(x => Object.keys(x)[0]?.startsWith('Cashout at')).map(x => {
         const name = Object.keys(x)[0], d = x[name];
         const m = name.match(/Cashout at ([\d.]+)x/);
         return { name, multiplier: m ? +m[1] : 0, ...d };
-      }).sort((a, b) => {
+      }).filter(x => x.multiplier !== 500 && x.multiplier !== 1000).sort((a, b) => {
         const ai = displayOrder.indexOf(a.multiplier), bi = displayOrder.indexOf(b.multiplier);
         return (ai < 0 ? 999 + a.multiplier : ai) - (bi < 0 ? 999 + b.multiplier : bi);
       });
@@ -589,6 +593,9 @@
         html += `<div class="multipliers-grid">`;
 
         Object.keys(strategies).forEach(multiplier => {
+          // Exclude 500x and 1000x if returned from backend
+          if (multiplier.includes('500') || multiplier.includes('1000')) return;
+
           const item = strategies[multiplier];
           const isSuccess = item.message.toLowerCase().includes('sucessfully') || item.message.toLowerCase().includes('successfully');
           const finalProfitClass = item.finalProfit >= 0 ? 'positive' : 'negative';
@@ -765,19 +772,20 @@
           const strip = document.getElementById('recentRecordsStrip');
           if (!strip) return;
 
-          // Display the next 10 items in a single non-scrolling text line
-          const latest10 = this.allRecords.slice(0, 10);
-          if (latest10.length === 0) {
+          const latest15 = this.allRecords.slice(0, 15);
+          if (latest15.length === 0) {
             strip.innerHTML = `No records available.`;
             return;
           }
 
-          strip.innerHTML = latest10.map(r => {
+          strip.innerHTML = latest15.map(r => {
             let cls = 'val-norm';
             if (r.multiplier >= 10) cls = 'val-high';
             else if (r.multiplier >= 3) cls = 'val-mid';
-            return `<span class="${cls}">${r.rawMultiplier}</span>`;
-          }).join('&nbsp;&nbsp;|&nbsp;&nbsp;');
+            
+            let shortTime = r.time.split(' ')[0];
+            return `<span class="item-block"><span class="${cls}">${r.rawMultiplier}</span><span class="item-time">(${shortTime})</span></span>`;
+          }).join('&nbsp;|&nbsp;');
         },
 
         runAnalytics() {
