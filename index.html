@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- Enabled pinch-to-zoom by removing user-scalable=no and maximum-scale constraints -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aviator Intelligence Command Center</title>
   <style>
@@ -21,7 +20,6 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 
-    /* Allowed native scrolling/pull-to-refresh by using auto overflow and standard touch actions */
     html, body {
       min-height: 100vh;
       width: 100%;
@@ -212,6 +210,7 @@
         <select id="dateSelect" class="ctrl-dropdown"></select>
       </div>
 
+      <!-- FROM FIELD: Hour Dropdown + Min Input + Sec Input -->
       <div class="field-group">
         <label>From (Hr/Min/Sec)</label>
         <div class="time-inputs">
@@ -221,6 +220,7 @@
         </div>
       </div>
 
+      <!-- TO FIELD: Hour Dropdown + Min Input + Sec Input -->
       <div class="field-group">
         <label>To (Hr/Min/Sec)</label>
         <div class="time-inputs">
@@ -236,6 +236,7 @@
   </header>
 
   <main>
+    <!-- PAGE 1: Daily Overview -->
     <section class="view-panel active" id="overviewView">
       <div class="metrics-row">
         <div class="metric"><div class="label">Rounds</div><div class="value" id="totRoundsVal">-</div><div class="note" id="totRoundsDate">Date</div></div>
@@ -254,12 +255,14 @@
       </article>
     </section>
 
+    <!-- PAGE 2: Target Analytics Grid -->
     <section class="view-panel" id="targetView">
       <div class="dashboard-grid" id="targetContainer">
         <div style="text-align:center; padding:1.5rem; width:100%; color:var(--muted); font-size:0.75rem">Tap 'Sync' to load Target Analytics...</div>
       </div>
     </section>
 
+    <!-- PAGE 3: Cashout Performance -->
     <section class="view-panel" id="cashoutView">
       <article class="panel-block">
         <h2>Cashout Performance</h2>
@@ -272,6 +275,7 @@
       </article>
     </section>
 
+    <!-- PAGE 4: Raw Round Data Feed -->
     <section class="view-panel" id="roundsView">
       <article class="panel-block">
         <h2>Downloaded Raw Rounds Feed</h2>
@@ -343,6 +347,7 @@
       el.value = val.toString().padStart(2, '0');
     }
 
+    // Formats into hh:mm:ss AM/PM
     function getFormattedTimeString(hourVal, minVal, secVal) {
       let [hh, ampm] = hourVal.split(':');
       let mm = minVal.toString().padStart(2, '0');
@@ -571,9 +576,10 @@
         const parts = text.match(/\d{2}\/\d{2}\/\d{4},\s*\d{2}:\d{2}:\d{2}\s*[AP]M,?\s*\d+(?:\.\d+)?x/g);
         output.textContent = parts ? parts.join('\n') : text;
 
-        requestAnimationFrame(() => {
+        // Guaranteed auto-scroll to bottom after hosted layout rendering completes
+        setTimeout(() => {
           output.scrollTop = output.scrollHeight;
-        });
+        }, 100);
 
       } catch (err) {
         output.textContent = `Error loading raw rounds: ${err.message}`;
