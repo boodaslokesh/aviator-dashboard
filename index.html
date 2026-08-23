@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Enabled pinch-to-zoom by removing user-scalable=no and maximum-scale constraints -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aviator Intelligence Command Center</title>
   <style>
     :root {
@@ -20,13 +21,14 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 
+    /* Allowed native scrolling/pull-to-refresh by using auto overflow and standard touch actions */
     html, body {
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
+      min-height: 100vh;
+      width: 100%;
+      overflow-y: auto;
       background: radial-gradient(900px 430px at 100% -50px, #1d3e74 0%, transparent 64%), var(--bg);
       color: var(--text);
-      touch-action: manipulation;
+      touch-action: auto;
     }
 
     body { display: flex; flex-direction: column; padding: 0.3rem; gap: 0.3rem; }
@@ -40,6 +42,9 @@
       display: flex;
       flex-direction: column;
       gap: 0.35rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
     .top-bar {
@@ -112,12 +117,10 @@
 
     main {
       flex: 1;
-      height: calc(100vh - 85px);
-      min-height: 0;
       position: relative;
     }
 
-    .view-panel { display: none; height: 100%; min-height: 0; }
+    .view-panel { display: none; height: 100%; }
     .view-panel.active { display: flex; flex-direction: column; }
 
     .metrics-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.3rem; flex-shrink: 0; margin-bottom: 0.3rem; }
@@ -126,10 +129,10 @@
     .metric .value { font-size: clamp(0.9rem, 1.8vh, 1.1rem); font-weight: 800; }
     .metric .note { font-size: 0.55rem; color: var(--muted); }
 
-    .panel-block { background: #0d1a2e; border: 1px solid var(--border); border-radius: 6px; padding: 0.35rem; display: flex; flex-direction: column; min-height: 0; flex: 1; }
+    .panel-block { background: #0d1a2e; border: 1px solid var(--border); border-radius: 6px; padding: 0.35rem; display: flex; flex-direction: column; flex: 1; }
     .panel-block h2 { font-size: 0.75rem; color: var(--accent); margin-bottom: 0.25rem; }
 
-    .table-wrap { flex: 1; min-height: 0; overflow-y: auto; }
+    .table-wrap { flex: 1; overflow-y: auto; max-height: 60vh; }
     table { width: 100%; border-collapse: collapse; font-size: clamp(0.58rem, 1.15vh, 0.65rem); }
     th { color: #8fa5c7; text-align: left; font-size: 0.55rem; text-transform: uppercase; background: #0e1c31; position: sticky; top: 0; padding: 0.2rem 0.3rem; }
     td { padding: 0.18rem 0.3rem; border-bottom: 1px solid var(--border); }
@@ -140,9 +143,6 @@
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 0.35rem;
       flex: 1;
-      height: 100%;
-      min-height: 0;
-      overflow-y: auto;
     }
 
     .target-card {
@@ -152,8 +152,6 @@
       padding: 0.35rem;
       display: flex;
       flex-direction: column;
-      height: 100%;
-      min-height: 0;
     }
 
     .target-header { font-size: 0.78rem; font-weight: 700; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 0.15rem; flex-shrink: 0; }
@@ -161,11 +159,9 @@
     .multipliers-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(2, 1fr);
       gap: 0.25rem;
       flex: 1;
       margin-top: 0.2rem;
-      min-height: 0;
     }
 
     .strategy-box {
@@ -177,7 +173,6 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 0;
     }
 
     .strategy-title { font-weight: 700; font-size: clamp(0.62rem, 1.2vh, 0.72rem); display: flex; justify-content: space-between; align-items: center; }
@@ -192,7 +187,7 @@
 
     .raw-terminal {
       white-space: pre-wrap; word-break: break-word; color: #b9c9e2; background: #040912;
-      border: 1px solid var(--border); padding: 0.4rem; border-radius: 6px; flex: 1; min-height: 0;
+      border: 1px solid var(--border); padding: 0.4rem; border-radius: 6px; flex: 1; min-height: 300px;
       overflow-y: auto; font: 0.6rem/1.35 monospace;
     }
   </style>
@@ -217,7 +212,6 @@
         <select id="dateSelect" class="ctrl-dropdown"></select>
       </div>
 
-      <!-- FROM FIELD: Hour Dropdown + Min Input + Sec Input -->
       <div class="field-group">
         <label>From (Hr/Min/Sec)</label>
         <div class="time-inputs">
@@ -227,7 +221,6 @@
         </div>
       </div>
 
-      <!-- TO FIELD: Hour Dropdown + Min Input + Sec Input -->
       <div class="field-group">
         <label>To (Hr/Min/Sec)</label>
         <div class="time-inputs">
@@ -243,7 +236,6 @@
   </header>
 
   <main>
-    <!-- PAGE 1: Daily Overview -->
     <section class="view-panel active" id="overviewView">
       <div class="metrics-row">
         <div class="metric"><div class="label">Rounds</div><div class="value" id="totRoundsVal">-</div><div class="note" id="totRoundsDate">Date</div></div>
@@ -262,14 +254,12 @@
       </article>
     </section>
 
-    <!-- PAGE 2: Target Analytics Grid -->
     <section class="view-panel" id="targetView">
       <div class="dashboard-grid" id="targetContainer">
         <div style="text-align:center; padding:1.5rem; width:100%; color:var(--muted); font-size:0.75rem">Tap 'Sync' to load Target Analytics...</div>
       </div>
     </section>
 
-    <!-- PAGE 3: Cashout Performance -->
     <section class="view-panel" id="cashoutView">
       <article class="panel-block">
         <h2>Cashout Performance</h2>
@@ -282,7 +272,6 @@
       </article>
     </section>
 
-    <!-- PAGE 4: Raw Round Data Feed -->
     <section class="view-panel" id="roundsView">
       <article class="panel-block">
         <h2>Downloaded Raw Rounds Feed</h2>
@@ -354,7 +343,6 @@
       el.value = val.toString().padStart(2, '0');
     }
 
-    // Formats into hh:mm:ss AM/PM
     function getFormattedTimeString(hourVal, minVal, secVal) {
       let [hh, ampm] = hourVal.split(':');
       let mm = minVal.toString().padStart(2, '0');
