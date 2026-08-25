@@ -654,7 +654,6 @@
         const card = document.createElement('div');
         card.className = 'target-card';
 
-        // Added dateStr display alongside the title
         let html = `
           <div class="target-header">
             <span>${title}</span>
@@ -674,7 +673,8 @@
             const notifKey = `wa_sent_${dateStr}_${multiplier}`;
             if (!localStorage.getItem(notifKey)) {
               localStorage.setItem(notifKey, 'true');
-              const msg = `*Hey, Lokesh for ${multiplier} ${title} was reached!* \nHit Amount: +${item.profitReachedAmount}\nHit Time: ${item.profitReachedtRound ? 'Round #' + item.profitReachedtRound : 'N/A'}\nHit Round: #${item.profitReachedtRound}`;
+              // Fixed WhatsApp Message template to display Hit Round correctly
+              const msg = `*Hey, Lokesh for ${multiplier} ${title} was reached!* \nHit Amount: +${item.profitReachedAmount}\nHit Round: #${item.profitReachedtRound}`;
               sendWhatsAppMessage(msg);
             }
           }
