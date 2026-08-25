@@ -60,7 +60,7 @@
     }
 
     .brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 800; font-size: 0.95rem; color: var(--accent); }
-    .mark { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, var(--success), var(--blue)); color: #07101d; display: grid; place-items: center; font-size: 0.85rem; font-weight: 900; }
+    .mark { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, var(--success), var(--blue)); color: #07101d; display: grid; place-items: center; font-size: 0.85rem;[...]
 
     select.view-selector {
       background: #142641;
@@ -243,6 +243,10 @@
     .reached-section { background: rgba(79, 219, 182, 0.08); border: 1px dashed rgba(79, 219, 182, 0.3); border-radius: 4px; padding: 0.15rem 0.3rem; margin: 0.1rem 0; }
     .lowest-section { background: rgba(255, 113, 139, 0.08); border: 1px dashed rgba(255, 113, 139, 0.3); border-radius: 4px; padding: 0.15rem 0.3rem; margin: 0.1rem 0; }
     .positive { color: var(--success); } .negative { color: var(--danger); } .neutral { color: var(--amber); }
+
+    #targetView .time-field {
+      display: none;
+    }
   </style>
 </head>
 <body x-data="aviatorApp()" x-init="window.streakApp = $data; loadInitialData();">
@@ -254,8 +258,8 @@
       <select class="view-selector" id="viewSelector" onchange="switchView(this.value)">
         <option value="overviewView">📊 1. Daily Overview</option>
         <option value="targetView">🎯 2. Target Analytics</option>
-        <option value="cashoutView">📊 3. Cashout Performance</option>
-        <option value="streakView">📈 4. Sequence & Streak Analytics</option>
+        <option value="streakView">📈 3. Sequence & Streak Analytics</option>
+        <option value="cashoutView">📊 4. Cashout Performance</option>
       </select>
     </div>
 
@@ -265,7 +269,7 @@
         <select id="dateSelect" class="ctrl-dropdown" @change="syncAllData()"></select>
       </div>
 
-      <div class="field-group">
+      <div class="field-group time-field" id="fromField">
         <label>From (Hr/Min/Sec)</label>
         <div class="time-inputs">
           <select id="fromHourSelect" class="ctrl-dropdown"></select>
@@ -274,7 +278,7 @@
         </div>
       </div>
 
-      <div class="field-group">
+      <div class="field-group time-field" id="toField">
         <label>To (Hr/Min/Sec)</label>
         <div class="time-inputs">
           <select id="toHourSelect" class="ctrl-dropdown"></select>
@@ -322,20 +326,7 @@
       </div>
     </section>
 
-    <!-- PAGE 3: Cashout Performance -->
-    <section class="view-panel" id="cashoutView">
-      <article class="panel-block">
-        <h2>Cashout Performance</h2>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Strategy</th><th class="num">Hits</th><th class="num">Hit Rate</th><th class="num">Total P/L</th></tr></thead>
-            <tbody id="cashoutTableBody"></tbody>
-          </table>
-        </div>
-      </article>
-    </section>
-
-    <!-- PAGE 4: Sequence & Streak Analytics -->
+    <!-- PAGE 3: Sequence & Streak Analytics -->
     <section class="view-panel p-1 space-y-2 bg-slate-950 text-slate-100" id="streakView">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
             <div class="bg-slate-900 border border-slate-800 rounded-lg p-2.5">
@@ -429,6 +420,19 @@
             </div>
         </div>
     </section>
+
+    <!-- PAGE 4: Cashout Performance -->
+    <section class="view-panel" id="cashoutView">
+      <article class="panel-block">
+        <h2>Cashout Performance</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Strategy</th><th class="num">Hits</th><th class="num">Hit Rate</th><th class="num">Total P/L</th></tr></thead>
+            <tbody id="cashoutTableBody"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
   </main>
 
   <script>
@@ -439,6 +443,14 @@
     function switchView(viewId) {
       document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
       document.getElementById(viewId).classList.add('active');
+      
+      // Hide time fields when target view is active
+      const timeFields = document.querySelectorAll('.time-field');
+      if (viewId === 'targetView') {
+        timeFields.forEach(field => field.style.display = 'none');
+      } else {
+        timeFields.forEach(field => field.style.display = 'flex');
+      }
     }
 
     function initDateDropdown() {
@@ -488,7 +500,7 @@
     }
 
     function padInput(el) {
-      let val = parseInt(el.value, 8);
+      let val = parseInt(el.value, 10);
       if (isNaN(val) || val < 0) val = 0;
       if (val > 59) val = 59;
       el.value = val.toString().padStart(2, '0');
