@@ -35,8 +35,8 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      padding: 0.5rem;
-      gap: 0.5rem;
+      padding: 0.35rem;
+      gap: 0.35rem;
       overflow-x: hidden;
       touch-action: manipulation;
     }
@@ -44,12 +44,12 @@
     header {
       background: #0d1a2e;
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.5rem 0.7rem;
+      border-radius: 8px;
+      padding: 0.35rem 0.4rem;
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      gap: 0.45rem;
+      gap: 0.3rem;
     }
 
     .top-bar {
@@ -59,91 +59,78 @@
       width: 100%;
     }
 
-    .brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 800; font-size: 0.95rem; color: var(--accent); }
-    .mark { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, var(--success), var(--blue)); color: #07101d; display: grid; place-items: center; font-size: 0.85rem; font-weight: 900; }
+    .brand { display: flex; align-items: center; gap: 0.4rem; font-weight: 800; font-size: 0.85rem; color: var(--accent); }
+    .mark { width: 22px; height: 22px; border-radius: 5px; background: linear-gradient(135deg, var(--success), var(--blue)); color: #07101d; display: grid; place-items: center; font-size: 0.75rem; font-weight: 900; }
 
     select.view-selector {
       background: #142641;
       color: var(--text);
       border: 1px solid var(--blue);
-      padding: 0.3rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
+      padding: 0.2rem 0.4rem;
+      border-radius: 5px;
+      font-size: 0.75rem;
       font-weight: 700;
       outline: none;
     }
 
-    /* Controls Layout */
+    /* Controls Layout - Adjusted widths and compact heights */
     .controls {
-      display: grid;
-      grid-template-columns: 1.2fr 1.4fr 1.4fr;
-      gap: 0.35rem;
-      align-items: end;
-    }
-
-    .controls.target-mode {
-      grid-template-columns: 1fr auto auto;
-      align-items: end;
-    }
-
-    .controls-actions {
       display: flex;
-      gap: 0.35rem;
-      grid-column: span 3;
+      flex-direction: row;
+      gap: 0.15rem;
+      align-items: center;
       width: 100%;
-      margin-top: 0.1rem;
     }
 
-    .controls-actions button {
-      flex: 1;
-      width: 100%;
-      text-align: center;
-      justify-content: center;
+    .field-group { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 0.08rem; 
+      flex-shrink: 0;
     }
 
-    @media (max-width: 768px) {
-      .controls {
-        grid-template-columns: 1fr;
-      }
-      .controls.target-mode {
-        grid-template-columns: 1fr;
-      }
-      .controls-actions { grid-column: span 1; }
-    }
+    .field-date { width: 17%; }
+    .field-from { width: 33%; }
+    .field-to { width: 33%; }
+    .field-sync { width: 17%; }
 
-    .field-group { display: flex; flex-direction: column; gap: 0.15rem; }
-    .field-group label { font-size: 0.62rem; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+    .field-group label { font-size: 0.52rem; color: var(--muted); font-weight: 700; text-transform: uppercase; white-space: nowrap; }
 
     .time-inputs {
       display: flex;
-      gap: 0.15rem;
+      gap: 0.03rem;
       align-items: center;
+      width: 100%;
     }
 
-    select.ctrl-dropdown, input.ctrl-input {
+    select.ctrl-dropdown {
       background: #081426;
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 0.35rem 0.2rem;
-      border-radius: 6px;
-      font-size: 0.72rem;
+      padding: 0.2rem 0.02rem;
+      border-radius: 4px;
+      font-size: 0.54rem;
       outline: none;
       width: 100%;
       text-align: center;
+      text-overflow: ellipsis;
+      height: 27px;
     }
 
-    input.ctrl-input {
-      width: 32px;
-      flex-shrink: 0;
-      padding: 0.35rem 0.1rem;
+    .field-from select.ctrl-dropdown:first-child, 
+    .field-to select.ctrl-dropdown:first-child {
+      flex: 1.3; 
+    }
+
+    .field-from select.ctrl-dropdown:not(:first-child), 
+    .field-to select.ctrl-dropdown:not(:first-child) {
+      flex: 1; 
     }
 
     button {
       border: 0;
-      padding: 0.4rem 0.7rem;
-      border-radius: 6px;
+      border-radius: 5px;
       font-weight: 700;
-      font-size: 0.78rem;
       cursor: pointer;
       white-space: nowrap;
       display: inline-flex;
@@ -153,8 +140,13 @@
     }
     button:active { opacity: 0.8; }
 
-    button.btn-sync { background: linear-gradient(135deg, var(--success), #76caff); color: #07101d; }
-    button.btn-refresh { background: #1c3151; color: var(--text); border: 1px solid var(--border); }
+    button.btn-sync { 
+      background: linear-gradient(135deg, var(--success), #76caff); 
+      color: #07101d; 
+      width: 100%;
+      height: 27px; /* Matches dropdown height exactly */
+      font-size: 0.75rem;
+    }
 
     main {
       flex: 1;
@@ -162,28 +154,28 @@
       flex-direction: column;
     }
 
-    .view-panel { display: none; flex-direction: column; gap: 0.5rem; padding-bottom: 1.5rem; }
+    .view-panel { display: none; flex-direction: column; gap: 0.4rem; padding-bottom: 1.5rem; }
     .view-panel.active { display: flex; }
 
-    .metrics-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem; flex-shrink: 0; margin-bottom: 0.2rem; }
-    .metric { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.35rem 0.45rem; }
-    .metric .label { color: var(--muted); font-size: 0.58rem; font-weight: 700; text-transform: uppercase; }
-    .metric .value { font-size: clamp(0.9rem, 1.7vh, 1.1rem); font-weight: 800; }
-    .metric .note { font-size: 0.55rem; color: var(--muted); }
+    .metrics-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.35rem; flex-shrink: 0; margin-bottom: 0.1rem; }
+    .metric { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.3rem 0.4rem; }
+    .metric .label { color: var(--muted); font-size: 0.55rem; font-weight: 700; text-transform: uppercase; }
+    .metric .value { font-size: clamp(0.85rem, 1.5vh, 1rem); font-weight: 800; }
+    .metric .note { font-size: 0.5rem; color: var(--muted); }
 
     .recent-strip-container {
       background: #0d1a2e;
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 0.25rem 0.35rem;
+      padding: 0.2rem 0.3rem;
       flex-shrink: 0;
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.1rem;
       width: 100%;
     }
     .recent-inline-text {
       display: grid;
       grid-template-columns: repeat(10, 1fr);
-      gap: 0.2rem;
+      gap: 0.15rem;
       width: 100%;
     }
     .item-card {
@@ -194,18 +186,18 @@
       background: rgba(8, 20, 38, 0.7);
       border: 1px solid var(--border);
       border-radius: 4px;
-      padding: 0.12rem 0.1rem;
+      padding: 0.1rem 0.05rem;
       text-align: center;
       min-width: 0;
     }
     .item-val {
-      font-size: 0.68rem;
+      font-size: 0.62rem;
       font-weight: 700;
       line-height: 1;
       white-space: nowrap;
     }
     .item-time {
-      font-size: 0.5rem;
+      font-size: 0.45rem;
       color: var(--muted);
       font-weight: 500;
       line-height: 1.1;
@@ -216,59 +208,60 @@
     .val-mid { color: var(--success); }
     .val-norm { color: var(--text); }
 
-    .panel-block { background: #0d1a2e; border: 1px solid var(--border); border-radius: 8px; padding: 0.45rem; display: flex; flex-direction: column; }
-    .panel-block h2 { font-size: 0.8rem; color: var(--accent); margin-bottom: 0.3rem; }
+    .panel-block { background: #0d1a2e; border: 1px solid var(--border); border-radius: 8px; padding: 0.4rem; display: flex; flex-direction: column; }
+    .panel-block h2 { font-size: 0.75rem; color: var(--accent); margin-bottom: 0.25rem; }
 
     .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: clamp(0.65rem, 1.25vh, 0.72rem); }
-    th { color: #8fa5c7; text-align: left; font-size: 0.6rem; text-transform: uppercase; background: #0e1c31; position: sticky; top: 0; padding: 0.3rem 0.4rem; z-index: 10; }
-    td { padding: 0.25rem 0.4rem; border-bottom: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: clamp(0.6rem, 1.1vh, 0.7rem); }
+    th { color: #8fa5c7; text-align: left; font-size: 0.55rem; text-transform: uppercase; background: #0e1c31; position: sticky; top: 0; padding: 0.25rem 0.35rem; z-index: 10; }
+    td { padding: 0.2rem 0.35rem; border-bottom: 1px solid var(--border); }
     td.num, th.num { text-align: right; }
 
     .dashboard-grid {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.35rem;
     }
 
     .target-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 0.45rem;
+      padding: 0.5rem 0.5rem; /* Slightly increased vertical padding */
       display: flex;
       flex-direction: column;
     }
 
-    .target-header { font-size: 0.85rem; font-weight: 700; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 0.2rem; flex-shrink: 0; }
+    .target-header { font-size: 0.85rem; font-weight: 700; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; margin-bottom: 0.25rem; flex-shrink: 0; }
     
     .multipliers-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 0.3rem;
-      margin-top: 0.3rem;
+      gap: 0.35rem; /* Increased gap for better spacing */
+      margin-top: 0.15rem;
     }
 
     .strategy-box {
-      background: rgba(7, 16, 29, 0.6);
+      background: rgba(7, 16, 29, 0.7);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 0.3rem 0.4rem;
-      font-size: clamp(0.62rem, 1.2vh, 0.72rem);
+      padding: 0.4rem 0.45rem; /* Increased vertical sizing for target strategy boxes */
+      font-size: clamp(0.65rem, 1.2vh, 0.75rem); /* Increased display text size */
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      min-height: 115px; /* Ensured generous vertical expansion */
     }
 
-    .strategy-title { font-weight: 700; font-size: clamp(0.68rem, 1.3vh, 0.78rem); display: flex; justify-content: space-between; align-items: center; }
-    .badge { padding: 0.08rem 0.25rem; border-radius: 4px; font-size: 0.58rem; font-weight: 700; text-transform: uppercase; }
+    .strategy-title { font-weight: 700; font-size: clamp(0.7rem, 1.3vh, 0.8rem); display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.15rem; }
+    .badge { padding: 0.08rem 0.25rem; border-radius: 3px; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; }
     .badge.success { background: rgba(79, 219, 182, 0.2); color: var(--success); }
     .badge.danger { background: rgba(255, 113, 139, 0.2); color: var(--danger); }
 
-    .stat-row { display: flex; justify-content: space-between; color: var(--muted); white-space: nowrap; line-height: 1.2; }
+    .stat-row { display: flex; justify-content: space-between; color: var(--muted); white-space: nowrap; line-height: 1.3; }
     .stat-value { color: var(--text); font-weight: 600; }
-    .reached-section { background: rgba(79, 219, 182, 0.08); border: 1px dashed rgba(79, 219, 182, 0.3); border-radius: 4px; padding: 0.15rem 0.3rem; margin: 0.1rem 0; }
-    .lowest-section { background: rgba(255, 113, 139, 0.08); border: 1px dashed rgba(255, 113, 139, 0.3); border-radius: 4px; padding: 0.15rem 0.3rem; margin: 0.1rem 0; }
+    .reached-section { background: rgba(79, 219, 182, 0.08); border: 1px dashed rgba(79, 219, 182, 0.3); border-radius: 4px; padding: 0.15rem 0.25rem; margin: 0.12rem 0; }
+    .lowest-section { background: rgba(255, 113, 139, 0.08); border: 1px dashed rgba(255, 113, 139, 0.3); border-radius: 4px; padding: 0.15rem 0.25rem; margin: 0.12rem 0; }
     .positive { color: var(--success); } .negative { color: var(--danger); } .neutral { color: var(--amber); }
   </style>
 </head>
@@ -286,46 +279,35 @@
       </select>
     </div>
 
-    <!-- Controls Row 1: Date, From, To (or Date, Today, Sync on Target View) -->
+    <!-- Controls Row -->
     <div class="controls" id="controlsContainer">
-      <div class="field-group">
+      <div class="field-group field-date">
         <label>Date</label>
         <select id="dateSelect" class="ctrl-dropdown" @change="syncAllData()"></select>
       </div>
 
-      <div class="field-group time-filter-field">
-        <label>From (Hr/Min/Sec)</label>
+      <div class="field-group field-from time-filter-field">
+        <label>From</label>
         <div class="time-inputs">
           <select id="fromHourSelect" class="ctrl-dropdown"></select>
-          <input id="fromMinInput" type="number" class="ctrl-input" min="0" max="59" value="00" placeholder="MM" onblur="padInput(this)">
-          <input id="fromSecInput" type="number" class="ctrl-input" min="0" max="59" value="00" placeholder="SS" onblur="padInput(this)">
+          <select id="fromMinSelect" class="ctrl-dropdown"></select>
+          <select id="fromSecSelect" class="ctrl-dropdown"></select>
         </div>
       </div>
 
-      <div class="field-group time-filter-field">
-        <label>To (Hr/Min/Sec)</label>
+      <div class="field-group field-to time-filter-field">
+        <label>To</label>
         <div class="time-inputs">
           <select id="toHourSelect" class="ctrl-dropdown"></select>
-          <input id="toMinInput" type="number" class="ctrl-input" min="0" max="59" value="59" placeholder="MM" onblur="padInput(this)">
-          <input id="toSecInput" type="number" class="ctrl-input" min="0" max="59" value="59" placeholder="SS" onblur="padInput(this)">
+          <select id="toMinSelect" class="ctrl-dropdown"></select>
+          <select id="toSecSelect" class="ctrl-dropdown"></select>
         </div>
       </div>
 
-      <!-- Target View Action Buttons (Injected dynamically or toggled) -->
-      <div class="field-group target-action-field" id="targetTodayField" style="display: none;">
+      <div class="field-group field-sync" id="syncFieldGroup">
         <label>&nbsp;</label>
-        <button class="btn-refresh" onclick="resetToTodayDate()" title="Set Today's Date" style="width:100%;">🔄 Today</button>
+        <button class="btn-sync" onclick="syncAllData()">⚡</button>
       </div>
-      <div class="field-group target-action-field" id="targetSyncField" style="display: none;">
-        <label>&nbsp;</label>
-        <button class="btn-sync" onclick="syncAllData()" style="width:100%;">⚡ Sync</button>
-      </div>
-    </div>
-
-    <!-- Controls Row 2: Today and Sync spanning full width (Hidden on Target View) -->
-    <div class="controls-actions" id="standardActionsRow">
-      <button class="btn-refresh" onclick="resetToTodayDate()" title="Set Today's Date">🔄 Today</button>
-      <button class="btn-sync" onclick="syncAllData()">⚡ Sync</button>
     </div>
   </header>
 
@@ -364,84 +346,84 @@
     </section>
 
     <!-- PAGE 3: Sequence & Streak Analytics -->
-    <section class="view-panel p-1 space-y-2 bg-slate-950 text-slate-100" id="streakView">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
-            <div class="bg-slate-900 border border-slate-800 rounded-lg p-2.5">
-                <p class="text-[10px] text-slate-400 font-medium">Total Records</p>
-                <h3 class="text-lg font-bold text-white mt-0.5" x-text="allRecords.length">0</h3>
+    <section class="view-panel p-1 space-y-1 bg-slate-950 text-slate-100" id="streakView">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-1.5">
+            <div class="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5">
+                <p class="text-[9px] text-slate-400 font-medium leading-tight">Total Records</p>
+                <h3 class="text-base font-bold text-white mt-0.5 leading-tight" x-text="allRecords.length">0</h3>
             </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-lg p-2.5">
-                <p class="text-[10px] text-slate-400 font-medium">Highest Multiplier</p>
-                <h3 class="text-base font-bold text-amber-400 mt-0.5 truncate" x-text="highestMultiplier">1.00x</h3>
+            <div class="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5">
+                <p class="text-[9px] text-slate-400 font-medium leading-tight">Highest Multiplier</p>
+                <h3 class="text-sm font-bold text-amber-400 mt-0.5 truncate leading-tight" x-text="highestMultiplier">1.00x</h3>
             </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-lg p-2.5">
-                <p class="text-[10px] text-slate-400 font-medium">Peak Active Hour</p>
-                <h3 class="text-sm font-bold text-emerald-400 mt-0.5 truncate" x-text="peakHour">N/A</h3>
+            <div class="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5">
+                <p class="text-[9px] text-slate-400 font-medium leading-tight">Peak Active Hour</p>
+                <h3 class="text-xs font-bold text-emerald-400 mt-0.5 truncate leading-tight" x-text="peakHour">N/A</h3>
             </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-lg p-2.5">
-                <p class="text-[10px] text-slate-400 font-medium">Longest 1.x Streak</p>
-                <h3 class="text-base font-bold text-rose-400 mt-0.5 truncate" x-text="maxStreak1x + ' in a row'">0</h3>
-            </div>
-        </div>
-
-        <div class="bg-slate-900 border border-slate-800 rounded-lg p-2 space-y-1.5">
-            <h4 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Drought & Below-Threshold Streaks</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-1.5">
-                <div class="bg-slate-950 border border-slate-800/80 rounded p-1.5">
-                    <span class="text-[11px] text-amber-400 font-semibold block">Streak Below 10.00x</span>
-                    <p class="text-xs font-bold text-slate-200 mt-0.5" x-text="streakBelow10.count + ' games in a row'"></p>
-                    <p class="text-[9px] text-slate-500 mt-0.5 truncate" x-text="streakBelow10.timeframe"></p>
-                </div>
-                <div class="bg-slate-950 border border-slate-800/80 rounded p-1.5">
-                    <span class="text-[11px] text-emerald-400 font-semibold block">Streak Below 20.00x</span>
-                    <p class="text-xs font-bold text-slate-200 mt-0.5" x-text="streakBelow20.count + ' games in a row'"></p>
-                    <p class="text-[9px] text-slate-500 mt-0.5 truncate" x-text="streakBelow20.timeframe"></p>
-                </div>
-                <div class="bg-slate-950 border border-slate-800/80 rounded p-1.5">
-                    <span class="text-[11px] text-indigo-400 font-semibold block">Streak Below 30.00x</span>
-                    <p class="text-xs font-bold text-slate-200 mt-0.5" x-text="streakBelow30.count + ' games in a row'"></p>
-                    <p class="text-[9px] text-slate-500 mt-0.5 truncate" x-text="streakBelow30.timeframe"></p>
-                </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5">
+                <p class="text-[9px] text-slate-400 font-medium leading-tight">Longest 1.x Streak</p>
+                <h3 class="text-sm font-bold text-rose-400 mt-0.5 truncate leading-tight" x-text="maxStreak1x + ' in a row'">0</h3>
             </div>
         </div>
 
-        <div class="bg-slate-900 border border-slate-800 rounded-lg p-2">
-            <h4 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Hourly Count Breakdown</h4>
-            <div class="flex gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+        <div class="bg-slate-900 border border-slate-800 rounded-lg p-1.5 space-y-1">
+            <h4 class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Drought & Below-Threshold Streaks</h4>
+            <div class="grid grid-cols-3 gap-1">
+                <div class="bg-slate-950 border border-slate-800/80 rounded px-1.5 py-1">
+                    <span class="text-[10px] text-amber-400 font-semibold block leading-tight">Streak Below 10.00x</span>
+                    <p class="text-[11px] font-bold text-slate-200 mt-0.5 leading-tight" x-text="streakBelow10.count + ' games in a row'"></p>
+                    <p class="text-[8px] text-slate-500 mt-0.5 truncate leading-tight" x-text="streakBelow10.timeframe"></p>
+                </div>
+                <div class="bg-slate-950 border border-slate-800/80 rounded px-1.5 py-1">
+                    <span class="text-[10px] text-emerald-400 font-semibold block leading-tight">Streak Below 20.00x</span>
+                    <p class="text-[11px] font-bold text-slate-200 mt-0.5 leading-tight" x-text="streakBelow20.count + ' games in a row'"></p>
+                    <p class="text-[8px] text-slate-500 mt-0.5 truncate leading-tight" x-text="streakBelow20.timeframe"></p>
+                </div>
+                <div class="bg-slate-950 border border-slate-800/80 rounded px-1.5 py-1">
+                    <span class="text-[10px] text-indigo-400 font-semibold block leading-tight">Streak Below 30.00x</span>
+                    <p class="text-[11px] font-bold text-slate-200 mt-0.5 leading-tight" x-text="streakBelow30.count + ' games in a row'"></p>
+                    <p class="text-[8px] text-slate-500 mt-0.5 truncate leading-tight" x-text="streakBelow30.timeframe"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-lg p-1.5">
+            <h4 class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Hourly Count Breakdown</h4>
+            <div class="flex gap-1 overflow-x-auto pb-0.5 scrollbar-thin">
                 <template x-for="(count, hourRange) in hourlyCounts" :key="hourRange">
-                    <div class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-center min-w-[105px] flex-shrink-0">
-                        <span class="text-[10px] font-medium text-slate-400 block" x-text="hourRange"></span>
-                        <span class="text-[11px] font-bold text-amber-400 block mt-0.5" x-text="count + ' entries'"></span>
+                    <div class="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-center min-w-[95px] flex-shrink-0">
+                        <span class="text-[9px] font-medium text-slate-400 block leading-tight" x-text="hourRange"></span>
+                        <span class="text-[10px] font-bold text-amber-400 block mt-0.5 leading-tight" x-text="count + ' entries'"></span>
                     </div>
                 </template>
                 <template x-if="Object.keys(hourlyCounts).length === 0">
-                    <div class="text-slate-500 text-[10px] py-1">No data loaded yet.</div>
+                    <div class="text-slate-500 text-[9px] py-1">No data loaded yet.</div>
                 </template>
             </div>
         </div>
 
         <div class="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
-            <div class="px-2.5 py-2 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-                <h2 class="font-semibold text-[11px] text-slate-200">Dataset Logs (Latest First)</h2>
-                <span class="text-[10px] text-slate-400 font-mono" x-text="allRecords.length + ' rows'"></span>
+            <div class="px-2 py-1.5 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+                <h2 class="font-semibold text-[10px] text-slate-200">Dataset Logs (Latest First)</h2>
+                <span class="text-[9px] text-slate-400 font-mono" x-text="allRecords.length + ' rows'"></span>
             </div>
-            <div class="overflow-x-auto max-h-[380px] overflow-y-auto">
+            <div class="overflow-x-auto max-h-[300px] overflow-y-auto">
                 <table class="w-full text-left border-collapse font-mono text-xs">
-                    <thead class="bg-slate-950 sticky top-0 text-[10px] font-semibold text-slate-400 uppercase border-b border-slate-800 z-10">
+                    <thead class="bg-slate-950 sticky top-0 text-[9px] font-semibold text-slate-400 uppercase border-b border-slate-800 z-10">
                         <tr>
-                            <th class="py-2 px-3 bg-slate-950">#</th>
-                            <th class="py-2 px-3 bg-slate-950">Date</th>
-                            <th class="py-2 px-3 bg-slate-950">Timestamp</th>
-                            <th class="py-2 px-3 text-right bg-slate-950">Multiplier</th>
+                            <th class="py-1.5 px-2 bg-slate-950">#</th>
+                            <th class="py-1.5 px-2 bg-slate-950">Date</th>
+                            <th class="py-1.5 px-2 bg-slate-950">Timestamp</th>
+                            <th class="py-1.5 px-2 text-right bg-slate-950">Multiplier</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800/60">
                         <template x-for="(row, index) in allRecords" :key="index">
                             <tr class="hover:bg-slate-800/45 transition">
-                                <td class="py-2 px-3 text-slate-500" x-text="allRecords.length - index"></td>
-                                <td class="py-2 px-3 text-slate-300" x-text="row.date"></td>
-                                <td class="py-2 px-3 text-slate-200 font-semibold" x-text="row.time"></td>
-                                <td class="py-2 px-3 text-right font-bold" 
+                                <td class="py-1.5 px-2 text-slate-500 text-[11px]" x-text="allRecords.length - index"></td>
+                                <td class="py-1.5 px-2 text-slate-300 text-[11px]" x-text="row.date"></td>
+                                <td class="py-1.5 px-2 text-slate-200 font-semibold text-[11px]" x-text="row.time"></td>
+                                <td class="py-1.5 px-2 text-right font-bold text-[11px]" 
                                     :class="row.multiplier >= 10 ? 'text-amber-400' : (row.multiplier >= 3 ? 'text-emerald-400' : 'text-slate-300')"
                                     x-text="row.rawMultiplier">
                                 </td>
@@ -449,7 +431,7 @@
                         </template>
                         <template x-if="allRecords.length === 0">
                             <tr>
-                                <td colspan="4" class="py-6 text-center text-slate-500 text-xs">No records available.</td>
+                                <td colspan="4" class="py-4 text-center text-slate-500 text-[11px]">No records available within this time range.</td>
                             </tr>
                         </template>
                     </tbody>
@@ -482,20 +464,17 @@
       document.getElementById(viewId).classList.add('active');
 
       const timeFields = document.querySelectorAll('.time-filter-field');
-      const targetActionFields = document.querySelectorAll('.target-action-field');
-      const controlsContainer = document.getElementById('controlsContainer');
-      const standardActionsRow = document.getElementById('standardActionsRow');
+      const dateField = document.getElementById('dateSelect').parentElement;
+      const syncField = document.getElementById('syncFieldGroup');
       
       if (viewId === 'targetView') {
         timeFields.forEach(el => el.style.display = 'none');
-        targetActionFields.forEach(el => el.style.display = 'flex');
-        controlsContainer.classList.add('target-mode');
-        standardActionsRow.style.display = 'none';
+        dateField.style.width = '48%';
+        syncField.style.width = '48%';
       } else {
         timeFields.forEach(el => el.style.display = 'flex');
-        targetActionFields.forEach(el => el.style.display = 'none');
-        controlsContainer.classList.remove('target-mode');
-        standardActionsRow.style.display = 'flex';
+        dateField.style.width = '17%';
+        syncField.style.width = '17%';
       }
     }
 
@@ -514,61 +493,79 @@
 
         const opt = document.createElement('option');
         opt.value = dateStr;
-        opt.textContent = i === 0 ? `Today (${dateStr})` : dateStr;
+        opt.textContent = dateStr;
         select.appendChild(opt);
       }
     }
 
-    function initHourDropdowns() {
-      const fromSel = document.getElementById('fromHourSelect');
-      const toSel = document.getElementById('toHourSelect');
-      fromSel.innerHTML = '';
-      toSel.innerHTML = '';
+    function initTimeDropdowns() {
+      const fromHourSel = document.getElementById('fromHourSelect');
+      const toHourSel = document.getElementById('toHourSelect');
+      const fromMinSel = document.getElementById('fromMinSelect');
+      const toMinSel = document.getElementById('toMinSelect');
+      const fromSecSel = document.getElementById('fromSecSelect');
+      const toSecSel = document.getElementById('toSecSelect');
+
+      fromHourSel.innerHTML = '';
+      toHourSel.innerHTML = '';
+      fromMinSel.innerHTML = '';
+      toMinSel.innerHTML = '';
+      fromSecSel.innerHTML = '';
+      toSecSel.innerHTML = '';
 
       for (let h = 0; h < 24; h++) {
         const ampm = h >= 12 ? 'PM' : 'AM';
         const hh = (h % 12 || 12).toString().padStart(2, '0');
-        const label = `${hh}:00 ${ampm}`;
+        const label = `${hh} ${ampm}`;
 
         const optF = document.createElement('option');
         optF.value = `${hh}:${ampm}`;
         optF.textContent = label;
-        fromSel.appendChild(optF);
+        fromHourSel.appendChild(optF);
 
         const optT = document.createElement('option');
         optT.value = `${hh}:${ampm}`;
         optT.textContent = label;
-        toSel.appendChild(optT);
+        toHourSel.appendChild(optT);
       }
 
-      fromSel.value = "12:AM";
-      toSel.value = "11:PM";
-    }
+      for (let m = 0; m < 60; m++) {
+        const mm = m.toString().padStart(2, '0');
+        
+        const optFMin = document.createElement('option');
+        optFMin.value = mm;
+        optFMin.textContent = mm;
+        fromMinSel.appendChild(optFMin);
 
-    function padInput(el) {
-      let val = parseInt(el.value, 10);
-      if (isNaN(val) || val < 0) val = 0;
-      if (val > 59) val = 59;
-      el.value = val.toString().padStart(2, '0');
+        const optTMin = document.createElement('option');
+        optTMin.value = mm;
+        optTMin.textContent = mm;
+        toMinSel.appendChild(optTMin);
+
+        const optFSec = document.createElement('option');
+        optFSec.value = mm;
+        optFSec.textContent = mm;
+        fromSecSel.appendChild(optFSec);
+
+        const optTSec = document.createElement('option');
+        optTSec.value = mm;
+        optTSec.textContent = mm;
+        toSecSel.appendChild(optTSec);
+      }
+
+      fromHourSel.value = "12:AM";
+      toHourSel.value = "11:PM";
+      fromMinSel.value = "00";
+      toMinSel.value = "59";
+      fromSecSel.value = "00";
+      toSecSel.value = "59";
     }
 
     function getFormattedTimeString(hourVal, minVal, secVal) {
       let [hh, ampm] = hourVal.split(':');
-      let mm = minVal.toString().padStart(2, '0');
-      let ss = secVal.toString().padStart(2, '0');
+      let mm = (minVal || '00').padStart(2, '0');
+      let ss = (secVal || '00').padStart(2, '0');
       return `${hh}:${mm}:${ss} ${ampm}`;
-    }
-
-    function resetToTodayDate() {
-      initDateDropdown();
-      document.getElementById('fromHourSelect').value = "12:AM";
-      document.getElementById('fromMinInput').value = "00";
-      document.getElementById('fromSecInput').value = "00";
-
-      document.getElementById('toHourSelect').value = "11:PM";
-      document.getElementById('toMinInput').value = "59";
-      document.getElementById('toSecInput').value = "59";
-      syncAllData();
     }
 
     const money = n => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(n || 0);
@@ -587,7 +584,7 @@
 
     function loadInitialData() {
       initDateDropdown();
-      initHourDropdowns();
+      initTimeDropdowns();
       syncAllData();
     }
 
@@ -595,13 +592,13 @@
       const dateVal = document.getElementById('dateSelect').value.trim();
       
       const fromHour = document.getElementById('fromHourSelect').value;
-      const fromMin = document.getElementById('fromMinInput').value;
-      const fromSec = document.getElementById('fromSecInput').value;
+      const fromMin = document.getElementById('fromMinSelect').value;
+      const fromSec = document.getElementById('fromSecSelect').value;
       const fromVal = getFormattedTimeString(fromHour, fromMin, fromSec);
 
       const toHour = document.getElementById('toHourSelect').value;
-      const toMin = document.getElementById('toMinInput').value;
-      const toSec = document.getElementById('toSecInput').value;
+      const toMin = document.getElementById('toMinSelect').value;
+      const toSec = document.getElementById('toSecSelect').value;
       const toVal = getFormattedTimeString(toHour, toMin, toSec);
 
       if (!dateVal) return;
@@ -610,7 +607,7 @@
         await Promise.all([
           fetchTargetAnalytics(dateVal),
           fetchLiveIntelligence(dateVal, fromVal, toVal),
-          window.streakApp && typeof window.streakApp.loadRawDataForStreaks === 'function' ? window.streakApp.loadRawDataForStreaks(dateVal) : Promise.resolve()
+          window.streakApp && typeof window.streakApp.loadRawDataForStreaks === 'function' ? window.streakApp.loadRawDataForStreaks(dateVal, fromVal, toVal) : Promise.resolve()
         ]);
       } catch (e) {
         console.error("Sync error:", e);
@@ -707,7 +704,7 @@
                 ` : ''}
               </div>
 
-              <div style="border-top: 1px dashed var(--border); padding-top: 0.15rem; margin-top: 0.15rem;">
+              <div style="border-top: 1px dashed var(--border); padding-top: 0.2rem; margin-top: 0.2rem;">
                 <div class="stat-row">
                   <span>Final Profit:</span>
                   <span class="stat-value ${finalProfitClass}">${item.finalProfit >= 0 ? '+' : ''}${item.finalProfit}</span>
@@ -801,19 +798,22 @@
         streakBelow20: { count: 0, timeframe: 'None' },
         streakBelow30: { count: 0, timeframe: 'None' },
 
-        async loadRawDataForStreaks(dateStr) {
+        async loadRawDataForStreaks(dateStr, fromTimeStr, toTimeStr) {
           try {
             const response = await fetch(`${RAW_API}?date=${encodeURIComponent(dateStr)}`);
             const text = await response.text();
-            this.parseStreakData(text);
+            this.parseStreakData(text, fromTimeStr, toTimeStr);
           } catch (err) {
             console.error("Error loading streaks data:", err);
           }
         },
 
-        parseStreakData(rawText) {
+        parseStreakData(rawText, fromTimeStr, toTimeStr) {
           const lines = rawText.split('\n');
           let parsed = [];
+
+          let fromObj = this.parseTimestamp(`01/01/2000 ${fromTimeStr}`);
+          let toObj = this.parseTimestamp(`01/01/2000 ${toTimeStr}`);
 
           lines.forEach(line => {
             const parts = line.split(',');
@@ -823,6 +823,13 @@
               const rawMultiplier = parts[2].trim();
               const multiplierNum = parseFloat(rawMultiplier.replace('x', '')) || 0;
               const timestampObj = this.parseTimestamp(`${date} ${time}`);
+
+              if (fromTimeStr && toTimeStr) {
+                let timeOnlyObj = this.parseTimestamp(`01/01/2000 ${time}`);
+                if (timeOnlyObj < fromObj || timeOnlyObj > toObj) {
+                  return;
+                }
+              }
 
               parsed.push({ date, time, rawMultiplier, multiplier: multiplierNum, timestampObj });
             }
@@ -840,7 +847,7 @@
 
           const latest10 = this.allRecords.slice(0, 10);
           if (latest10.length === 0) {
-            strip.innerHTML = `No records available.`;
+            strip.innerHTML = `No records available in this range.`;
             return;
           }
 
@@ -859,7 +866,14 @@
         },
 
         runAnalytics() {
-          if (this.allRecords.length === 0) return;
+          if (this.allRecords.length === 0) {
+            this.highestMultiplier = '1.00x';
+            this.maxStreak1x = 0;
+            this.streakBelow10 = { count: 0, timeframe: 'None' };
+            this.streakBelow20 = { count: 0, timeframe: 'None' };
+            this.streakBelow30 = { count: 0, timeframe: 'None' };
+            return;
+          }
 
           let maxObj = this.allRecords.reduce((max, r) => r.multiplier > max.multiplier ? r : max, this.allRecords[0]);
           this.highestMultiplier = `${maxObj.rawMultiplier} (${maxObj.time})`;
