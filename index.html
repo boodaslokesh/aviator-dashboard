@@ -155,7 +155,7 @@
     }
     .recent-inline-text {
       display: grid;
-      grid-template-columns: repeat(10, 1fr);
+      grid-template-columns: repeat(8, 1fr);
       gap: 0.2rem;
       width: 100%;
     }
@@ -488,7 +488,7 @@
     }
 
     function padInput(el) {
-      let val = parseInt(el.value, 10);
+      let val = parseInt(el.value, 8);
       if (isNaN(val) || val < 0) val = 0;
       if (val > 59) val = 59;
       el.value = val.toString().padStart(2, '0');
