@@ -73,11 +73,18 @@
       outline: none;
     }
 
-    /* Controls Layout - Adjusted widths and compact heights */
-    .controls {
+    /* Controls Layout - Two Rows stacked */
+    .controls-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      width: 100%;
+    }
+
+    .controls-row {
       display: flex;
       flex-direction: row;
-      gap: 0.15rem;
+      gap: 0.25rem;
       align-items: center;
       width: 100%;
     }
@@ -89,10 +96,11 @@
       flex-shrink: 0;
     }
 
-    .field-date { width: 17%; }
-    .field-from { width: 33%; }
-    .field-to { width: 33%; }
-    .field-sync { width: 17%; }
+    /* Row 1: From and To take full width evenly */
+    .row-top .field-from, .row-top .field-to { width: 50%; }
+
+    /* Row 2: Date and Sync take 50% width each (equal size) */
+    .row-bottom .field-date, .row-bottom .field-sync { width: 50%; }
 
     .field-group label { font-size: 0.52rem; color: var(--muted); font-weight: 700; text-transform: uppercase; white-space: nowrap; }
 
@@ -227,7 +235,7 @@
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 0.5rem 0.5rem; /* Slightly increased vertical padding */
+      padding: 0.5rem 0.5rem;
       display: flex;
       flex-direction: column;
     }
@@ -237,7 +245,7 @@
     .multipliers-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 0.35rem; /* Increased gap for better spacing */
+      gap: 0.35rem;
       margin-top: 0.15rem;
     }
 
@@ -245,12 +253,12 @@
       background: rgba(7, 16, 29, 0.7);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 0.4rem 0.45rem; /* Increased vertical sizing for target strategy boxes */
-      font-size: clamp(0.65rem, 1.2vh, 0.75rem); /* Increased display text size */
+      padding: 0.4rem 0.45rem;
+      font-size: clamp(0.65rem, 1.2vh, 0.75rem);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 115px; /* Ensured generous vertical expansion */
+      min-height: 115px;
     }
 
     .strategy-title { font-weight: 700; font-size: clamp(0.7rem, 1.3vh, 0.8rem); display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.15rem; }
@@ -279,34 +287,38 @@
       </select>
     </div>
 
-    <!-- Controls Row -->
-    <div class="controls" id="controlsContainer">
-      <div class="field-group field-date">
-        <label>Date</label>
-        <select id="dateSelect" class="ctrl-dropdown" @change="syncAllData()"></select>
-      </div>
+    <!-- Controls Rows: Top row (From & To), Bottom row (Date & Sync with equal 50/50 sizing) -->
+    <div class="controls-container" id="controlsContainer">
+      <div class="controls-row row-top">
+        <div class="field-group field-from time-filter-field">
+          <label>From</label>
+          <div class="time-inputs">
+            <select id="fromHourSelect" class="ctrl-dropdown"></select>
+            <select id="fromMinSelect" class="ctrl-dropdown"></select>
+            <select id="fromSecSelect" class="ctrl-dropdown"></select>
+          </div>
+        </div>
 
-      <div class="field-group field-from time-filter-field">
-        <label>From</label>
-        <div class="time-inputs">
-          <select id="fromHourSelect" class="ctrl-dropdown"></select>
-          <select id="fromMinSelect" class="ctrl-dropdown"></select>
-          <select id="fromSecSelect" class="ctrl-dropdown"></select>
+        <div class="field-group field-to time-filter-field">
+          <label>To</label>
+          <div class="time-inputs">
+            <select id="toHourSelect" class="ctrl-dropdown"></select>
+            <select id="toMinSelect" class="ctrl-dropdown"></select>
+            <select id="toSecSelect" class="ctrl-dropdown"></select>
+          </div>
         </div>
       </div>
 
-      <div class="field-group field-to time-filter-field">
-        <label>To</label>
-        <div class="time-inputs">
-          <select id="toHourSelect" class="ctrl-dropdown"></select>
-          <select id="toMinSelect" class="ctrl-dropdown"></select>
-          <select id="toSecSelect" class="ctrl-dropdown"></select>
+      <div class="controls-row row-bottom">
+        <div class="field-group field-date" id="dateFieldGroup">
+          <label>Date</label>
+          <select id="dateSelect" class="ctrl-dropdown" @change="syncAllData()"></select>
         </div>
-      </div>
 
-      <div class="field-group field-sync" id="syncFieldGroup">
-        <label>&nbsp;</label>
-        <button class="btn-sync" onclick="syncAllData()">⚡</button>
+        <div class="field-group field-sync" id="syncFieldGroup">
+          <label>&nbsp;</label>
+          <button class="btn-sync" onclick="syncAllData()">⚡ Sync</button>
+        </div>
       </div>
     </div>
   </header>
@@ -464,17 +476,17 @@
       document.getElementById(viewId).classList.add('active');
 
       const timeFields = document.querySelectorAll('.time-filter-field');
-      const dateField = document.getElementById('dateSelect').parentElement;
-      const syncField = document.getElementById('syncFieldGroup');
+      const dateFieldGroup = document.getElementById('dateFieldGroup');
+      const syncFieldGroup = document.getElementById('syncFieldGroup');
       
       if (viewId === 'targetView') {
         timeFields.forEach(el => el.style.display = 'none');
-        dateField.style.width = '48%';
-        syncField.style.width = '48%';
+        dateFieldGroup.style.width = '50%';
+        syncFieldGroup.style.display = 'flex';
       } else {
         timeFields.forEach(el => el.style.display = 'flex');
-        dateField.style.width = '17%';
-        syncField.style.width = '17%';
+        dateFieldGroup.style.width = '50%';
+        syncFieldGroup.style.display = 'flex';
       }
     }
 
