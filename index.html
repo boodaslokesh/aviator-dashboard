@@ -799,7 +799,7 @@
           const strip = document.getElementById('recentRecordsStrip');
           if (!strip) return;
 
-          const latest10 = this.allRecords.slice(0, 10);
+          const latest10 = this.allRecords.slice(0, 8);
           if (latest10.length === 0) {
             strip.innerHTML = `No records available.`;
             return;
