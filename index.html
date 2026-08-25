@@ -73,18 +73,42 @@
       outline: none;
     }
 
+    /* Controls Layout */
     .controls {
       display: grid;
-      grid-template-columns: 1fr 1.4fr 1.4fr auto auto;
+      grid-template-columns: 1.2fr 1.4fr 1.4fr;
       gap: 0.35rem;
-      align-items: center;
+      align-items: end;
+    }
+
+    .controls.target-mode {
+      grid-template-columns: 1fr auto auto;
+      align-items: end;
+    }
+
+    .controls-actions {
+      display: flex;
+      gap: 0.35rem;
+      grid-column: span 3;
+      width: 100%;
+      margin-top: 0.1rem;
+    }
+
+    .controls-actions button {
+      flex: 1;
+      width: 100%;
+      text-align: center;
+      justify-content: center;
     }
 
     @media (max-width: 768px) {
       .controls {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
       }
-      .controls .field-group:nth-child(1) { grid-column: span 2; }
+      .controls.target-mode {
+        grid-template-columns: 1fr;
+      }
+      .controls-actions { grid-column: span 1; }
     }
 
     .field-group { display: flex; flex-direction: column; gap: 0.15rem; }
@@ -92,7 +116,7 @@
 
     .time-inputs {
       display: flex;
-      gap: 0.18rem;
+      gap: 0.15rem;
       align-items: center;
     }
 
@@ -109,19 +133,22 @@
     }
 
     input.ctrl-input {
-      width: 34px;
+      width: 32px;
       flex-shrink: 0;
+      padding: 0.35rem 0.1rem;
     }
 
     button {
       border: 0;
-      padding: 0.45rem 0.7rem;
+      padding: 0.4rem 0.7rem;
       border-radius: 6px;
       font-weight: 700;
       font-size: 0.78rem;
       cursor: pointer;
       white-space: nowrap;
-      height: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       transition: opacity 0.1s;
     }
     button:active { opacity: 0.8; }
@@ -139,10 +166,10 @@
     .view-panel.active { display: flex; }
 
     .metrics-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem; flex-shrink: 0; margin-bottom: 0.2rem; }
-    .metric { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0.5rem; }
-    .metric .label { color: var(--muted); font-size: 0.62rem; font-weight: 700; text-transform: uppercase; }
-    .metric .value { font-size: clamp(1rem, 2vh, 1.25rem); font-weight: 800; }
-    .metric .note { font-size: 0.6rem; color: var(--muted); }
+    .metric { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.35rem 0.45rem; }
+    .metric .label { color: var(--muted); font-size: 0.58rem; font-weight: 700; text-transform: uppercase; }
+    .metric .value { font-size: clamp(0.9rem, 1.7vh, 1.1rem); font-weight: 800; }
+    .metric .note { font-size: 0.55rem; color: var(--muted); }
 
     .recent-strip-container {
       background: #0d1a2e;
@@ -259,7 +286,8 @@
       </select>
     </div>
 
-    <div class="controls">
+    <!-- Controls Row 1: Date, From, To (or Date, Today, Sync on Target View) -->
+    <div class="controls" id="controlsContainer">
       <div class="field-group">
         <label>Date</label>
         <select id="dateSelect" class="ctrl-dropdown" @change="syncAllData()"></select>
@@ -283,6 +311,19 @@
         </div>
       </div>
 
+      <!-- Target View Action Buttons (Injected dynamically or toggled) -->
+      <div class="field-group target-action-field" id="targetTodayField" style="display: none;">
+        <label>&nbsp;</label>
+        <button class="btn-refresh" onclick="resetToTodayDate()" title="Set Today's Date" style="width:100%;">🔄 Today</button>
+      </div>
+      <div class="field-group target-action-field" id="targetSyncField" style="display: none;">
+        <label>&nbsp;</label>
+        <button class="btn-sync" onclick="syncAllData()" style="width:100%;">⚡ Sync</button>
+      </div>
+    </div>
+
+    <!-- Controls Row 2: Today and Sync spanning full width (Hidden on Target View) -->
+    <div class="controls-actions" id="standardActionsRow">
       <button class="btn-refresh" onclick="resetToTodayDate()" title="Set Today's Date">🔄 Today</button>
       <button class="btn-sync" onclick="syncAllData()">⚡ Sync</button>
     </div>
@@ -440,16 +481,21 @@
       document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
       document.getElementById(viewId).classList.add('active');
 
-      // Hide From/To time inputs specifically on Target Analytics page
       const timeFields = document.querySelectorAll('.time-filter-field');
-      const controlsGrid = document.querySelector('.controls');
+      const targetActionFields = document.querySelectorAll('.target-action-field');
+      const controlsContainer = document.getElementById('controlsContainer');
+      const standardActionsRow = document.getElementById('standardActionsRow');
       
       if (viewId === 'targetView') {
         timeFields.forEach(el => el.style.display = 'none');
-        controlsGrid.style.gridTemplateColumns = '1fr auto auto';
+        targetActionFields.forEach(el => el.style.display = 'flex');
+        controlsContainer.classList.add('target-mode');
+        standardActionsRow.style.display = 'none';
       } else {
         timeFields.forEach(el => el.style.display = 'flex');
-        controlsGrid.style.gridTemplateColumns = '1fr 1.4fr 1.4fr auto auto';
+        targetActionFields.forEach(el => el.style.display = 'none');
+        controlsContainer.classList.remove('target-mode');
+        standardActionsRow.style.display = 'flex';
       }
     }
 
@@ -525,11 +571,6 @@
       syncAllData();
     }
 
-    function formatTime(dateTimeStr) {
-      if (!dateTimeStr) return 'N/A';
-      return dateTimeStr.includes(', ') ? dateTimeStr.split(', ')[1] : dateTimeStr;
-    }
-
     const money = n => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(n || 0);
 
     function strategyEntries(data) {
@@ -594,14 +635,12 @@
       const sections = [];
       for (let i = 0; i < data.length; i += 2) {
         if (data[i] && data[i + 1]) {
-          // Hide / skip section calculations matching 1000
           if (!data[i].includes('1000')) {
             sections.push({ title: data[i], strategies: data[i + 1] });
           }
         }
       }
 
-      // Explicitly sort sections to show 500 first
       sections.sort((a, b) => {
         if (a.title.includes('500')) return -1;
         if (b.title.includes('500')) return 1;
@@ -615,7 +654,6 @@
         let html = `<div class="target-header">${title}</div>`;
         html += `<div class="multipliers-grid">`;
 
-        // Reverse multiplier keys to position higher cards down and lower cards top
         const multipliers = Object.keys(strategies).reverse();
 
         multipliers.forEach(multiplier => {
