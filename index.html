@@ -60,7 +60,7 @@
     }
 
     .brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 800; font-size: 0.95rem; color: var(--accent); }
-    .mark { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, var(--success), var(--blue)); color: #07101d; display: grid; place-items: center; font-size: 0.85rem;[...]
+    .mark { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, var(--success), var(--blue)); color: #07101d; display: grid; place-items: center; font-size: 0.85rem; font-weight: 900; }
 
     select.view-selector {
       background: #142641;
@@ -155,7 +155,7 @@
     }
     .recent-inline-text {
       display: grid;
-      grid-template-columns: repeat(8, 1fr);
+      grid-template-columns: repeat(10, 1fr);
       gap: 0.2rem;
       width: 100%;
     }
@@ -243,10 +243,6 @@
     .reached-section { background: rgba(79, 219, 182, 0.08); border: 1px dashed rgba(79, 219, 182, 0.3); border-radius: 4px; padding: 0.15rem 0.3rem; margin: 0.1rem 0; }
     .lowest-section { background: rgba(255, 113, 139, 0.08); border: 1px dashed rgba(255, 113, 139, 0.3); border-radius: 4px; padding: 0.15rem 0.3rem; margin: 0.1rem 0; }
     .positive { color: var(--success); } .negative { color: var(--danger); } .neutral { color: var(--amber); }
-
-    #targetView .time-field {
-      display: none;
-    }
   </style>
 </head>
 <body x-data="aviatorApp()" x-init="window.streakApp = $data; loadInitialData();">
@@ -269,7 +265,7 @@
         <select id="dateSelect" class="ctrl-dropdown" @change="syncAllData()"></select>
       </div>
 
-      <div class="field-group time-field" id="fromField">
+      <div class="field-group">
         <label>From (Hr/Min/Sec)</label>
         <div class="time-inputs">
           <select id="fromHourSelect" class="ctrl-dropdown"></select>
@@ -278,7 +274,7 @@
         </div>
       </div>
 
-      <div class="field-group time-field" id="toField">
+      <div class="field-group">
         <label>To (Hr/Min/Sec)</label>
         <div class="time-inputs">
           <select id="toHourSelect" class="ctrl-dropdown"></select>
@@ -443,14 +439,6 @@
     function switchView(viewId) {
       document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
       document.getElementById(viewId).classList.add('active');
-      
-      // Hide time fields when target view is active
-      const timeFields = document.querySelectorAll('.time-field');
-      if (viewId === 'targetView') {
-        timeFields.forEach(field => field.style.display = 'none');
-      } else {
-        timeFields.forEach(field => field.style.display = 'flex');
-      }
     }
 
     function initDateDropdown() {
@@ -594,16 +582,17 @@
       const sections = [];
       for (let i = 0; i < data.length; i += 2) {
         if (data[i] && data[i + 1]) {
-          sections.push({ title: data[i], strategies: data[i + 1] });
+          // Hide / skip section calculations matching 1000
+          if (!data[i].includes('1000')) {
+            sections.push({ title: data[i], strategies: data[i + 1] });
+          }
         }
       }
 
-      // Explicitly sort sections to show 500 first, then 1000
+      // Explicitly sort sections to show 500 first
       sections.sort((a, b) => {
         if (a.title.includes('500')) return -1;
         if (b.title.includes('500')) return 1;
-        if (a.title.includes('1000')) return 1;
-        if (b.title.includes('1000')) return -1;
         return 0;
       });
 
@@ -642,10 +631,7 @@
                       <span>Hit Rd:</span>
                       <span class="stat-value">#${item.profitReachedtRound}</span>
                     </div>
-                    <div class="stat-row">
-                      <span>Hit Time:</span>
-                      <span class="stat-value">${formatTime(item.profitReachedTime)}</span>
-                    </div>
+                    <!-- Target Analytics time display removed per request -->
                   </div>
                 ` : ''}
 
@@ -657,10 +643,7 @@
                   <span>Peak Round:</span>
                   <span class="stat-value">#${item.highestProfitRound}</span>
                 </div>
-                <div class="stat-row">
-                  <span>Peak Time:</span>
-                  <span class="stat-value">${formatTime(item.maxProfitTime)}</span>
-                </div>
+                <!-- Target Analytics time display removed per request -->
 
                 ${item.lowestProfitReached !== undefined ? `
                   <div class="lowest-section">
@@ -672,10 +655,7 @@
                       <span>Lowest Rd:</span>
                       <span class="stat-value">#${item.lowestProfitRound}</span>
                     </div>
-                    <div class="stat-row">
-                      <span>Lowest Time:</span>
-                      <span class="stat-value">${formatTime(item.lowestProfitTime)}</span>
-                    </div>
+                    <!-- Target Analytics time display removed per request -->
                   </div>
                 ` : ''}
               </div>
@@ -811,7 +791,7 @@
           const strip = document.getElementById('recentRecordsStrip');
           if (!strip) return;
 
-          const latest10 = this.allRecords.slice(0, 8);
+          const latest10 = this.allRecords.slice(0, 10);
           if (latest10.length === 0) {
             strip.innerHTML = `No records available.`;
             return;
