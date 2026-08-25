@@ -174,7 +174,7 @@
     }
     .recent-inline-text {
       display: grid;
-      grid-template-columns: repeat(10, 1fr);
+      grid-template-columns: repeat(8, 1fr); /* Updated to 8 records per row */
       gap: 0.15rem;
       width: 100%;
     }
@@ -673,7 +673,6 @@
             const notifKey = `wa_sent_${dateStr}_${multiplier}`;
             if (!localStorage.getItem(notifKey)) {
               localStorage.setItem(notifKey, 'true');
-              // Fixed WhatsApp Message template to display Hit Round correctly
               const msg = `*Hey, Lokesh for ${multiplier} ${title} was reached!* \nHit Amount: +${item.profitReachedAmount}\nHit Round: #${item.profitReachedtRound}`;
               sendWhatsAppMessage(msg);
             }
@@ -904,13 +903,14 @@
           const strip = document.getElementById('recentRecordsStrip');
           if (!strip) return;
 
-          const latest10 = this.allRecords.slice(0, 10);
-          if (latest10.length === 0) {
+          // Updated to show last 24 records total (8 per row setup)
+          const latest24 = this.allRecords.slice(0, 24);
+          if (latest24.length === 0) {
             strip.innerHTML = `No records available in this range.`;
             return;
           }
 
-          strip.innerHTML = latest10.map(r => {
+          strip.innerHTML = latest24.map(r => {
             let cls = 'val-norm';
             if (r.multiplier >= 10) cls = 'val-high';
             else if (r.multiplier >= 3) cls = 'val-mid';
