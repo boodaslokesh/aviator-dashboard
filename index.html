@@ -265,7 +265,7 @@
         <select id="dateSelect" class="ctrl-dropdown" @change="syncAllData()"></select>
       </div>
 
-      <div class="field-group">
+      <div class="field-group time-filter-field">
         <label>From (Hr/Min/Sec)</label>
         <div class="time-inputs">
           <select id="fromHourSelect" class="ctrl-dropdown"></select>
@@ -274,7 +274,7 @@
         </div>
       </div>
 
-      <div class="field-group">
+      <div class="field-group time-filter-field">
         <label>To (Hr/Min/Sec)</label>
         <div class="time-inputs">
           <select id="toHourSelect" class="ctrl-dropdown"></select>
@@ -439,6 +439,18 @@
     function switchView(viewId) {
       document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
       document.getElementById(viewId).classList.add('active');
+
+      // Hide From/To time inputs specifically on Target Analytics page
+      const timeFields = document.querySelectorAll('.time-filter-field');
+      const controlsGrid = document.querySelector('.controls');
+      
+      if (viewId === 'targetView') {
+        timeFields.forEach(el => el.style.display = 'none');
+        controlsGrid.style.gridTemplateColumns = '1fr auto auto';
+      } else {
+        timeFields.forEach(el => el.style.display = 'flex');
+        controlsGrid.style.gridTemplateColumns = '1fr 1.4fr 1.4fr auto auto';
+      }
     }
 
     function initDateDropdown() {
@@ -631,7 +643,6 @@
                       <span>Hit Rd:</span>
                       <span class="stat-value">#${item.profitReachedtRound}</span>
                     </div>
-                    <!-- Target Analytics time display removed per request -->
                   </div>
                 ` : ''}
 
@@ -643,7 +654,6 @@
                   <span>Peak Round:</span>
                   <span class="stat-value">#${item.highestProfitRound}</span>
                 </div>
-                <!-- Target Analytics time display removed per request -->
 
                 ${item.lowestProfitReached !== undefined ? `
                   <div class="lowest-section">
@@ -655,7 +665,6 @@
                       <span>Lowest Rd:</span>
                       <span class="stat-value">#${item.lowestProfitRound}</span>
                     </div>
-                    <!-- Target Analytics time display removed per request -->
                   </div>
                 ` : ''}
               </div>
