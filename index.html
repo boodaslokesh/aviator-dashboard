@@ -1,142 +1,1235 @@
-(function () {
-    console.log("Aviator completed-history tracker active...");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategy Analysis Dashboard</title>
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-panel: #111827;
+            --bg-card: #162032;
+            --bg-input: #1f293d;
+            --border-color: #27354f;
+            --accent-cyan: #00e5ff;
+            --accent-green: #00e676;
+            --accent-red: #ff5252;
+            
+            --mult-blue: #3b82f6;     
+            --mult-purple: #a855f7;   
+            --mult-pink: #ec4899;     
 
-    const POLL_MS = 250;
-    const HISTORY_LIMIT = 50;
-    const HISTORY_SELECTOR = ".result-history .payouts-block .payout";
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
 
-    let previousHistory = [];
-    let initialized = false;
-    let checkQueued = false;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 6px;
+        }
 
-    function sendToWebhook(multiplier) {
-        const now = new Date();
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
 
-        const dateStr = [
-            String(now.getDate()).padStart(2, "0"),
-            String(now.getMonth() + 1).padStart(2, "0"),
-            now.getFullYear()
-        ].join("-");
+        .top-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 4px 6px;
+            gap: 6px;
+            width: 100%;
+            box-sizing: border-box;
+        }
 
-        const timeStr = now.toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: true
-        });
+        .platform-select {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--accent-cyan);
+            padding: 0 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            outline: none;
+            cursor: pointer;
+            height: 28px;
+            line-height: 28px;
+            width: 100%;
+            box-sizing: border-box;
+            display: block;
+        }
 
-        const targetUrl =
-            "https://aviator-data-write-f1wq2z.5sc6y6-4.usa-e2.cloudhub.io/api/playinject/" +
-            dateStr + "/" +
-            encodeURIComponent(timeStr) + "/" +
-            encodeURIComponent(multiplier);
+        .platform-select:focus {
+            border-color: var(--accent-cyan);
+        }
 
-        console.log(
-            `[HEARTBEAT] Triggering CloudHub | Value: ${multiplier} | Time: ${dateStr} ${timeStr}`
-        );
+        .nav-tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            width: 100%;
+            height: 28px;
+            box-sizing: border-box;
+        }
 
-        fetch(targetUrl, {
-            method: "GET",
-            mode: "no-cors"
-        })
-            .then(() => {
-                console.log(
-                    `[HEARTBEAT] CloudHub request sent | Value: ${multiplier}`
-                );
-            })
-            .catch((error) => {
-                console.error(
-                    `[HEARTBEAT] CloudHub request failed | Value: ${multiplier}`,
-                    error
-                );
-            });
-    }
+        .nav-tab-btn {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0 2px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            outline: none;
+            cursor: pointer;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: all 0.2s ease;
+            width: 100%;
+            height: 28px;
+            line-height: 26px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-    function getVisibleHistory() {
-        return [...document.querySelectorAll(HISTORY_SELECTOR)]
-            .map((el) => el.textContent.trim())
-            .filter((value) => /^\d+\.\d+x$/.test(value))
-            .slice(0, HISTORY_LIMIT);
-    }
+        .nav-tab-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--text-main);
+        }
 
-    function arraysEqual(first, second) {
-        return first.length === second.length &&
-            first.every((value, index) => value === second[index]);
-    }
+        .nav-tab-btn.active {
+            background-color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            color: #000;
+        }
 
-    function findNewValues(oldHistory, currentHistory) {
-        const maxOverlap = Math.min(oldHistory.length, currentHistory.length);
+        .control-panel {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
 
-        for (let overlapLength = maxOverlap; overlapLength >= 1; overlapLength--) {
-            for (
-                let newCount = 1;
-                newCount + overlapLength <= currentHistory.length;
-                newCount++
-            ) {
-                const overlapMatches = currentHistory
-                    .slice(newCount, newCount + overlapLength)
-                    .every((value, index) => value === oldHistory[index]);
+        .filter-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
 
-                if (overlapMatches) {
-                    return currentHistory.slice(0, newCount).reverse();
-                }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .filter-group label {
+            font-size: 8px;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        .time-triplet {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4px;
+        }
+
+        .bottom-filter-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            align-items: flex-end;
+            border-top: 1px solid var(--border-color);
+            padding-top: 5px;
+        }
+
+        select, input {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+            height: 24px;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .btn-sync {
+            background: linear-gradient(90deg, #2dd4bf 0%, #0ea5e9 100%);
+            color: #070b14;
+            border: none;
+            font-weight: bold;
+            padding: 4px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            height: 24px;
+            width: 100%;
+        }
+
+        .btn-sync:hover {
+            opacity: 0.9;
+        }
+
+        .btn-reset {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-weight: bold;
+            padding: 4px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            height: 24px;
+            width: 100%;
+        }
+
+        .btn-reset:hover {
+            background-color: var(--border-color);
+        }
+
+        .btn-download {
+            background-color: var(--bg-input);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-download:hover {
+            background-color: var(--accent-cyan);
+            color: #000;
+        }
+
+        .section-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        @media (max-width: 900px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
-        return null;
+        .metric-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 4px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .metric-title {
+            font-size: 8px;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .metric-sub {
+            font-size: 9px;
+            color: var(--text-muted);
+        }
+
+        .status-bar {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .status-bar h4 {
+            margin: 0;
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .top-highest-row {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 3px;
+            overflow-x: auto;
+        }
+
+        @media (max-width: 1100px) {
+            .top-highest-row {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        .highest-badge {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            padding: 3px 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1px;
+            white-space: nowrap;
+        }
+
+        .highest-badge .mult {
+            font-size: 10px;
+            font-weight: bold;
+            color: var(--accent-green);
+        }
+
+        .highest-badge .time {
+            font-size: 6px;
+            color: #ffffff;
+        }
+
+        .latest-section {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .latest-section h3 {
+            margin: 0;
+            font-size: 11px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .latest-rows-container {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .latest-row {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 3px;
+        }
+
+        .latest-badge {
+            background-color: var(--bg-input);
+            border: none;
+            border-radius: 2px;
+            padding: 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1px;
+            overflow: hidden;
+        }
+
+        .latest-badge .time {
+            font-size: 6px;
+            color: #ffffff;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .latest-badge .mult {
+            font-size: 9px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .mult-blue { color: var(--mult-blue) !important; }
+        .mult-purple { color: var(--mult-purple) !important; }
+        .mult-pink { color: var(--mult-pink) !important; }
+
+        .table-section {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-x: auto;
+        }
+
+        .table-section h3 {
+            margin: 0;
+            font-size: 11px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+
+        th, td {
+            padding: 4px 6px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 11px;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-size: 9px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.01);
+        }
+
+        .no-data {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 10px;
+        }
+
+        .positive {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        .negative {
+            color: var(--accent-red);
+            font-weight: bold;
+        }
+
+        .analytics-view {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        @media (max-width: 1100px) {
+            .analytics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .analytics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+        }
+
+        .target-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .target-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 4px;
+        }
+
+        .target-card-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .target-status-badge {
+            font-size: 7px;
+            font-weight: bold;
+            padding: 1px 4px;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-reached {
+            background-color: rgba(0, 230, 118, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+        }
+
+        .badge-not-reached {
+            background-color: rgba(255, 82, 82, 0.15);
+            color: var(--accent-red);
+            border: 1px solid rgba(255, 82, 82, 0.3);
+        }
+
+        .target-metrics-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            font-size: 10px;
+        }
+
+        .target-metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-input);
+            padding: 3px 6px;
+            border-radius: 3px;
+            border: 1px solid var(--border-color);
+        }
+
+        .target-metric-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .target-metric-val {
+            font-weight: bold;
+        }
+
+        .raw-data-view {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    
+    <div class="top-header">
+        <select class="platform-select" id="platformSelect" onchange="switchPlatform(this.value)">
+            <option value="aviator">Aviator Live</option>
+            <option value="playInject">Play Inject Live</option>
+        </select>
+        <div class="nav-tabs" id="navTabsContainer">
+            <button class="nav-tab-btn active" id="tabOverview" onclick="switchView('overview')">Overview</button>
+            <button class="nav-tab-btn" id="tabAnalytics" onclick="switchView('analytics')">Analytics</button>
+            <button class="nav-tab-btn" id="tabRawData" onclick="switchView('rawdata')">Logs</button>
+        </div>
+    </div>
+
+    <div id="activeAppContainer" style="display: flex; flex-direction: column; gap: 6px;">
+        <div class="control-panel">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>FROM TIME</label>
+                    <div class="time-triplet">
+                        <select id="fromHour"><option value="">Hour</option></select>
+                        <select id="fromMin"><option value="">Min</option></select>
+                        <select id="fromSec"><option value="">Sec</option></select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label>TO TIME</label>
+                    <div class="time-triplet">
+                        <select id="toHour"><option value="">Hour</option></select>
+                        <select id="toMin"><option value="">Min</option></select>
+                        <select id="toSec"><option value="">Sec</option></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-filter-row">
+                <div class="filter-group">
+                    <label>DATE</label>
+                    <select id="dateSelect">
+                        <option value="">All Dates</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn-reset" onclick="resetFilters()">
+                        Reset Filter
+                    </button>
+                </div>
+
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn-sync" onclick="fetchCSVData()">
+                        Sync
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="viewOverview" style="display: flex; flex-direction: column; gap: 6px;">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <span class="metric-title">Rounds</span>
+                    <span class="metric-value" id="statRounds">-</span>
+                    <span class="metric-sub" id="statDateSub">Date</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-title">Best Strategy</span>
+                    <span class="metric-value" id="statBestStrategy">-</span>
+                    <span class="metric-sub">-</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-title">Max Drawdown</span>
+                    <span class="metric-value" id="statDrawdown">-</span>
+                    <span class="metric-sub">Capital Deployed</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-title">Hit Success Rate</span>
+                    <span class="metric-value" id="statProfitable">-</span>
+                    <span class="metric-sub">Hits / Total</span>
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <h4>Top 10 Highest Multipliers Reached</h4>
+                <div class="top-highest-row" id="topHighestContainer">
+                    <div class="no-data" style="grid-column: span 10;">No records loaded yet</div>
+                </div>
+            </div>
+
+            <div class="latest-section">
+                <h3>Latest 24 Values</h3>
+                <div class="latest-rows-container" id="latestRowsContainer">
+                    <div class="no-data">No records loaded yet</div>
+                </div>
+            </div>
+
+            <div class="table-section">
+                <h3>Time-Range Strategy Results</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Strategy Target</th>
+                            <th>Window P/L</th>
+                            <th>Hits</th>
+                        </tr>
+                    </thead>
+                    <tbody id="strategyTableBody">
+                        <tr>
+                            <td colspan="3" class="no-data">No data loaded yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="viewAnalytics" class="analytics-view">
+            <div class="latest-section" style="margin-bottom: 0;">
+                <h3 id="analyticsHeaderTitle">Target Analytics View</h3>
+            </div>
+            <div class="analytics-grid" id="analyticsGridContainer">
+            </div>
+        </div>
+
+        <div id="viewRawData" class="raw-data-view">
+            <div class="table-section">
+                <div class="section-header-row">
+                    <h3 id="rawHeaderTitle">Complete Records Log</h3>
+                    <button class="btn-download" onclick="downloadFilteredCSV()">Download CSV</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Round Number</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rawTableBody">
+                        <tr>
+                            <td colspan="4" class="no-data">No records match your selected filter criteria</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const PLAY_INJECT_URL = "https://download-aviator-data-latest-f1wq2z.5sc6y6-3.usa-e2.cloudhub.io/downloadPlayinject";
+    const AVIATOR_URL = "https://download-aviator-data-latest-f1wq2z.5sc6y6-3.usa-e2.cloudhub.io/downloadData";
+
+    let currentPlatform = 'aviator';
+    let allRowsData = [];
+    let currentFilteredData = [];
+    let initialLoadDone = false;
+    let availableSortedDates = [];
+
+    function switchPlatform(platformVal) {
+        currentPlatform = platformVal;
+        initialLoadDone = false;
+        fetchCSVData();
     }
 
-    function checkHistory() {
-        checkQueued = false;
+    function parseDateToTimestamp(dateStr) {
+        const cleanDate = dateStr.replace(/\\/g, '').replace(/\//g, '-');
+        const parts = cleanDate.split('-');
+        if (parts.length === 3) {
+            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+        }
+        return 0;
+    }
 
-        const currentHistory = getVisibleHistory();
+    function getMultiplierColorClass(val) {
+        if (val >= 10.0) return 'mult-pink';
+        if (val >= 2.0) return 'mult-purple';
+        return 'mult-blue';
+    }
 
-        if (currentHistory.length === 0) {
-            return;
+    function initDropdowns() {
+        let hourHtml = '<option value="">Hour</option>';
+        hourHtml += `<option value="00">12 AM</option>`;
+        for (let i = 1; i <= 11; i++) {
+            const h = String(i).padStart(2, '0');
+            hourHtml += `<option value="${h}">${i} AM</option>`;
+        }
+        hourHtml += `<option value="12">12 PM</option>`;
+        for (let i = 1; i <= 11; i++) {
+            const val = i + 12;
+            const h = String(val).padStart(2, '0');
+            hourHtml += `<option value="${h}">${i} PM</option>`;
         }
 
-        if (!initialized) {
-            previousHistory = currentHistory;
-            initialized = true;
-            console.log("History baseline saved:", previousHistory.slice(0, 5));
-            return;
-        }
+        document.getElementById('fromHour').innerHTML = hourHtml;
+        document.getElementById('toHour').innerHTML = hourHtml;
 
-        if (arraysEqual(previousHistory, currentHistory)) {
-            return;
-        }
+        const minHtml = '<option value="">Min</option>' + Array.from({length: 60}, (_, i) => {
+            const m = String(i).padStart(2, '0');
+            return `<option value="${m}">${m}</option>`;
+        }).join('');
+        document.getElementById('fromMin').innerHTML = minHtml;
+        document.getElementById('toMin').innerHTML = minHtml;
 
-        const newValues = findNewValues(previousHistory, currentHistory);
+        const secHtml = '<option value="">Sec</option>' + Array.from({length: 60}, (_, i) => {
+            const s = String(i).padStart(2, '0');
+            return `<option value="${s}">${s}</option>`;
+        }).join('');
+        document.getElementById('fromSec').innerHTML = secHtml;
+        document.getElementById('toSec').innerHTML = secHtml;
+    }
 
-        if (newValues) {
-            newValues.forEach(sendToWebhook);
+    function switchView(val) {
+        document.getElementById('tabOverview').classList.toggle('active', val === 'overview');
+        document.getElementById('tabAnalytics').classList.toggle('active', val === 'analytics');
+        document.getElementById('tabRawData').classList.toggle('active', val === 'rawdata');
+
+        document.getElementById('viewOverview').style.display = val === 'overview' ? 'flex' : 'none';
+        document.getElementById('viewAnalytics').style.display = val === 'analytics' ? 'flex' : 'none';
+        document.getElementById('viewRawData').style.display = val === 'rawdata' ? 'flex' : 'none';
+        applyFilters();
+    }
+
+    function resetFilters() {
+        const dateSelect = document.getElementById('dateSelect');
+        
+        if (availableSortedDates.length > 0) {
+            dateSelect.value = availableSortedDates[0];
         } else {
-            console.warn(
-                "History changed too much at once; baseline was reset without sending."
-            );
+            dateSelect.value = "";
         }
 
-        previousHistory = currentHistory;
+        document.getElementById('fromHour').value = "00";
+        document.getElementById('fromMin').value = "00";
+        document.getElementById('fromSec').value = "00";
+
+        document.getElementById('toHour').value = "23";
+        document.getElementById('toMin').value = "59";
+        document.getElementById('toSec').value = "59";
+
+        applyFilters();
     }
 
-    function queueCheck() {
-        if (checkQueued) {
+    async function fetchCSVData() {
+        const targetUrl = currentPlatform === 'playInject' ? PLAY_INJECT_URL : AVIATOR_URL;
+        try {
+            const response = await fetch(`${targetUrl}?_t=${Date.now()}`, {
+                headers: { 'ngrok-skip-browser-warning': 'true' }
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch logs");
+
+            const csvText = await response.text();
+            processCSV(csvText);
+        } catch (error) {
+            console.error("Error loading CSV:", error);
+            document.getElementById('topHighestContainer').innerHTML = `<div class="no-data" style="grid-column: span 10; color: var(--accent-red);">Connection error / Failed to load data</div>`;
+        }
+    }
+
+    function processCSV(csvText) {
+        const lines = csvText.trim().split('\n').filter(line => line.length > 0);
+        const rows = lines[0].toLowerCase().includes('date') ? lines.slice(1) : lines;
+
+        allRowsData = [];
+        const uniqueDates = new Set();
+
+        rows.forEach((row, index) => {
+            const parts = row.split(',').map(p => p.trim());
+            if (parts.length >= 3) {
+                // Normalize dates: strip out escape backslashes and standardise slashes to hyphens for grouping
+                let rawDate = parts[0].replace(/\\/g, '');
+                let standardizedDate = rawDate.replace(/\//g, '-');
+                
+                uniqueDates.add(standardizedDate);
+                let multStr = parts[2].replace(/x/gi, '').trim();
+                let parsedVal = parseFloat(multStr) || 1.0;
+                allRowsData.push({
+                    roundNum: index + 1,
+                    date: standardizedDate,
+                    time: parts[1],
+                    multiplier: parsedVal,
+                    rawMultiplier: parts[2].endsWith('x') ? parts[2] : parts[2] + 'x',
+                    sortKey: parseTimeToSeconds(parts[1])
+                });
+            }
+        });
+
+        availableSortedDates = Array.from(uniqueDates).sort((a, b) => parseDateToTimestamp(b) - parseDateToTimestamp(a));
+
+        const dateSelect = document.getElementById('dateSelect');
+        const currentSelected = dateSelect.value;
+
+        dateSelect.innerHTML = '<option value="">All Dates</option>' + 
+            availableSortedDates.map(d => `<option value="${d}">${d}</option>`).join('');
+
+        if (currentSelected && availableSortedDates.includes(currentSelected)) {
+            dateSelect.value = currentSelected;
+        } else if (!initialLoadDone) {
+            if (availableSortedDates.length > 0) {
+                dateSelect.value = availableSortedDates[0];
+            }
+            initialLoadDone = true;
+        } else {
+            if (availableSortedDates.length > 0) {
+                dateSelect.value = availableSortedDates[0];
+            }
+        }
+
+        applyFilters();
+    }
+
+    function parseTimeToSeconds(timeStr) {
+        const match = timeStr.match(/(\d{2}):(\d{2}):(\d{2})\s*(AM|PM)/i);
+        if (!match) return 0;
+        let hours = parseInt(match[1], 10);
+        const minutes = parseInt(match[2], 10);
+        const seconds = parseInt(match[3], 10);
+        const ampm = match[4].toUpperCase();
+
+        if (ampm === 'PM' && hours < 12) hours += 12;
+        if (ampm === 'AM' && hours === 12) hours = 0;
+
+        return hours * 3600 + minutes * 60 + seconds;
+    }
+
+    function applyFilters() {
+        const selectedDate = document.getElementById('dateSelect').value;
+        const fH = document.getElementById('fromHour').value;
+        const fM = document.getElementById('fromMin').value;
+        const fS = document.getElementById('fromSec').value;
+
+        const tH = document.getElementById('toHour').value;
+        const tM = document.getElementById('toMin').value;
+        const tS = document.getElementById('toSec').value;
+
+        let fromSeconds = fH !== '' ? parseInt(fH, 10) * 3600 + (fM !== '' ? parseInt(fM, 10) * 60 : 0) + (fS !== '' ? parseInt(fS, 10) : 0) : null;
+        let toSeconds = tH !== '' ? parseInt(tH, 10) * 3600 + (tM !== '' ? parseInt(tM, 10) * 60 : 59) + (tS !== '' ? parseInt(tS, 10) : 59) : null;
+
+        currentFilteredData = allRowsData.filter(item => {
+            if (selectedDate && item.date !== selectedDate) return false;
+            if (fromSeconds !== null && item.sortKey < fromSeconds) return false;
+            if (toSeconds !== null && item.sortKey > toSeconds) return false;
+            return true;
+        });
+
+        updateTopHighestDisplay(currentFilteredData);
+        updateDashboardMetrics(currentFilteredData, selectedDate);
+        renderLatestValues(currentFilteredData);
+        renderAnalyticsCards(currentFilteredData, selectedDate);
+        renderRawDataTable(currentFilteredData, selectedDate);
+    }
+
+    function updateTopHighestDisplay(dataArray) {
+        const container = document.getElementById('topHighestContainer');
+        container.innerHTML = '';
+
+        if (dataArray.length === 0) {
+            container.innerHTML = `<div class="no-data" style="grid-column: span 10;">No data available</div>`;
             return;
         }
 
-        checkQueued = true;
-        setTimeout(checkHistory, 0);
+        const sortedHighest = [...dataArray].sort((a, b) => b.multiplier - a.multiplier).slice(0, 10);
+
+        sortedHighest.forEach(item => {
+            const badge = document.createElement('div');
+            badge.className = 'highest-badge';
+
+            badge.innerHTML = `
+                <span class="mult">${item.rawMultiplier}</span>
+                <span class="time">${item.time}</span>
+            `;
+            container.appendChild(badge);
+        });
     }
 
-    const observer = new MutationObserver(queueCheck);
+    function renderLatestValues(dataArray) {
+        const container = document.getElementById('latestRowsContainer');
+        container.innerHTML = '';
 
-    observer.observe(document.documentElement, {
-        childList: true,
-        subtree: true,
-        characterData: true
+        if (dataArray.length === 0) {
+            container.innerHTML = `<div class="no-data">No records match your selected filter criteria</div>`;
+            return;
+        }
+
+        const latest24 = [...dataArray].reverse().slice(0, 24);
+
+        for (let i = 0; i < latest24.length; i += 8) {
+            const rowChunk = latest24.slice(i, i + 8);
+            const rowEl = document.createElement('div');
+            rowEl.className = 'latest-row';
+
+            rowChunk.forEach(item => {
+                const badge = document.createElement('div');
+                badge.className = 'latest-badge';
+                const colorClass = getMultiplierColorClass(item.multiplier);
+                badge.innerHTML = `
+                    <span class="time">${item.time}</span>
+                    <span class="mult ${colorClass}">${item.rawMultiplier}</span>
+                `;
+                rowEl.appendChild(badge);
+            });
+
+            container.appendChild(rowEl);
+        }
+    }
+
+    function renderRawDataTable(dataArray, selectedDate) {
+        const tbody = document.getElementById('rawTableBody');
+        tbody.innerHTML = '';
+        document.getElementById('rawHeaderTitle').innerText = `Complete Records Log (${selectedDate || 'All Dates'}) - Total: ${dataArray.length}`;
+
+        if (dataArray.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="no-data">No records match your selected filter criteria</td></tr>`;
+            return;
+        }
+
+        const reversedData = [...dataArray].reverse();
+
+        reversedData.forEach(item => {
+            const tr = document.createElement('tr');
+            const colorClass = getMultiplierColorClass(item.multiplier);
+            tr.innerHTML = `
+                <td><strong>#${item.roundNum}</strong></td>
+                <td>${item.date}</td>
+                <td>${item.time}</td>
+                <td><strong class="${colorClass}">${item.rawMultiplier}</strong></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function downloadFilteredCSV() {
+        if (!currentFilteredData || currentFilteredData.length === 0) {
+            alert("No data available to download.");
+            return;
+        }
+
+        let csvContent = "Round Number,Date,Time,Value\n";
+        currentFilteredData.forEach(item => {
+            csvContent += `${item.roundNum},${item.date},${item.time},${item.rawMultiplier}\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `${currentPlatform}_raw_logs_${document.getElementById('dateSelect').value || 'all_dates'}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function simulateDetailedStrategy(dataArray, targetMultiplier, baseBet = 10) {
+        let currentBalance = 0;
+        let firstHitAmt = 0;
+        let firstHitRd = 0;
+        let hasHit500 = false;
+        let peakProfit = 0;
+        let lowestProfit = 0;
+        let peakRound = 0;
+        let lowestRound = 0;
+        let totalRounds = dataArray.length;
+
+        dataArray.forEach((row, index) => {
+            const roundNum = index + 1;
+            currentBalance -= baseBet;
+
+            if (row.multiplier >= targetMultiplier) {
+                const winAmount = baseBet * targetMultiplier;
+                currentBalance += winAmount;
+            }
+
+            if (!hasHit500 && currentBalance >= 500) {
+                hasHit500 = true;
+                firstHitAmt = currentBalance;
+                firstHitRd = roundNum;
+            }
+
+            if (currentBalance > peakProfit) {
+                peakProfit = currentBalance;
+                peakRound = roundNum;
+            }
+            if (currentBalance < lowestProfit) {
+                lowestProfit = currentBalance;
+                lowestRound = roundNum;
+            }
+        });
+
+        if (!hasHit500 && totalRounds > 0) {
+            firstHitAmt = currentBalance;
+            firstHitRd = totalRounds;
+        }
+
+        return {
+            finalProfit: currentBalance,
+            totalRounds: totalRounds,
+            hitAmt: firstHitAmt,
+            hitRd: firstHitRd,
+            peakProfit: peakProfit,
+            peakRound: peakRound,
+            lowestProfit: lowestProfit,
+            lowestRound: lowestRound,
+            isReached: hasHit500 || currentBalance >= 500
+        };
+    }
+
+    function simulateStrategy(dataArray, targetMultiplier, baseBet = 10) {
+        const totalRounds = dataArray.length;
+        let hits = 0;
+
+        dataArray.forEach(row => {
+            if (row.multiplier >= targetMultiplier) {
+                hits++;
+            }
+        });
+
+        let totalBet = totalRounds * baseBet;
+        let totalReturn = hits * targetMultiplier * baseBet;
+        let profit = totalReturn - totalBet;
+
+        return {
+            windowPL: profit,
+            hits: hits
+        };
+    }
+
+    function updateDashboardMetrics(dataArray, selectedDate) {
+        document.getElementById('statRounds').innerText = dataArray.length;
+        document.getElementById('statDateSub').innerText = selectedDate || "All Recorded Dates";
+        
+        if (dataArray.length === 0) {
+            document.getElementById('statProfitable').innerText = "0%";
+            document.getElementById('statBestStrategy').innerText = "-";
+            document.getElementById('statDrawdown').innerText = "0";
+            document.getElementById('strategyTableBody').innerHTML = `<tr><td colspan="3" class="no-data">No records match your selected filter criteria</td></tr>`;
+            return;
+        }
+
+        const targets = [2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 20.0, 30.0, 50.0, 70.0, 100.0, 200.0];
+        let strategyResults = [];
+        let bestStrat = "-";
+        let maxProfit = -Infinity;
+        let totalHitsAll = 0;
+
+        targets.forEach(t => {
+            const res = simulateStrategy(dataArray, t, 10);
+            totalHitsAll += res.hits;
+            if (res.windowPL > maxProfit) {
+                maxProfit = res.windowPL;
+                bestStrat = `${t.toFixed(0)}x Target`;
+            }
+            strategyResults.push({
+                target: `${t.toFixed(0)}x Target`,
+                ...res
+            });
+        });
+
+        const hitSuccessRate = ((totalHitsAll / (dataArray.length * targets.length)) * 100).toFixed(1) + '%';
+        document.getElementById('statProfitable').innerText = hitSuccessRate;
+        document.getElementById('statBestStrategy').innerText = bestStrat;
+        document.getElementById('statDrawdown').innerText = `${(dataArray.length * 10)}`;
+
+        const tbody = document.getElementById('strategyTableBody');
+        tbody.innerHTML = '';
+
+        strategyResults.forEach(strat => {
+            const tr = document.createElement('tr');
+            const wClass = strat.windowPL >= 0 ? 'positive' : 'negative';
+            const wSign = strat.windowPL >= 0 ? '+' : '';
+
+            tr.innerHTML = `
+                <td><strong>${strat.target}</strong></td>
+                <td class="${wClass}">${wSign}${strat.windowPL.toFixed(2)}</td>
+                <td>${strat.hits}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderAnalyticsCards(dataArray, selectedDate) {
+        const container = document.getElementById('analyticsGridContainer');
+        container.innerHTML = '';
+        document.getElementById('analyticsHeaderTitle').innerText = `Target Analytics View (${selectedDate || 'All Dates'}) - Total Rounds: ${dataArray.length}`;
+
+        if (dataArray.length === 0) {
+            container.innerHTML = `<div class="no-data" style="grid-column: span 3;">No records match your selected filter criteria</div>`;
+            return;
+        }
+
+        const keyTargets = [8, 9, 10, 20, 7, 6, 5, 4, 30, 40, 50, 100];
+
+        keyTargets.forEach(t => {
+            const res = simulateDetailedStrategy(dataArray, t, 10);
+            const card = document.createElement('div');
+            card.className = 'target-card';
+
+            const hitSign = res.hitAmt >= 0 ? '+' : '';
+            const peakSign = res.peakProfit >= 0 ? '+' : '';
+            const finalSign = res.finalProfit >= 0 ? '+' : '';
+
+            const hitClass = res.hitAmt >= 0 ? 'positive' : 'negative';
+            const peakClass = res.peakProfit >= 0 ? 'positive' : 'negative';
+            const lowestClass = res.lowestProfit >= 0 ? 'positive' : 'negative';
+            const finalClass = res.finalProfit >= 0 ? 'positive' : 'negative';
+
+            const statusBadgeClass = res.isReached ? 'badge-reached' : 'badge-not-reached';
+            const statusBadgeText = res.isReached ? 'REACHED' : 'NOT REACHED';
+
+            card.innerHTML = `
+                <div class="target-card-header">
+                    <span class="target-card-title">${t}x Target</span>
+                    <span class="target-status-badge ${statusBadgeClass}">${statusBadgeText}</span>
+                </div>
+                <div class="target-metrics-rows">
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Hit Amt:</span>
+                        <span class="target-metric-val ${hitClass}">${hitSign}${res.hitAmt}</span>
+                    </div>
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Hit Rd:</span>
+                        <span class="target-metric-val">#${res.hitRd}</span>
+                    </div>
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Peak Profit:</span>
+                        <span class="target-metric-val ${peakClass}">${peakSign}${res.peakProfit}</span>
+                    </div>
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Peak Round:</span>
+                        <span class="target-metric-val">#${res.peakRound}</span>
+                    </div>
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Lowest Profit:</span>
+                        <span class="target-metric-val ${lowestClass}">${res.lowestProfit}</span>
+                    </div>
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Lowest Rd:</span>
+                        <span class="target-metric-val">#${res.lowestRound}</span>
+                    </div>
+                    <div class="target-metric-row" style="border-top: 1px solid var(--border-color); margin-top: 1px; padding-top: 3px;">
+                        <span class="target-metric-label">Final Profit:</span>
+                        <span class="target-metric-val ${finalClass}">${finalSign}${res.finalProfit}</span>
+                    </div>
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Total Rounds:</span>
+                        <span class="target-metric-val">${res.totalRounds}</span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    document.querySelectorAll('select').forEach(el => {
+        if(el.id !== 'platformSelect') {
+            el.addEventListener('change', applyFilters);
+        }
     });
 
-    setInterval(checkHistory, POLL_MS);
+    initDropdowns();
+    resetFilters();
+    fetchCSVData();
+    setInterval(fetchCSVData, 5000);
+</script>
 
-    checkHistory();
-})();
+</body>
+</html>
