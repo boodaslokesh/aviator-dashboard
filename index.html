@@ -1143,10 +1143,10 @@
             totalHitsAll += res.hits;
             if (res.windowPL > maxProfit) {
                 maxProfit = res.windowPL;
-                bestStrat = `${t.toFixed(0)}x Target`;
+                bestStrat = `${t.toFixed(0)}x`;
             }
             strategyResults.push({
-                target: `${t.toFixed(0)}x Target`,
+                target: `${t.toFixed(0)}x`,
                 ...res
             });
         });
