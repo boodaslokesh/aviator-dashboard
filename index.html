@@ -1143,10 +1143,10 @@
             totalHitsAll += res.hits;
             if (res.windowPL > maxProfit) {
                 maxProfit = res.windowPL;
-                bestStrat = `${t.toFixed(0)}x` Target;
+                bestStrat = `${t.toFixed(0)}x Target`;
             }
             strategyResults.push({
-                target: `${t.toFixed(0)}x`Target,
+                target: `${t.toFixed(0)}x Target`,
                 ...res
             });
         });
@@ -1204,7 +1204,7 @@
 
             card.innerHTML = `
                 <div class="target-card-header">
-                    <span class="target-card-title">${t}x</span>
+                    <span class="target-card-title">${t}x Target</span>
                     <span class="target-status-badge ${statusBadgeClass}">${statusBadgeText}</span>
                 </div>
                 <div class="target-metrics-rows">
