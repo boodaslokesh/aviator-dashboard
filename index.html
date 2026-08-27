@@ -124,7 +124,8 @@
             padding: 6px 8px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
+            overflow: hidden;
         }
 
         .filter-row {
@@ -137,6 +138,7 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            min-width: 0;
         }
 
         .filter-group label {
@@ -144,6 +146,9 @@
             letter-spacing: 0.5px;
             color: var(--text-muted);
             font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .time-triplet {
@@ -161,17 +166,94 @@
             padding-top: 5px;
         }
 
+        .api-controls-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            gap: 6px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 6px;
+            align-items: center;
+        }
+
+        .api-left-pairs {
+            grid-column: span 2;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .api-pair-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .api-right-row {
+            grid-column: span 3;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .btn-submit-api {
+            background-color: var(--accent-cyan);
+            color: #000;
+            border: none;
+            font-weight: bold;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            height: 24px;
+            line-height: 24px;
+            width: 100%;
+            padding: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-submit-api:hover {
+            opacity: 0.85;
+        }
+
+        .btn-manual-cashout {
+            background: linear-gradient(90deg, #ff5252 0%, #ff1744 100%);
+            color: #fff;
+            border: none;
+            font-weight: bold;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            height: 24px;
+            line-height: 24px;
+            width: 100%;
+            padding: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-manual-cashout:hover {
+            opacity: 0.9;
+        }
+
         select, input {
             background-color: var(--bg-input);
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            padding: 3px 6px;
+            padding: 2px 4px;
             border-radius: 3px;
             font-size: 10px;
             outline: none;
             width: 100%;
             box-sizing: border-box;
             height: 24px;
+        }
+
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
         }
 
         select:focus, input:focus {
@@ -247,14 +329,8 @@
 
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 6px;
-        }
-
-        @media (max-width: 900px) {
-            .metrics-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
 
         .metric-card {
@@ -477,7 +553,7 @@
             }
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .analytics-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 6px;
@@ -559,6 +635,165 @@
             flex-direction: column;
             gap: 6px;
         }
+
+        /* CUSTOM MODAL POPUP STYLES WITH UPDATED/INCREASED TEXT SIZES */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(5, 8, 15, 0.75);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-container {
+            background: var(--bg-panel);
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
+            border-radius: 6px;
+            width: 340px; 
+            max-width: 85%;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transform: scale(0.92);
+            transition: transform 0.2s ease-out;
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 13px; /* Increased from 11px */
+            color: var(--accent-cyan);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .modal-body-grid {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        .modal-bets-column {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .modal-bet-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            padding: 6px 8px;
+            font-size: 11px; /* Increased from 9px */
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            line-height: 1.3;
+        }
+
+        .modal-bet-box .title {
+            color: var(--accent-cyan);
+            font-weight: bold;
+            font-size: 11px; /* Increased from 9px */
+            margin-bottom: 1px;
+        }
+
+        .modal-target-column {
+            flex: 1;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            padding: 6px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .modal-target-column .label {
+            font-size: 9px; /* Increased from 8px */
+            color: var(--text-muted);
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .modal-target-column .val {
+            font-size: 17px; /* Increased from 14px */
+            font-weight: bold;
+            color: var(--accent-green);
+            margin-top: 2px;
+        }
+
+        .modal-single-box {
+            width: 100%;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .modal-single-box .msg {
+            color: var(--accent-green);
+            font-size: 12px; /* Increased from 11px */
+            font-weight: bold;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid var(--border-color);
+            padding-top: 6px;
+        }
+
+        .modal-btn-ok {
+            background-color: var(--accent-cyan);
+            color: #000;
+            border: none;
+            font-weight: bold;
+            padding: 5px 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px; /* Increased from 10px */
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-btn-ok:hover {
+            opacity: 0.85;
+        }
     </style>
 </head>
 <body>
@@ -621,6 +856,44 @@
                     </button>
                 </div>
             </div>
+
+            <div class="api-controls-section">
+                <div class="api-left-pairs">
+                    <div class="api-pair-row">
+                        <div class="filter-group">
+                            <label>INPUT AMOUNT 1</label>
+                            <input type="number" id="inputAmount1" value="0">
+                        </div>
+                        <div class="filter-group">
+                            <label>TARGET CASHOUT 1</label>
+                            <input type="number" id="targetCashout1" value="0">
+                        </div>
+                    </div>
+                    <div class="api-pair-row">
+                        <div class="filter-group">
+                            <label>INPUT AMOUNT 2</label>
+                            <input type="number" id="inputAmount2" value="0">
+                        </div>
+                        <div class="filter-group">
+                            <label>TARGET CASHOUT 2</label>
+                            <input type="number" id="targetCashout2" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="api-right-row">
+                    <div class="filter-group">
+                        <label>TARGET AMOUNT</label>
+                        <input type="number" id="targetReachAmount" value="0">
+                    </div>
+                    <div class="filter-group">
+                        <button class="btn-submit-api" onclick="submitApiValues()">Submit</button>
+                    </div>
+                    <div class="filter-group">
+                        <button class="btn-manual-cashout" onclick="triggerManualCashout()">Manual Cashout</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="viewOverview" style="display: flex; flex-direction: column; gap: 6px;">
@@ -631,19 +904,14 @@
                     <span class="metric-sub" id="statDateSub">Date</span>
                 </div>
                 <div class="metric-card">
+                    <span class="metric-title">Current Balance</span>
+                    <span class="metric-value" id="statCurrentBalance" style="color: var(--accent-cyan);">0.00</span>
+                    <span class="metric-sub">Auto Live (3s)</span>
+                </div>
+                <div class="metric-card">
                     <span class="metric-title">Best Strategy</span>
                     <span class="metric-value" id="statBestStrategy">-</span>
                     <span class="metric-sub">-</span>
-                </div>
-                <div class="metric-card">
-                    <span class="metric-title">Max Drawdown</span>
-                    <span class="metric-value" id="statDrawdown">-</span>
-                    <span class="metric-sub">Capital Deployed</span>
-                </div>
-                <div class="metric-card">
-                    <span class="metric-title">Hit Success Rate</span>
-                    <span class="metric-value" id="statProfitable">-</span>
-                    <span class="metric-sub">Hits / Total</span>
                 </div>
             </div>
 
@@ -715,15 +983,146 @@
 
 </div>
 
+<!-- CUSTOM MODAL POPUP -->
+<div class="modal-overlay" id="customModal">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3 id="modalHeaderTitle">Submission Confirmation</h3>
+        </div>
+        <div class="modal-body-grid" id="modalBodyContainer">
+            <!-- Dynamically Populated -->
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn-ok" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const PLAY_INJECT_URL = "https://download-aviator-data-latest-f1wq2z.5sc6y6-3.usa-e2.cloudhub.io/downloadPlayinject";
     const AVIATOR_URL = "https://download-aviator-data-latest-f1wq2z.5sc6y6-3.usa-e2.cloudhub.io/downloadData";
+    const CURRENT_BALANCE_URL = "https://example.com/fetchCurrentBalace/lokesh";
 
     let currentPlatform = 'aviator';
     let allRowsData = [];
     let currentFilteredData = [];
     let initialLoadDone = false;
     let availableSortedDates = [];
+
+    // HELPER: RESET ALL INPUT FIELDS BACK TO 0
+    function clearApiInputFields() {
+        document.getElementById('inputAmount1').value = '0';
+        document.getElementById('targetCashout1').value = '0';
+        document.getElementById('inputAmount2').value = '0';
+        document.getElementById('targetCashout2').value = '0';
+        document.getElementById('targetReachAmount').value = '0';
+    }
+
+    // MODAL CONTROL FUNCTIONS
+    function showSubmitModal(bets, targetAmount) {
+        document.getElementById('modalHeaderTitle').innerText = "Submit Success";
+        const bodyContainer = document.getElementById('modalBodyContainer');
+        
+        let betsHtml = '<div class="modal-bets-column">';
+        bets.forEach(b => {
+            betsHtml += `
+                <div class="modal-bet-box">
+                    <div class="title">${b.title}</div>
+                    <div><strong>Bet:</strong> ${b.amount} &nbsp;|&nbsp; <strong>Target:</strong> ${b.cashout}x</div>
+                </div>
+            `;
+        });
+        betsHtml += '</div>';
+
+        const targetHtml = `
+            <div class="modal-target-column">
+                <span class="label">Target Amount</span>
+                <span class="val">${targetAmount}</span>
+            </div>
+        `;
+
+        bodyContainer.innerHTML = betsHtml + targetHtml;
+        document.getElementById('customModal').classList.add('active');
+    }
+
+    function showManualCashoutModal() {
+        document.getElementById('modalHeaderTitle').innerText = "Manual Cashout";
+        const bodyContainer = document.getElementById('modalBodyContainer');
+
+        bodyContainer.innerHTML = `
+            <div class="modal-single-box">
+                <div class="msg">Manual cashout triggered successfully!</div>
+            </div>
+        `;
+
+        document.getElementById('customModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('customModal').classList.remove('active');
+    }
+
+    // FETCH CURRENT BALANCE API (Runs in background only)
+    async function fetchCurrentBalance() {
+        try {
+            const response = await fetch(`${CURRENT_BALANCE_URL}?_t=${Date.now()}`);
+            if (!response.ok) throw new Error("Network response failed");
+            const data = await response.json();
+            
+            let bal = data.balance !== undefined ? data.balance : data;
+            let formattedBal = "0.00";
+            if (typeof bal === 'number') {
+                formattedBal = bal.toFixed(2);
+            } else if (!isNaN(parseFloat(bal))) {
+                formattedBal = parseFloat(bal).toFixed(2);
+            } else {
+                formattedBal = String(bal);
+            }
+            document.getElementById('statCurrentBalance').innerText = formattedBal;
+        } catch (err) {
+            console.error("Error fetching current balance:", err);
+        }
+    }
+
+    // TRIGGER API SUBMIT
+    function submitApiValues() {
+        const amt1 = parseFloat(document.getElementById('inputAmount1').value) || 0;
+        const target1 = parseFloat(document.getElementById('targetCashout1').value) || 0;
+        const amt2 = parseFloat(document.getElementById('inputAmount2').value) || 0;
+        const target2 = parseFloat(document.getElementById('targetCashout2').value) || 0;
+        const reachAmt = parseFloat(document.getElementById('targetReachAmount').value) || 0;
+
+        const requestUrl = `https://example.com/api/${amt1}/${target1}/${amt2}/${target2}/${reachAmt}`;
+        console.log("Triggering URL:", requestUrl);
+
+        fetch(requestUrl, { mode: 'no-cors' }).catch(() => {});
+
+        const activeBets = [];
+        if (amt1 > 0 || target1 > 0) {
+            activeBets.push({ title: 'Bet 1', amount: amt1, cashout: target1 });
+        }
+        if (amt2 > 0 || target2 > 0) {
+            activeBets.push({ title: 'Bet 2', amount: amt2, cashout: target2 });
+        }
+
+        if (activeBets.length === 0) {
+            activeBets.push({ title: 'Bet 1', amount: amt1, cashout: target1 });
+        }
+
+        showSubmitModal(activeBets, reachAmt);
+        clearApiInputFields();
+    }
+
+    // TRIGGER MANUAL CASHOUT API (Instant, without waiting for fetch balance)
+    function triggerManualCashout() {
+        const manualUrl = "https://example.com/api/mannualCashout/true";
+        console.log("Triggering Manual Cashout:", manualUrl);
+
+        fetch(manualUrl, { mode: 'no-cors' }).catch(() => {});
+
+        showManualCashoutModal();
+        clearApiInputFields();
+    }
 
     function switchPlatform(platformVal) {
         currentPlatform = platformVal;
@@ -836,7 +1235,6 @@
         rows.forEach((row, index) => {
             const parts = row.split(',').map(p => p.trim());
             if (parts.length >= 3) {
-                // Normalize dates: strip out escape backslashes and standardise slashes to hyphens for grouping
                 let rawDate = parts[0].replace(/\\/g, '');
                 let standardizedDate = rawDate.replace(/\//g, '-');
                 
@@ -1098,9 +1496,7 @@
         document.getElementById('statDateSub').innerText = selectedDate || "All Recorded Dates";
         
         if (dataArray.length === 0) {
-            document.getElementById('statProfitable').innerText = "0%";
             document.getElementById('statBestStrategy').innerText = "-";
-            document.getElementById('statDrawdown').innerText = "0";
             document.getElementById('strategyTableBody').innerHTML = `<tr><td colspan="3" class="no-data">No records match your selected filter criteria</td></tr>`;
             return;
         }
@@ -1109,11 +1505,9 @@
         let strategyResults = [];
         let bestStrat = "-";
         let maxProfit = -Infinity;
-        let totalHitsAll = 0;
 
         targets.forEach(t => {
             const res = simulateStrategy(dataArray, t, 10);
-            totalHitsAll += res.hits;
             if (res.windowPL > maxProfit) {
                 maxProfit = res.windowPL;
                 bestStrat = `${t.toFixed(0)}x Target`;
@@ -1124,10 +1518,7 @@
             });
         });
 
-        const hitSuccessRate = ((totalHitsAll / (dataArray.length * targets.length)) * 100).toFixed(1) + '%';
-        document.getElementById('statProfitable').innerText = hitSuccessRate;
         document.getElementById('statBestStrategy').innerText = bestStrat;
-        document.getElementById('statDrawdown').innerText = `${(dataArray.length * 10)}`;
 
         const tbody = document.getElementById('strategyTableBody');
         tbody.innerHTML = '';
@@ -1228,7 +1619,10 @@
     initDropdowns();
     resetFilters();
     fetchCSVData();
+    fetchCurrentBalance();
+
     setInterval(fetchCSVData, 5000);
+    setInterval(fetchCurrentBalance, 3000);
 </script>
 
 </body>
