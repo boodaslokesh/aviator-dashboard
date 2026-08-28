@@ -636,7 +636,6 @@
             gap: 6px;
         }
 
-        /* CUSTOM MODAL POPUP STYLES WITH UPDATED/INCREASED TEXT SIZES */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -687,7 +686,7 @@
 
         .modal-header h3 {
             margin: 0;
-            font-size: 13px; /* Increased from 11px */
+            font-size: 13px;
             color: var(--accent-cyan);
             letter-spacing: 0.5px;
             text-transform: uppercase;
@@ -711,7 +710,7 @@
             border: 1px solid var(--border-color);
             border-radius: 3px;
             padding: 6px 8px;
-            font-size: 11px; /* Increased from 9px */
+            font-size: 11px;
             display: flex;
             flex-direction: column;
             gap: 2px;
@@ -721,7 +720,7 @@
         .modal-bet-box .title {
             color: var(--accent-cyan);
             font-weight: bold;
-            font-size: 11px; /* Increased from 9px */
+            font-size: 11px;
             margin-bottom: 1px;
         }
 
@@ -740,14 +739,14 @@
         }
 
         .modal-target-column .label {
-            font-size: 9px; /* Increased from 8px */
+            font-size: 9px;
             color: var(--text-muted);
             font-weight: bold;
             text-transform: uppercase;
         }
 
         .modal-target-column .val {
-            font-size: 17px; /* Increased from 14px */
+            font-size: 17px;
             font-weight: bold;
             color: var(--accent-green);
             margin-top: 2px;
@@ -768,7 +767,7 @@
 
         .modal-single-box .msg {
             color: var(--accent-green);
-            font-size: 12px; /* Increased from 11px */
+            font-size: 12px;
             font-weight: bold;
         }
 
@@ -787,7 +786,7 @@
             padding: 5px 16px;
             border-radius: 3px;
             cursor: pointer;
-            font-size: 11px; /* Increased from 10px */
+            font-size: 11px;
             transition: opacity 0.2s ease;
         }
 
@@ -861,22 +860,22 @@
                 <div class="api-left-pairs">
                     <div class="api-pair-row">
                         <div class="filter-group">
-                            <label>INPUT AMOUNT 1</label>
-                            <input type="number" id="inputAmount1" value="0">
+                            <label>INPUT AMOUNT 1 (Min 7 or 0)</label>
+                            <input type="number" id="inputAmount1" value="7" min="0" step="any">
                         </div>
                         <div class="filter-group">
-                            <label>TARGET CASHOUT 1</label>
-                            <input type="number" id="targetCashout1" value="0">
+                            <label>TARGET CASHOUT 1 (Min 1.1)</label>
+                            <input type="number" id="targetCashout1" value="1.1" min="1.1" step="any">
                         </div>
                     </div>
                     <div class="api-pair-row">
                         <div class="filter-group">
-                            <label>INPUT AMOUNT 2</label>
-                            <input type="number" id="inputAmount2" value="0">
+                            <label>INPUT AMOUNT 2 (Min 7 or 0)</label>
+                            <input type="number" id="inputAmount2" value="7" min="0" step="any">
                         </div>
                         <div class="filter-group">
-                            <label>TARGET CASHOUT 2</label>
-                            <input type="number" id="targetCashout2" value="0">
+                            <label>TARGET CASHOUT 2 (Min 1.1)</label>
+                            <input type="number" id="targetCashout2" value="1.1" min="1.1" step="any">
                         </div>
                     </div>
                 </div>
@@ -885,6 +884,8 @@
                     <div class="filter-group">
                         <label>TARGET AMOUNT</label>
                         <input type="number" id="targetReachAmount" value="0">
+                        <label style="margin-top: 4px;">STOP LOSS</label>
+                        <input type="number" id="stopLossAmount" value="0">
                     </div>
                     <div class="filter-group">
                         <button class="btn-submit-api" onclick="submitApiValues()">Submit</button>
@@ -990,7 +991,6 @@
             <h3 id="modalHeaderTitle">Submission Confirmation</h3>
         </div>
         <div class="modal-body-grid" id="modalBodyContainer">
-            <!-- Dynamically Populated -->
         </div>
         <div class="modal-footer">
             <button class="modal-btn-ok" onclick="closeModal()">OK</button>
@@ -1002,6 +1002,9 @@
     const PLAY_INJECT_URL = "https://download-aviator-data-latest-f1wq2z.5sc6y6-3.usa-e2.cloudhub.io/downloadPlayinject";
     const AVIATOR_URL = "https://download-aviator-data-latest-f1wq2z.5sc6y6-3.usa-e2.cloudhub.io/downloadData";
     const CURRENT_BALANCE_URL = "https://aviator-strategy-proxy-api-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/lokeshboodas/fetchCurrentBalance";
+    
+    const BASE_API_URL = "https://aviator-strategy-proxy-api-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/lokeshboodas";
+    const MANUAL_CASHOUT_URL = "https://aviator-strategy-proxy-api-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/lokeshboodas/mannualCashout";
 
     let currentPlatform = 'aviator';
     let allRowsData = [];
@@ -1009,18 +1012,17 @@
     let initialLoadDone = false;
     let availableSortedDates = [];
 
-    // HELPER: RESET ALL INPUT FIELDS BACK TO 0
     function clearApiInputFields() {
-        document.getElementById('inputAmount1').value = '0';
-        document.getElementById('targetCashout1').value = '0';
-        document.getElementById('inputAmount2').value = '0';
-        document.getElementById('targetCashout2').value = '0';
+        document.getElementById('inputAmount1').value = '7';
+        document.getElementById('targetCashout1').value = '1.1';
+        document.getElementById('inputAmount2').value = '7';
+        document.getElementById('targetCashout2').value = '1.1';
         document.getElementById('targetReachAmount').value = '0';
+        document.getElementById('stopLossAmount').value = '0';
     }
 
-    // MODAL CONTROL FUNCTIONS
     function showSubmitModal(bets, targetAmount) {
-        document.getElementById('modalHeaderTitle').innerText = "Submit Success";
+        document.getElementById('modalHeaderTitle').innerText = "Submit Success & DB Updated";
         const bodyContainer = document.getElementById('modalBodyContainer');
         
         let betsHtml = '<div class="modal-bets-column">';
@@ -1051,7 +1053,7 @@
 
         bodyContainer.innerHTML = `
             <div class="modal-single-box">
-                <div class="msg">Manual cashout triggered successfully!</div>
+                <div class="msg">Manual cashout triggered successfully via API!</div>
             </div>
         `;
 
@@ -1062,12 +1064,9 @@
         document.getElementById('customModal').classList.remove('active');
     }
 
-    // FETCH CURRENT BALANCE API (Runs in background only)
     async function fetchCurrentBalance() {
         try {
-            const response = await fetch(`${CURRENT_BALANCE_URL}?_t=${Date.now()}`, {
-                headers: { 'ngrok-skip-browser-warning': 'true' }
-            });
+            const response = await fetch(`${CURRENT_BALANCE_URL}?_t=${Date.now()}`);
             if (!response.ok) throw new Error("Network response failed");
             const data = await response.json();
             
@@ -1086,44 +1085,70 @@
         }
     }
 
-    // TRIGGER API SUBMIT
-    function submitApiValues() {
-        const amt1 = parseFloat(document.getElementById('inputAmount1').value) || 0;
-        const target1 = parseFloat(document.getElementById('targetCashout1').value) || 0;
-        const amt2 = parseFloat(document.getElementById('inputAmount2').value) || 0;
-        const target2 = parseFloat(document.getElementById('targetCashout2').value) || 0;
+    async function submitApiValues() {
+        const amt1 = parseFloat(document.getElementById('inputAmount1').value);
+        const target1 = parseFloat(document.getElementById('targetCashout1').value);
+        const amt2 = parseFloat(document.getElementById('inputAmount2').value);
+        const target2 = parseFloat(document.getElementById('targetCashout2').value);
         const reachAmt = parseFloat(document.getElementById('targetReachAmount').value) || 0;
+        const stopLossAmt = parseFloat(document.getElementById('stopLossAmount').value) || 0;
 
-        const requestUrl = `https://example.com/api/${amt1}/${target1}/${amt2}/${target2}/${reachAmt}`;
-        console.log("Triggering URL:", requestUrl);
-
-        fetch(requestUrl, { mode: 'no-cors' }).catch(() => {});
-
-        const activeBets = [];
-        if (amt1 > 0 || target1 > 0) {
-            activeBets.push({ title: 'Bet 1', amount: amt1, cashout: target1 });
+        if (isNaN(amt1) || (amt1 !== 0 && amt1 < 7)) {
+            alert("Input Amount 1 must be either 0 or at least 7.");
+            return;
         }
-        if (amt2 > 0 || target2 > 0) {
-            activeBets.push({ title: 'Bet 2', amount: amt2, cashout: target2 });
+        if (isNaN(amt2) || (amt2 !== 0 && amt2 < 7)) {
+            alert("Input Amount 2 must be either 0 or at least 7.");
+            return;
+        }
+        if (amt1 === 0 && amt2 === 0) {
+            alert("Both input amounts cannot be 0 at the same time. At least one bet must be active.");
+            return;
+        }
+        if (amt1 !== 0 && (isNaN(target1) || target1 < 1.1)) {
+            alert("Target Cashout 1 cannot be less than 1.1.");
+            return;
+        }
+        if (amt2 !== 0 && (isNaN(target2) || target2 < 1.1)) {
+            alert("Target Cashout 2 cannot be less than 1.1.");
+            return;
         }
 
-        if (activeBets.length === 0) {
-            activeBets.push({ title: 'Bet 1', amount: amt1, cashout: target1 });
+        const targetUrl = `${BASE_API_URL}/updateBet/${amt1}/${target1}/${amt2}/${target2}/${reachAmt}/${stopLossAmt}`;
+
+        try {
+            await fetch(targetUrl, {
+                method: 'PUT',
+                headers: { 
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            });
+        } catch (err) {
+            console.error("Database update network error:", err);
         }
+
+        const activeBets = [
+            { title: 'Bet 1', amount: amt1, cashout: target1 },
+            { title: 'Bet 2', amount: amt2, cashout: target2 }
+        ];
 
         showSubmitModal(activeBets, reachAmt);
         clearApiInputFields();
     }
 
-    // TRIGGER MANUAL CASHOUT API (Instant, without waiting for fetch balance)
-    function triggerManualCashout() {
-        const manualUrl = "https://example.com/api/mannualCashout/true";
-        console.log("Triggering Manual Cashout:", manualUrl);
-
-        fetch(manualUrl, { mode: 'no-cors' }).catch(() => {});
+    async function triggerManualCashout() {
+        try {
+            await fetch(MANUAL_CASHOUT_URL, {
+                method: 'PUT',
+                headers: { 
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            });
+        } catch (err) {
+            console.error("Manual cashout network error:", err);
+        }
 
         showManualCashoutModal();
-        clearApiInputFields();
     }
 
     function switchPlatform(platformVal) {
@@ -1614,7 +1639,7 @@
 
     document.querySelectorAll('select').forEach(el => {
         if(el.id !== 'platformSelect') {
-            el.addEventListener('change', applyFilters);
+            el.addEventListener('click', applyFilters);
         }
     });
 
@@ -1624,7 +1649,7 @@
     fetchCurrentBalance();
 
     setInterval(fetchCSVData, 5000);
-    setInterval(fetchCurrentBalance, 3000);
+    setInterval(fetchCurrentBalance, 2000);
 </script>
 
 </body>
