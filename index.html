@@ -190,8 +190,14 @@
 
         .api-right-row {
             grid-column: span 3;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .api-inline-row {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 120px;
             gap: 6px;
             align-items: flex-end;
         }
@@ -881,17 +887,23 @@
                 </div>
 
                 <div class="api-right-row">
-                    <div class="filter-group">
-                        <label>TARGET AMOUNT</label>
-                        <input type="number" id="targetReachAmount" value="0">
-                        <label style="margin-top: 4px;">STOP LOSS</label>
-                        <input type="number" id="stopLossAmount" value="0">
+                    <div class="api-inline-row">
+                        <div class="filter-group">
+                            <label>TARGET AMOUNT</label>
+                            <input type="number" id="targetReachAmount" value="0">
+                        </div>
+                        <div class="filter-group">
+                            <button class="btn-submit-api" onclick="submitApiValues()">Submit</button>
+                        </div>
                     </div>
-                    <div class="filter-group">
-                        <button class="btn-submit-api" onclick="submitApiValues()">Submit</button>
-                    </div>
-                    <div class="filter-group">
-                        <button class="btn-manual-cashout" onclick="triggerManualCashout()">Manual Cashout</button>
+                    <div class="api-inline-row">
+                        <div class="filter-group">
+                            <label>STOP LOSS</label>
+                            <input type="number" id="stopLossAmount" value="0">
+                        </div>
+                        <div class="filter-group">
+                            <button class="btn-manual-cashout" onclick="triggerManualCashout()">Manual Cashout</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1053,7 +1065,7 @@
 
         bodyContainer.innerHTML = `
             <div class="modal-single-box">
-                <div class="msg">Manual cashout triggered successfully via API!</div>
+                <div class="msg">Manual Cashout triggered || Bet Removed Successfully</div>
             </div>
         `;
 
