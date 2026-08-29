@@ -1344,7 +1344,7 @@
             if (Array.isArray(data) && data.length > 0) {
                 const s = data[0];
                 
-                const isManualCashout = String(s.mannualCashout).toLowerCase() === 'true';
+                const isManualCashout = String(s.mannualCashout).toLowerCase() === 'false';
                 const statusText = isManualCashout ? 'STOPPED' : 'RUNNING';
                 const statusColor = isManualCashout ? 'var(--accent-red)' : 'var(--accent-green)';
                 
