@@ -656,7 +656,7 @@
             border-radius: 6px;
             padding: 6px 8px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 8px;
             align-items: flex-end;
         }
@@ -881,244 +881,244 @@
         </div>
     </div>
 
-    <div id="activeAppContainer" style="display: flex; flex-direction: column; gap: 6px;">
-        <!-- OVERVIEW CONTROL PANEL -->
-        <div class="control-panel" id="overviewControlPanel">
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label>FROM TIME</label>
-                    <div class="time-triplet">
-                        <select id="fromHour"><option value="">Hour</option></select>
-                        <select id="fromMin"><option value="">Min</option></select>
-                        <select id="fromSec"><option value="">Sec</option></select>
-                    </div>
-                </div>
-
-                <div class="filter-group">
-                    <label>TO TIME</label>
-                    <div class="time-triplet">
-                        <select id="toHour"><option value="">Hour</option></select>
-                        <select id="toMin"><option value="">Min</option></select>
-                        <select id="toSec"><option value="">Sec</option></select>
-                    </div>
+    <!-- GLOBAL CONTROL PANEL (Always Visible across all views) -->
+    <div class="control-panel" id="globalControlPanel">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label>FROM TIME</label>
+                <div class="time-triplet">
+                    <select id="fromHour"><option value="">Hour</option></select>
+                    <select id="fromMin"><option value="">Min</option></select>
+                    <select id="fromSec"><option value="">Sec</option></select>
                 </div>
             </div>
 
-            <div class="bottom-filter-row">
-                <div class="filter-group">
-                    <label>DATE</label>
-                    <select id="dateSelect">
-                        <option value="">All Dates</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label>&nbsp;</label>
-                    <button class="btn-reset" onclick="resetFilters()">
-                        Reset Filter
-                    </button>
-                </div>
-
-                <div class="filter-group">
-                    <label>&nbsp;</label>
-                    <button class="btn-sync" onclick="syncData()">
-                        Sync
-                    </button>
-                </div>
-            </div>
-
-            <div class="api-controls-section" id="apiControlsSection">
-                <div class="api-left-pairs">
-                    <div class="api-pair-row">
-                        <div class="filter-group">
-                            <label>INPUT AMOUNT 1</label>
-                            <select id="inputAmount1">
-                                <option value="0">0</option>
-                                <option value="7" selected>7</option>
-                                <option value="10">10</option>
-                                <option value="15">15</option>
-                                <option value="20">20</option>
-                                <option value="25">25</option>
-                                <option value="30">30</option>
-                                <option value="40">40</option>
-                                <option value="50">50</option>
-                                <option value="60">60</option>
-                                <option value="70">70</option>
-                                <option value="80">80</option>
-                                <option value="90">90</option>
-                                <option value="100">100</option>
-                                <option value="120">120</option>
-                                <option value="150">150</option>
-                                <option value="200">200</option>
-                                <option value="300">300</option>
-                                <option value="400">400</option>
-                                <option value="500">500</option>
-                                <option value="600">600</option>
-                                <option value="700">700</option>
-                                <option value="800">800</option>
-                                <option value="900">900</option>
-                                <option value="1000">1000</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>TARGET CASHOUT 1</label>
-                            <select id="targetCashout1">
-                                <option value="1.1" selected>1.1</option>
-                                <option value="1.2">1.2</option>
-                                <option value="1.3">1.3</option>
-                                <option value="1.4">1.4</option>
-                                <option value="1.5">1.5</option>
-                                <option value="2">2</option>
-                                <option value="2.5">2.5</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                                <option value="7">7</option>
-                                <option value="8">8</option>
-                                <option value="10">10</option>
-                                <option value="12">12</option>
-                                <option value="15">15</option>
-                                <option value="20">20</option>
-                                <option value="25">25</option>
-                                <option value="30">30</option>
-                                <option value="40">40</option>
-                                <option value="50">50</option>
-                                <option value="60">60</option>
-                                <option value="70">70</option>
-                                <option value="80">80</option>
-                                <option value="90">90</option>
-                                <option value="100">100</option>
-                                <option value="120">120</option>
-                                <option value="150">150</option>
-                                <option value="160">160</option>
-                                <option value="170">170</option>
-                                <option value="180">180</option>
-                                <option value="190">190</option>
-                                <option value="200">200</option>
-                                <option value="300">300</option>
-                                <option value="400">400</option>
-                                <option value="500">500</option>
-                                <option value="600">600</option>
-                                <option value="700">700</option>
-                                <option value="800">800</option>
-                                <option value="900">900</option>
-                                <option value="1000">1000</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="api-pair-row">
-                        <div class="filter-group">
-                            <label>INPUT AMOUNT 2</label>
-                            <select id="inputAmount2">
-                                <option value="0" selected>0</option>
-                                <option value="7">7</option>
-                                <option value="10">10</option>
-                                <option value="15">15</option>
-                                <option value="20">20</option>
-                                <option value="25">25</option>
-                                <option value="30">30</option>
-                                <option value="40">40</option>
-                                <option value="50">50</option>
-                                <option value="60">60</option>
-                                <option value="70">70</option>
-                                <option value="80">80</option>
-                                <option value="90">90</option>
-                                <option value="100">100</option>
-                                <option value="120">120</option>
-                                <option value="150">150</option>
-                                <option value="200">200</option>
-                                <option value="300">300</option>
-                                <option value="400">400</option>
-                                <option value="500">500</option>
-                                <option value="600">600</option>
-                                <option value="700">700</option>
-                                <option value="800">800</option>
-                                <option value="900">900</option>
-                                <option value="1000">1000</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>TARGET CASHOUT 2</label>
-                            <select id="targetCashout2">
-                                <option value="1.1" selected>1.1</option>
-                                <option value="1.2">1.2</option>
-                                <option value="1.3">1.3</option>
-                                <option value="1.4">1.4</option>
-                                <option value="1.5">1.5</option>
-                                <option value="2">2</option>
-                                <option value="2.5">2.5</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                                <option value="7">7</option>
-                                <option value="8">8</option>
-                                <option value="10">10</option>
-                                <option value="12">12</option>
-                                <option value="15">15</option>
-                                <option value="20">20</option>
-                                <option value="25">25</option>
-                                <option value="30">30</option>
-                                <option value="40">40</option>
-                                <option value="50">50</option>
-                                <option value="60">60</option>
-                                <option value="70">70</option>
-                                <option value="80">80</option>
-                                <option value="90">90</option>
-                                <option value="100">100</option>
-                                <option value="120">120</option>
-                                <option value="150">150</option>
-                                <option value="160">160</option>
-                                <option value="170">170</option>
-                                <option value="180">180</option>
-                                <option value="190">190</option>
-                                <option value="200">200</option>
-                                <option value="300">300</option>
-                                <option value="400">400</option>
-                                <option value="500">500</option>
-                                <option value="600">600</option>
-                                <option value="700">700</option>
-                                <option value="800">800</option>
-                                <option value="900">900</option>
-                                <option value="1000">1000</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="api-right-row">
-                    <div class="api-inline-row">
-                        <div class="filter-group">
-                            <label>TARGET AMOUNT</label>
-                            <input type="number" id="targetReachAmount" value="0">
-                        </div>
-                        <div class="filter-group">
-                            <label>&nbsp;</label>
-                            <button class="btn-submit-api" onclick="submitApiValues()">Submit</button>
-                        </div>
-                    </div>
-                    <div class="api-inline-row">
-                        <div class="filter-group">
-                            <label>STOP LOSS</label>
-                            <input type="number" id="stopLossAmount" value="0">
-                        </div>
-                        <div class="filter-group">
-                            <label>&nbsp;</label>
-                            <button class="btn-manual-cashout" onclick="triggerManualCashout()">Manual Cashout</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Active Bet Status Banner -->
-            <div class="bottom-filter-row" style="border-top: 1px solid var(--border-color); padding-top: 5px;">
-                <div class="live-status-banner" id="liveStatusBanner">
-                    Loading active strategy status...
+            <div class="filter-group">
+                <label>TO TIME</label>
+                <div class="time-triplet">
+                    <select id="toHour"><option value="">Hour</option></select>
+                    <select id="toMin"><option value="">Min</option></select>
+                    <select id="toSec"><option value="">Sec</option></select>
                 </div>
             </div>
         </div>
 
+        <div class="bottom-filter-row">
+            <div class="filter-group">
+                <label>DATE</label>
+                <select id="dateSelect" onchange="syncData()">
+                    <option value="">All Dates</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>&nbsp;</label>
+                <button class="btn-reset" onclick="resetFilters()">
+                    Reset Filter
+                </button>
+            </div>
+
+            <div class="filter-group">
+                <label>&nbsp;</label>
+                <button class="btn-sync" onclick="syncData()">
+                    Sync
+                </button>
+            </div>
+        </div>
+
+        <div class="api-controls-section" id="apiControlsSection">
+            <div class="api-left-pairs">
+                <div class="api-pair-row">
+                    <div class="filter-group">
+                        <label>INPUT AMOUNT 1</label>
+                        <select id="inputAmount1">
+                            <option value="0">0</option>
+                            <option value="7" selected>7</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="30">30</option>
+                            <option value="40">40</option>
+                            <option value="50">50</option>
+                            <option value="60">60</option>
+                            <option value="70">70</option>
+                            <option value="80">80</option>
+                            <option value="90">90</option>
+                            <option value="100">100</option>
+                            <option value="120">120</option>
+                            <option value="150">150</option>
+                            <option value="200">200</option>
+                            <option value="300">300</option>
+                            <option value="400">400</option>
+                            <option value="500">500</option>
+                            <option value="600">600</option>
+                            <option value="700">700</option>
+                            <option value="800">800</option>
+                            <option value="900">900</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>TARGET CASHOUT 1</label>
+                        <select id="targetCashout1">
+                            <option value="1.1" selected>1.1</option>
+                            <option value="1.2">1.2</option>
+                            <option value="1.3">1.3</option>
+                            <option value="1.4">1.4</option>
+                            <option value="1.5">1.5</option>
+                            <option value="2">2</option>
+                            <option value="2.5">2.5</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="30">30</option>
+                            <option value="40">40</option>
+                            <option value="50">50</option>
+                            <option value="60">60</option>
+                            <option value="70">70</option>
+                            <option value="80">80</option>
+                            <option value="90">90</option>
+                            <option value="100">100</option>
+                            <option value="120">120</option>
+                            <option value="150">150</option>
+                            <option value="160">160</option>
+                            <option value="170">170</option>
+                            <option value="180">180</option>
+                            <option value="190">190</option>
+                            <option value="200">200</option>
+                            <option value="300">300</option>
+                            <option value="400">400</option>
+                            <option value="500">500</option>
+                            <option value="600">600</option>
+                            <option value="700">700</option>
+                            <option value="800">800</option>
+                            <option value="900">900</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="api-pair-row">
+                    <div class="filter-group">
+                        <label>INPUT AMOUNT 2</label>
+                        <select id="inputAmount2">
+                            <option value="0" selected>0</option>
+                            <option value="7">7</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="30">30</option>
+                            <option value="40">40</option>
+                            <option value="50">50</option>
+                            <option value="60">60</option>
+                            <option value="70">70</option>
+                            <option value="80">80</option>
+                            <option value="90">90</option>
+                            <option value="100">100</option>
+                            <option value="120">120</option>
+                            <option value="150">150</option>
+                            <option value="200">200</option>
+                            <option value="300">300</option>
+                            <option value="400">400</option>
+                            <option value="500">500</option>
+                            <option value="600">600</option>
+                            <option value="700">700</option>
+                            <option value="800">800</option>
+                            <option value="900">900</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>TARGET CASHOUT 2</label>
+                        <select id="targetCashout2">
+                            <option value="1.1" selected>0</option>
+                            <option value="1.2">1.2</option>
+                            <option value="1.3">1.3</option>
+                            <option value="1.4">1.4</option>
+                            <option value="1.5">1.5</option>
+                            <option value="2">2</option>
+                            <option value="2.5">2.5</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="30">30</option>
+                            <option value="40">40</option>
+                            <option value="50">50</option>
+                            <option value="60">60</option>
+                            <option value="70">70</option>
+                            <option value="80">80</option>
+                            <option value="90">90</option>
+                            <option value="100">100</option>
+                            <option value="120">120</option>
+                            <option value="150">150</option>
+                            <option value="160">160</option>
+                            <option value="170">170</option>
+                            <option value="180">180</option>
+                            <option value="190">190</option>
+                            <option value="200">200</option>
+                            <option value="300">300</option>
+                            <option value="400">400</option>
+                            <option value="500">500</option>
+                            <option value="600">600</option>
+                            <option value="700">700</option>
+                            <option value="800">800</option>
+                            <option value="900">900</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-right-row">
+                <div class="api-inline-row">
+                    <div class="filter-group">
+                        <label>TARGET AMOUNT</label>
+                        <input type="number" id="targetReachAmount" value="0">
+                    </div>
+                    <div class="filter-group">
+                        <label>&nbsp;</label>
+                        <button class="btn-submit-api" onclick="submitApiValues()">Submit</button>
+                    </div>
+                </div>
+                <div class="api-inline-row">
+                    <div class="filter-group">
+                        <label>STOP LOSS</label>
+                        <input type="number" id="stopLossAmount" value="0">
+                    </div>
+                    <div class="filter-group">
+                        <label>&nbsp;</label>
+                        <button class="btn-manual-cashout" onclick="triggerManualCashout()">Manual Cashout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Bet Status Banner -->
+        <div class="bottom-filter-row" style="border-top: 1px solid var(--border-color); padding-top: 5px;">
+            <div class="live-status-banner" id="liveStatusBanner">
+                Loading active strategy status...
+            </div>
+        </div>
+    </div>
+
+    <div id="activeAppContainer" style="display: flex; flex-direction: column; gap: 6px;">
         <!-- PAGE 1: OVERVIEW -->
         <div id="viewOverview" style="display: flex; flex-direction: column; gap: 6px;">
             <div class="metrics-grid">
@@ -1186,11 +1186,10 @@
             <div class="logs-filter-toolbar">
                 <div class="filter-group">
                     <label>HIGHEST STREAK THRESHOLD (e.g. enter 1 for <2.00x, 2 for <3.00x)</label>
-                    <input type="number" id="streakInputFilter" placeholder="Enter number (e.g., 1, 2...)" min="0" step="any" oninput="applyFilters()">
-                </div>
-                <div class="filter-group">
-                    <label>&nbsp;</label>
-                    <button class="btn-reset" onclick="resetLogsFilter()">Reset Logs Filter</button>
+                    <div style="display: grid; grid-template-columns: 1fr 140px; gap: 6px;">
+                        <input type="number" id="streakInputFilter" placeholder="Enter number (e.g., 1, 2...)" min="0" step="any" oninput="applyFilters()">
+                        <button class="btn-reset" onclick="resetLogsFilter()">Reset Logs Filter</button>
+                    </div>
                 </div>
             </div>
             <div class="streak-summary-box" id="streakSummaryBox" style="display: none;">
@@ -1251,7 +1250,6 @@
     let currentPlatform = 'aviator';
     let allRowsData = [];
     let currentFilteredData = [];
-    let initialLoadDone = false;
     let availableSortedDates = [];
     let appliedDate = '';
 
@@ -1429,8 +1427,7 @@
 
     function switchPlatform(platformVal) {
         currentPlatform = platformVal;
-        initialLoadDone = false;
-        fetchCSVData();
+        fetchCSVData(true); // force resetting to current date on platform switch
     }
 
     function parseDateToTimestamp(dateStr) {
@@ -1489,13 +1486,6 @@
         document.getElementById('viewAnalytics').style.display = val === 'analytics' ? 'flex' : 'none';
         document.getElementById('viewRawData').style.display = val === 'rawdata' ? 'flex' : 'none';
 
-        const overviewControlPanel = document.getElementById('overviewControlPanel');
-        if (val === 'overview') {
-            overviewControlPanel.style.display = 'flex';
-        } else {
-            overviewControlPanel.style.display = 'none';
-        }
-
         applyFilters();
     }
 
@@ -1530,10 +1520,10 @@
 
     function syncData() {
         appliedDate = document.getElementById('dateSelect').value;
-        fetchCSVData();
+        fetchCSVData(false);
     }
 
-    async function fetchCSVData() {
+    async function fetchCSVData(forceCurrentDate = false) {
         const targetUrl = currentPlatform === 'playInject' ? PLAY_INJECT_URL : AVIATOR_URL;
         try {
             const response = await fetch(`${targetUrl}?_t=${Date.now()}`, {
@@ -1543,14 +1533,14 @@
             if (!response.ok) throw new Error("Failed to fetch logs");
 
             const csvText = await response.text();
-            processCSV(csvText);
+            processCSV(csvText, forceCurrentDate);
         } catch (error) {
             console.error("Error loading CSV:", error);
             document.getElementById('topHighestContainer').innerHTML = `<div class="no-data" style="grid-column: span 10; color: var(--accent-red);">Connection error / Failed to load data</div>`;
         }
     }
 
-    function processCSV(csvText) {
+    function processCSV(csvText, forceCurrentDate) {
         const lines = csvText.trim().split('\n').filter(line => line.length > 0);
         const rows = lines[0].toLowerCase().includes('date') ? lines.slice(1) : lines;
 
@@ -1580,17 +1570,12 @@
         availableSortedDates = Array.from(uniqueDates).sort((a, b) => parseDateToTimestamp(b) - parseDateToTimestamp(a));
 
         const dateSelect = document.getElementById('dateSelect');
-        const currentSelected = dateSelect.value;
-
         dateSelect.innerHTML = availableSortedDates.map(d => `<option value="${d}">${d}</option>`).join('') + '<option value="">All dates</option>';
 
-        if (!initialLoadDone) {
-            initialLoadDone = true;
+        if (forceCurrentDate || !appliedDate) {
             setDefaultFiltersToCurrentDay();
-        } else if (currentSelected && (currentSelected === "" || availableSortedDates.includes(currentSelected))) {
-            dateSelect.value = currentSelected;
         } else {
-            setDefaultFiltersToCurrentDay();
+            dateSelect.value = appliedDate;
         }
 
         applyFilters();
@@ -1611,7 +1596,9 @@
     }
 
     function applyFilters() {
-        const selectedDate = appliedDate;
+        const selectedDate = document.getElementById('dateSelect').value;
+        appliedDate = selectedDate;
+        
         const fH = document.getElementById('fromHour').value;
         const fM = document.getElementById('fromMin').value;
         const fS = document.getElementById('fromSec').value;
@@ -2009,11 +1996,11 @@
 
     initDropdowns();
     document.getElementById('dateSelect').innerHTML = '<option value="">All dates</option>';
-    fetchCSVData();
+    fetchCSVData(true); // Initial load forces current date selection
     fetchCurrentBalance();
     fetchBetStatus();
 
-    setInterval(fetchCSVData, 5000);
+    setInterval(() => fetchCSVData(false), 5000); // Polling updates keep current applied filters/dates
     setInterval(fetchCurrentBalance, 3000);
     setInterval(fetchBetStatus, 2000);
 </script>
