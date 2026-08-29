@@ -921,7 +921,7 @@
 
                 <div class="filter-group">
                     <label>&nbsp;</label>
-                    <button class="btn-sync" onclick="fetchCSVData()">
+                    <button class="btn-sync" onclick="syncData()">
                         Sync
                     </button>
                 </div>
@@ -976,7 +976,6 @@
                                 <option value="6">6</option>
                                 <option value="7">7</option>
                                 <option value="8">8</option>
-								  <option value="8">9</option>
                                 <option value="10">10</option>
                                 <option value="12">12</option>
                                 <option value="15">15</option>
@@ -1055,7 +1054,6 @@
                                 <option value="6">6</option>
                                 <option value="7">7</option>
                                 <option value="8">8</option>
-								  <option value="8">9</option>
                                 <option value="10">10</option>
                                 <option value="12">12</option>
                                 <option value="15">15</option>
@@ -1255,6 +1253,7 @@
     let currentFilteredData = [];
     let initialLoadDone = false;
     let availableSortedDates = [];
+    let appliedDate = '';
 
     function clearApiInputFields() {
         document.getElementById('inputAmount1').value = '7';
@@ -1500,32 +1499,38 @@
         applyFilters();
     }
 
+    function setDefaultFiltersToCurrentDay() {
+        if (availableSortedDates.length > 0) {
+            document.getElementById('dateSelect').value = availableSortedDates[0];
+            appliedDate = availableSortedDates[0];
+        } else {
+            document.getElementById('dateSelect').value = "";
+            appliedDate = "";
+        }
+
+        document.getElementById('fromHour').value = "00";
+        document.getElementById('fromMin').value = "00";
+        document.getElementById('fromSec').value = "00";
+
+        document.getElementById('toHour').value = "23";
+        document.getElementById('toMin').value = "59";
+        document.getElementById('toSec').value = "59";
+    }
+
     function resetFilters() {
-        const dateSelect = document.getElementById('dateSelect');
-        dateSelect.value = "";
-
-        document.getElementById('fromHour').value = "";
-        document.getElementById('fromMin').value = "";
-        document.getElementById('fromSec').value = "";
-
-        document.getElementById('toHour').value = "";
-        document.getElementById('toMin').value = "";
-        document.getElementById('toSec').value = "";
-
+        setDefaultFiltersToCurrentDay();
         applyFilters();
     }
 
     function resetLogsFilter() {
         document.getElementById('streakInputFilter').value = '';
-        const dateSelect = document.getElementById('dateSelect');
-        dateSelect.value = ""; 
-        document.getElementById('fromHour').value = "";
-        document.getElementById('fromMin').value = "";
-        document.getElementById('fromSec').value = "";
-        document.getElementById('toHour').value = "";
-        document.getElementById('toMin').value = "";
-        document.getElementById('toSec').value = "";
+        setDefaultFiltersToCurrentDay();
         applyFilters();
+    }
+
+    function syncData() {
+        appliedDate = document.getElementById('dateSelect').value;
+        fetchCSVData();
     }
 
     async function fetchCSVData() {
@@ -1577,16 +1582,15 @@
         const dateSelect = document.getElementById('dateSelect');
         const currentSelected = dateSelect.value;
 
-        dateSelect.innerHTML = '<option value="">All Dates</option>' + 
-            availableSortedDates.map(d => `<option value="${d}">${d}</option>`).join('');
+        dateSelect.innerHTML = availableSortedDates.map(d => `<option value="${d}">${d}</option>`).join('') + '<option value="">All dates</option>';
 
-        if (currentSelected && (currentSelected === "" || availableSortedDates.includes(currentSelected))) {
-            dateSelect.value = currentSelected;
-        } else if (!initialLoadDone) {
-            dateSelect.value = "";
+        if (!initialLoadDone) {
             initialLoadDone = true;
+            setDefaultFiltersToCurrentDay();
+        } else if (currentSelected && (currentSelected === "" || availableSortedDates.includes(currentSelected))) {
+            dateSelect.value = currentSelected;
         } else {
-            dateSelect.value = "";
+            setDefaultFiltersToCurrentDay();
         }
 
         applyFilters();
@@ -1607,7 +1611,7 @@
     }
 
     function applyFilters() {
-        const selectedDate = document.getElementById('dateSelect').value;
+        const selectedDate = appliedDate;
         const fH = document.getElementById('fromHour').value;
         const fM = document.getElementById('fromMin').value;
         const fS = document.getElementById('fromSec').value;
@@ -1788,7 +1792,7 @@
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", `${currentPlatform}_filtered_logs_${document.getElementById('dateSelect').value || 'all_dates'}.csv`);
+        link.setAttribute("download", `${currentPlatform}_filtered_logs_${appliedDate || 'all_dates'}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -1998,13 +2002,13 @@
     }
 
     document.querySelectorAll('select').forEach(el => {
-        if(el.id !== 'platformSelect') {
+        if(el.id !== 'platformSelect' && el.id !== 'dateSelect') {
             el.addEventListener('click', applyFilters);
         }
     });
 
     initDropdowns();
-    resetFilters();
+    document.getElementById('dateSelect').innerHTML = '<option value="">All dates</option>';
     fetchCSVData();
     fetchCurrentBalance();
     fetchBetStatus();
