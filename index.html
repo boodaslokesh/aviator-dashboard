@@ -331,6 +331,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .section-header-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
         }
 
         .metrics-grid {
@@ -642,6 +650,62 @@
             gap: 6px;
         }
 
+        .logs-filter-toolbar {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .streak-summary-box {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .streak-summary-box h4 {
+            margin: 0;
+            font-size: 10px;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .streak-summary-content {
+            font-size: 11px;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        /* Active status live info banner */
+        .live-status-banner {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            box-sizing: border-box;
+            color: var(--text-main);
+            grid-column: span 3;
+        }
+
+        .live-status-banner span {
+            color: var(--accent-cyan);
+            font-weight: bold;
+        }
+
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -818,7 +882,8 @@
     </div>
 
     <div id="activeAppContainer" style="display: flex; flex-direction: column; gap: 6px;">
-        <div class="control-panel">
+        <!-- OVERVIEW CONTROL PANEL -->
+        <div class="control-panel" id="overviewControlPanel">
             <div class="filter-row">
                 <div class="filter-group">
                     <label>FROM TIME</label>
@@ -862,26 +927,164 @@
                 </div>
             </div>
 
-            <div class="api-controls-section">
+            <div class="api-controls-section" id="apiControlsSection">
                 <div class="api-left-pairs">
                     <div class="api-pair-row">
                         <div class="filter-group">
-                            <label>INPUT AMOUNT 1 (Min 7 or 0)</label>
-                            <input type="number" id="inputAmount1" value="7" min="0" step="any">
+                            <label>INPUT AMOUNT 1</label>
+                            <select id="inputAmount1">
+                                <option value="0">0</option>
+                                <option value="7" selected>7</option>
+                                <option value="10">10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                                <option value="25">25</option>
+                                <option value="30">30</option>
+                                <option value="40">40</option>
+                                <option value="50">50</option>
+                                <option value="60">60</option>
+                                <option value="70">70</option>
+                                <option value="80">80</option>
+                                <option value="90">90</option>
+                                <option value="100">100</option>
+                                <option value="120">120</option>
+                                <option value="150">150</option>
+                                <option value="200">200</option>
+                                <option value="300">300</option>
+                                <option value="400">400</option>
+                                <option value="500">500</option>
+                                <option value="600">600</option>
+                                <option value="700">700</option>
+                                <option value="800">800</option>
+                                <option value="900">900</option>
+                                <option value="1000">1000</option>
+                            </select>
                         </div>
                         <div class="filter-group">
-                            <label>TARGET CASHOUT 1 (Min 1.1)</label>
-                            <input type="number" id="targetCashout1" value="1.1" min="1.1" step="any">
+                            <label>TARGET CASHOUT 1</label>
+                            <select id="targetCashout1">
+                                <option value="1.1" selected>1.1</option>
+                                <option value="1.2">1.2</option>
+                                <option value="1.3">1.3</option>
+                                <option value="1.4">1.4</option>
+                                <option value="1.5">1.5</option>
+                                <option value="2">2</option>
+                                <option value="2.5">2.5</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+								  <option value="8">9</option>
+                                <option value="10">10</option>
+                                <option value="12">12</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                                <option value="25">25</option>
+                                <option value="30">30</option>
+                                <option value="40">40</option>
+                                <option value="50">50</option>
+                                <option value="60">60</option>
+                                <option value="70">70</option>
+                                <option value="80">80</option>
+                                <option value="90">90</option>
+                                <option value="100">100</option>
+                                <option value="120">120</option>
+                                <option value="150">150</option>
+                                <option value="160">160</option>
+                                <option value="170">170</option>
+                                <option value="180">180</option>
+                                <option value="190">190</option>
+                                <option value="200">200</option>
+                                <option value="300">300</option>
+                                <option value="400">400</option>
+                                <option value="500">500</option>
+                                <option value="600">600</option>
+                                <option value="700">700</option>
+                                <option value="800">800</option>
+                                <option value="900">900</option>
+                                <option value="1000">1000</option>
+                            </select>
                         </div>
                     </div>
                     <div class="api-pair-row">
                         <div class="filter-group">
-                            <label>INPUT AMOUNT 2 (Min 7 or 0)</label>
-                            <input type="number" id="inputAmount2" value="0" min="7" step="any">
+                            <label>INPUT AMOUNT 2</label>
+                            <select id="inputAmount2">
+                                <option value="0" selected>0</option>
+                                <option value="7">7</option>
+                                <option value="10">10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                                <option value="25">25</option>
+                                <option value="30">30</option>
+                                <option value="40">40</option>
+                                <option value="50">50</option>
+                                <option value="60">60</option>
+                                <option value="70">70</option>
+                                <option value="80">80</option>
+                                <option value="90">90</option>
+                                <option value="100">100</option>
+                                <option value="120">120</option>
+                                <option value="150">150</option>
+                                <option value="200">200</option>
+                                <option value="300">300</option>
+                                <option value="400">400</option>
+                                <option value="500">500</option>
+                                <option value="600">600</option>
+                                <option value="700">700</option>
+                                <option value="800">800</option>
+                                <option value="900">900</option>
+                                <option value="1000">1000</option>
+                            </select>
                         </div>
                         <div class="filter-group">
-                            <label>TARGET CASHOUT 2 (Min 1.1)</label>
-                            <input type="number" id="targetCashout2" value="0" min="1.1" step="any">
+                            <label>TARGET CASHOUT 2</label>
+                            <select id="targetCashout2">
+                                <option value="1.1" selected>1.1</option>
+                                <option value="1.2">1.2</option>
+                                <option value="1.3">1.3</option>
+                                <option value="1.4">1.4</option>
+                                <option value="1.5">1.5</option>
+                                <option value="2">2</option>
+                                <option value="2.5">2.5</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+								  <option value="8">9</option>
+                                <option value="10">10</option>
+                                <option value="12">12</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                                <option value="25">25</option>
+                                <option value="30">30</option>
+                                <option value="40">40</option>
+                                <option value="50">50</option>
+                                <option value="60">60</option>
+                                <option value="70">70</option>
+                                <option value="80">80</option>
+                                <option value="90">90</option>
+                                <option value="100">100</option>
+                                <option value="120">120</option>
+                                <option value="150">150</option>
+                                <option value="160">160</option>
+                                <option value="170">170</option>
+                                <option value="180">180</option>
+                                <option value="190">190</option>
+                                <option value="200">200</option>
+                                <option value="300">300</option>
+                                <option value="400">400</option>
+                                <option value="500">500</option>
+                                <option value="600">600</option>
+                                <option value="700">700</option>
+                                <option value="800">800</option>
+                                <option value="900">900</option>
+                                <option value="1000">1000</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -893,6 +1096,7 @@
                             <input type="number" id="targetReachAmount" value="0">
                         </div>
                         <div class="filter-group">
+                            <label>&nbsp;</label>
                             <button class="btn-submit-api" onclick="submitApiValues()">Submit</button>
                         </div>
                     </div>
@@ -902,13 +1106,22 @@
                             <input type="number" id="stopLossAmount" value="0">
                         </div>
                         <div class="filter-group">
+                            <label>&nbsp;</label>
                             <button class="btn-manual-cashout" onclick="triggerManualCashout()">Manual Cashout</button>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Active Bet Status Banner -->
+            <div class="bottom-filter-row" style="border-top: 1px solid var(--border-color); padding-top: 5px;">
+                <div class="live-status-banner" id="liveStatusBanner">
+                    Loading active strategy status...
+                </div>
+            </div>
         </div>
 
+        <!-- PAGE 1: OVERVIEW -->
         <div id="viewOverview" style="display: flex; flex-direction: column; gap: 6px;">
             <div class="metrics-grid">
                 <div class="metric-card">
@@ -961,6 +1174,7 @@
             </div>
         </div>
 
+        <!-- PAGE 2: ANALYTICS -->
         <div id="viewAnalytics" class="analytics-view">
             <div class="latest-section" style="margin-bottom: 0;">
                 <h3 id="analyticsHeaderTitle">Target Analytics View</h3>
@@ -969,11 +1183,28 @@
             </div>
         </div>
 
+        <!-- PAGE 3: LOGS / RAW DATA -->
         <div id="viewRawData" class="raw-data-view">
+            <div class="logs-filter-toolbar">
+                <div class="filter-group">
+                    <label>HIGHEST STREAK THRESHOLD (e.g. enter 1 for <2.00x, 2 for <3.00x)</label>
+                    <input type="number" id="streakInputFilter" placeholder="Enter number (e.g., 1, 2...)" min="0" step="any" oninput="applyFilters()">
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn-reset" onclick="resetLogsFilter()">Reset Logs Filter</button>
+                </div>
+            </div>
+            <div class="streak-summary-box" id="streakSummaryBox" style="display: none;">
+                <h4>Streak Analysis Summary</h4>
+                <div class="streak-summary-content" id="streakSummaryContent"></div>
+            </div>
             <div class="table-section">
                 <div class="section-header-row">
                     <h3 id="rawHeaderTitle">Complete Records Log</h3>
-                    <button class="btn-download" onclick="downloadFilteredCSV()">Download CSV</button>
+                    <div class="section-header-actions">
+                        <button class="btn-download" onclick="downloadFilteredCSV()">Download Filtered CSV</button>
+                    </div>
                 </div>
                 <table>
                     <thead>
@@ -1014,6 +1245,7 @@
     const PLAY_INJECT_URL = "https://download-aviator-data-latest-f1wq2z.5sc6y6-3.usa-e2.cloudhub.io/downloadPlayinject";
     const AVIATOR_URL = "https://download-aviator-data-latest-f1wq2z.5sc6y6-3.usa-e2.cloudhub.io/downloadData";
     const CURRENT_BALANCE_URL = "https://aviator-strategy-proxy-api-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/lokeshboodas/fetchCurrentBalance";
+    const BET_STATUS_URL = "https://aviator-strategy-proxy-api-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/lokeshboodas/betStatus";
     
     const BASE_API_URL = "https://aviator-strategy-proxy-api-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/lokeshboodas";
     const MANUAL_CASHOUT_URL = "https://aviator-strategy-proxy-api-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/lokeshboodas/mannualCashout";
@@ -1027,7 +1259,7 @@
     function clearApiInputFields() {
         document.getElementById('inputAmount1').value = '7';
         document.getElementById('targetCashout1').value = '1.1';
-        document.getElementById('inputAmount2').value = '7';
+        document.getElementById('inputAmount2').value = '0';
         document.getElementById('targetCashout2').value = '1.1';
         document.getElementById('targetReachAmount').value = '0';
         document.getElementById('stopLossAmount').value = '0';
@@ -1057,6 +1289,7 @@
 
         bodyContainer.innerHTML = betsHtml + targetHtml;
         document.getElementById('customModal').classList.add('active');
+        fetchBetStatus();
     }
 
     function showManualCashoutModal() {
@@ -1070,6 +1303,7 @@
         `;
 
         document.getElementById('customModal').classList.add('active');
+        fetchBetStatus();
     }
 
     function closeModal() {
@@ -1078,7 +1312,9 @@
 
     async function fetchCurrentBalance() {
         try {
-            const response = await fetch(`${CURRENT_BALANCE_URL}?_t=${Date.now()}`);
+            const response = await fetch(`${CURRENT_BALANCE_URL}?_t=${Date.now()}`, {
+                headers: { 'ngrok-skip-browser-warning': 'true' }
+            });
             if (!response.ok) throw new Error("Network response failed");
             const data = await response.json();
             
@@ -1094,6 +1330,35 @@
             document.getElementById('statCurrentBalance').innerText = formattedBal;
         } catch (err) {
             console.error("Error fetching current balance:", err);
+        }
+    }
+
+    async function fetchBetStatus() {
+        try {
+            const response = await fetch(`${BET_STATUS_URL}?_t=${Date.now()}`, {
+                headers: { 'ngrok-skip-browser-warning': 'true' }
+            });
+            if (!response.ok) throw new Error("Failed to fetch status");
+            const data = await response.json();
+            
+            const banner = document.getElementById('liveStatusBanner');
+            if (Array.isArray(data) && data.length > 0) {
+                const s = data[0];
+                
+                const isManualCashout = String(s.mannualCashout).toLowerCase() === 'true';
+                const statusText = isManualCashout ? 'STOPPED' : 'RUNNING';
+                const statusColor = isManualCashout ? 'var(--accent-red)' : 'var(--accent-green)';
+                
+                banner.innerHTML = `
+                    <div><strong>Bet1:</strong> amt <span>${s.inputAmount1}</span>, target <span>${s.cashoutTarget1}x</span> | <strong>Bet2:</strong> amt <span>${s.inputAmount2}</span>, target <span>${s.cashoutTarget2}x</span> | <strong style="color: ${statusColor};">${statusText}</strong></div>
+                    <div><strong>Target:</strong> <span>${s.targetAmount}</span> | <strong>StopLoss:</strong> <span>${s.stopLoss}</span></div>
+                `;
+            } else {
+                banner.innerHTML = `<div>No active configuration data found.</div>`;
+            }
+        } catch (err) {
+            console.error("Error fetching bet status:", err);
+            document.getElementById('liveStatusBanner').innerHTML = `<div>Status connection offline</div>`;
         }
     }
 
@@ -1224,26 +1489,42 @@
         document.getElementById('viewOverview').style.display = val === 'overview' ? 'flex' : 'none';
         document.getElementById('viewAnalytics').style.display = val === 'analytics' ? 'flex' : 'none';
         document.getElementById('viewRawData').style.display = val === 'rawdata' ? 'flex' : 'none';
+
+        const overviewControlPanel = document.getElementById('overviewControlPanel');
+        if (val === 'overview') {
+            overviewControlPanel.style.display = 'flex';
+        } else {
+            overviewControlPanel.style.display = 'none';
+        }
+
         applyFilters();
     }
 
     function resetFilters() {
         const dateSelect = document.getElementById('dateSelect');
-        
-        if (availableSortedDates.length > 0) {
-            dateSelect.value = availableSortedDates[0];
-        } else {
-            dateSelect.value = "";
-        }
+        dateSelect.value = "";
 
-        document.getElementById('fromHour').value = "00";
-        document.getElementById('fromMin').value = "00";
-        document.getElementById('fromSec').value = "00";
+        document.getElementById('fromHour').value = "";
+        document.getElementById('fromMin').value = "";
+        document.getElementById('fromSec').value = "";
 
-        document.getElementById('toHour').value = "23";
-        document.getElementById('toMin').value = "59";
-        document.getElementById('toSec').value = "59";
+        document.getElementById('toHour').value = "";
+        document.getElementById('toMin').value = "";
+        document.getElementById('toSec').value = "";
 
+        applyFilters();
+    }
+
+    function resetLogsFilter() {
+        document.getElementById('streakInputFilter').value = '';
+        const dateSelect = document.getElementById('dateSelect');
+        dateSelect.value = ""; 
+        document.getElementById('fromHour').value = "";
+        document.getElementById('fromMin').value = "";
+        document.getElementById('fromSec').value = "";
+        document.getElementById('toHour').value = "";
+        document.getElementById('toMin').value = "";
+        document.getElementById('toSec').value = "";
         applyFilters();
     }
 
@@ -1299,17 +1580,13 @@
         dateSelect.innerHTML = '<option value="">All Dates</option>' + 
             availableSortedDates.map(d => `<option value="${d}">${d}</option>`).join('');
 
-        if (currentSelected && availableSortedDates.includes(currentSelected)) {
+        if (currentSelected && (currentSelected === "" || availableSortedDates.includes(currentSelected))) {
             dateSelect.value = currentSelected;
         } else if (!initialLoadDone) {
-            if (availableSortedDates.length > 0) {
-                dateSelect.value = availableSortedDates[0];
-            }
+            dateSelect.value = "";
             initialLoadDone = true;
         } else {
-            if (availableSortedDates.length > 0) {
-                dateSelect.value = availableSortedDates[0];
-            }
+            dateSelect.value = "";
         }
 
         applyFilters();
@@ -1343,11 +1620,72 @@
         let toSeconds = tH !== '' ? parseInt(tH, 10) * 3600 + (tM !== '' ? parseInt(tM, 10) * 60 : 59) + (tS !== '' ? parseInt(tS, 10) : 59) : null;
 
         currentFilteredData = allRowsData.filter(item => {
-            if (selectedDate && item.date !== selectedDate) return false;
+            if (selectedDate && selectedDate !== "" && item.date !== selectedDate) return false;
             if (fromSeconds !== null && item.sortKey < fromSeconds) return false;
             if (toSeconds !== null && item.sortKey > toSeconds) return false;
             return true;
         });
+
+        const isRawDataTabActive = document.getElementById('tabRawData').classList.contains('active');
+        const streakSummaryBox = document.getElementById('streakSummaryBox');
+        const streakSummaryContent = document.getElementById('streakSummaryContent');
+
+        if (isRawDataTabActive) {
+            const streakInputVal = document.getElementById('streakInputFilter').value.trim();
+            if (streakInputVal !== "") {
+                const n = parseFloat(streakInputVal);
+                if (!isNaN(n)) {
+                    const threshold = n + 1.0;
+                    
+                    let streaks = [];
+                    let currentStreak = [];
+
+                    currentFilteredData.forEach(item => {
+                        if (item.multiplier < threshold) {
+                            currentStreak.push(item);
+                        } else {
+                            if (currentStreak.length > 0) {
+                                streaks.push([...currentStreak]);
+                                currentStreak = [];
+                            }
+                        }
+                    });
+                    if (currentStreak.length > 0) {
+                        streaks.push([...currentStreak]);
+                    }
+
+                    streaks.sort((a, b) => b.length - a.length);
+
+                    if (streaks.length > 0) {
+                        streakSummaryBox.style.display = 'flex';
+                        let summaryHtml = '';
+                        const topCount = Math.min(5, streaks.length);
+                        for (let i = 0; i < topCount; i++) {
+                            const s = streaks[i];
+                            const startTime = s[0].time;
+                            const startDate = s[0].date;
+                            const endTime = s[s.length - 1].time;
+                            const endDate = s[s.length - 1].date;
+                            const ordinal = (i === 0) ? "Highest" : (i === 1) ? "2nd Highest" : (i === 2) ? "3rd Highest" : `${i+1}th Highest`;
+                            
+                            summaryHtml += `<div><strong>${ordinal} streak count is ${s.length}</strong> happend from ${startDate} ${startTime} to ${endDate} ${endTime}</div>`;
+                        }
+                        streakSummaryContent.innerHTML = summaryHtml;
+                    } else {
+                        streakSummaryBox.style.display = 'flex';
+                        streakSummaryContent.innerHTML = `<div>No streaks found matching threshold &lt; ${threshold.toFixed(2)}x</div>`;
+                    }
+
+                    currentFilteredData = currentFilteredData.filter(item => item.multiplier < threshold);
+                } else {
+                    streakSummaryBox.style.display = 'none';
+                }
+            } else {
+                streakSummaryBox.style.display = 'none';
+            }
+        } else {
+            streakSummaryBox.style.display = 'none';
+        }
 
         updateTopHighestDisplay(currentFilteredData);
         updateDashboardMetrics(currentFilteredData, selectedDate);
@@ -1450,7 +1788,7 @@
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", `${currentPlatform}_raw_logs_${document.getElementById('dateSelect').value || 'all_dates'}.csv`);
+        link.setAttribute("download", `${currentPlatform}_filtered_logs_${document.getElementById('dateSelect').value || 'all_dates'}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -1460,10 +1798,12 @@
         let currentBalance = 0;
         let firstHitAmt = 0;
         let firstHitRd = 0;
+        let firstHitDateTime = '-';
         let hasHit500 = false;
         let peakProfit = 0;
         let lowestProfit = 0;
         let peakRound = 0;
+        let peakDateTime = '-';
         let lowestRound = 0;
         let totalRounds = dataArray.length;
 
@@ -1480,11 +1820,13 @@
                 hasHit500 = true;
                 firstHitAmt = currentBalance;
                 firstHitRd = roundNum;
+                firstHitDateTime = `${row.date} ${row.time}`;
             }
 
             if (currentBalance > peakProfit) {
                 peakProfit = currentBalance;
                 peakRound = roundNum;
+                peakDateTime = `${row.date} ${row.time}`;
             }
             if (currentBalance < lowestProfit) {
                 lowestProfit = currentBalance;
@@ -1502,8 +1844,10 @@
             totalRounds: totalRounds,
             hitAmt: firstHitAmt,
             hitRd: firstHitRd,
+            hitDateTime: firstHitDateTime,
             peakProfit: peakProfit,
             peakRound: peakRound,
+            peakDateTime: peakDateTime,
             lowestProfit: lowestProfit,
             lowestRound: lowestRound,
             isReached: hasHit500 || currentBalance >= 500
@@ -1532,7 +1876,7 @@
 
     function updateDashboardMetrics(dataArray, selectedDate) {
         document.getElementById('statRounds').innerText = dataArray.length;
-        document.getElementById('statDateSub').innerText = selectedDate || "All Recorded Dates";
+        document.getElementById('statDateSub').innerText = (selectedDate && selectedDate !== "") ? selectedDate : "All Recorded Dates";
         
         if (dataArray.length === 0) {
             document.getElementById('statBestStrategy').innerText = "-";
@@ -1579,7 +1923,7 @@
     function renderAnalyticsCards(dataArray, selectedDate) {
         const container = document.getElementById('analyticsGridContainer');
         container.innerHTML = '';
-        document.getElementById('analyticsHeaderTitle').innerText = `Target Analytics View (${selectedDate || 'All Dates'}) - Total Rounds: ${dataArray.length}`;
+        document.getElementById('analyticsHeaderTitle').innerText = `Target Analytics View (${(selectedDate && selectedDate !== "") ? selectedDate : 'All Dates'}) - Total Rounds: ${dataArray.length}`;
 
         if (dataArray.length === 0) {
             container.innerHTML = `<div class="no-data" style="grid-column: span 3;">No records match your selected filter criteria</div>`;
@@ -1624,6 +1968,10 @@
                         <span class="target-metric-val ${peakClass}">${peakSign}${res.peakProfit}</span>
                     </div>
                     <div class="target-metric-row">
+                        <span class="target-metric-label">Peak Time & Date:</span>
+                        <span class="target-metric-val" style="font-size: 9px; color: var(--accent-cyan);">${res.peakDateTime}</span>
+                    </div>
+                    <div class="target-metric-row">
                         <span class="target-metric-label">Peak Round:</span>
                         <span class="target-metric-val">#${res.peakRound}</span>
                     </div>
@@ -1659,9 +2007,11 @@
     resetFilters();
     fetchCSVData();
     fetchCurrentBalance();
+    fetchBetStatus();
 
     setInterval(fetchCSVData, 5000);
-    setInterval(fetchCurrentBalance, 2000);
+    setInterval(fetchCurrentBalance, 3000);
+    setInterval(fetchBetStatus, 2000);
 </script>
 
 </body>
