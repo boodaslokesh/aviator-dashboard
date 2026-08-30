@@ -1641,19 +1641,19 @@
                         </tr>
                         <tr>
                             <th>Cumulative Combined P/L</th>
-                            <td><strong class="${cumulativeProfit >= 0 ? 'positive' : 'negative'}">${pSign}$${cumulativeProfit.toFixed(2)}</strong></td>
+                            <td><strong class="${cumulativeProfit >= 0 ? 'positive' : 'negative'}">${pSign}${cumulativeProfit.toFixed(2)}</strong></td>
                         </tr>
                         <tr>
                             <th>Peak Combined Profit</th>
-                            <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}$${peakCombinedProfit.toFixed(2)}</strong> (Round #${peakRoundNum} at ${peakDateTime})</td>
+                            <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}${peakCombinedProfit.toFixed(2)}</strong> (Round #${peakRoundNum} at ${peakDateTime})</td>
                         </tr>
                         <tr>
                             <th>Lowest Combined (Drawdown)</th>
-                            <td><strong class="${lowestCombinedProfit >= 0 ? 'positive' : 'negative'}">${lowestSign}$${lowestCombinedProfit.toFixed(2)}</strong> (Round #${lowestRoundNum} at ${lowestDateTime})</td>
+                            <td><strong class="${lowestCombinedProfit >= 0 ? 'positive' : 'negative'}">${lowestSign}${lowestCombinedProfit.toFixed(2)}</strong> (Round #${lowestRoundNum} at ${lowestDateTime})</td>
                         </tr>
                         <tr>
                             <th>Recommended Target / Stop Amount</th>
-                            <td><strong style="color: var(--accent-cyan);">+$${recommendedTargetAmount}</strong> (Optimal take-profit stop limit to lock in profit for ${selectedDate || 'all dates combined'})</td>
+                            <td><strong style="color: var(--accent-cyan);">+${recommendedTargetAmount}</strong> (Optimal take-profit stop limit to lock in profit for ${selectedDate || 'all dates combined'})</td>
                         </tr>
                     </table>
                 `;
@@ -2062,3 +2062,4 @@
 
 </body>
 </html>
+```[cite: 1]
