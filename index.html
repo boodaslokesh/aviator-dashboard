@@ -32,7 +32,7 @@
         }
 
         .dashboard-container {
-            max-width: 1400px;
+            max-width: 1920px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
@@ -331,14 +331,33 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
         }
 
-        .section-header-actions {
+        /* Running Bet Status Two-Row Card Layout (No Horizontal Scroll) */
+        .running-bet-status-bar {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 10px;
             display: flex;
+            flex-direction: column;
             gap: 6px;
+            font-size: 11px;
+            color: var(--text-main);
+            box-sizing: border-box;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .bet-status-row {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
+            width: 100%;
+        }
+
+        .bet-status-row span {
+            white-space: nowrap;
         }
 
         .metrics-grid {
@@ -656,9 +675,20 @@
             border-radius: 6px;
             padding: 6px 8px;
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 8px;
             align-items: flex-end;
+        }
+
+        .dual-bet-toolbar-row {
+            grid-column: span 2;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr) auto;
+            gap: 6px;
+            align-items: flex-end;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+            margin-bottom: 2px;
         }
 
         .streak-summary-box {
@@ -683,27 +713,6 @@
             font-size: 11px;
             color: var(--text-main);
             line-height: 1.4;
-        }
-
-        /* Active status live info banner */
-        .live-status-banner {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--accent-cyan);
-            border-radius: 6px;
-            padding: 5px 8px;
-            font-size: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 6px;
-            box-sizing: border-box;
-            color: var(--text-main);
-            grid-column: span 3;
-        }
-
-        .live-status-banner span {
-            color: var(--accent-cyan);
-            font-weight: bold;
         }
 
         .modal-overlay {
@@ -881,246 +890,106 @@
         </div>
     </div>
 
-    <!-- GLOBAL CONTROL PANEL (Always Visible across all views) -->
-    <div class="control-panel" id="globalControlPanel">
-        <div class="filter-row">
-            <div class="filter-group">
-                <label>FROM TIME</label>
-                <div class="time-triplet">
-                    <select id="fromHour"><option value="">Hour</option></select>
-                    <select id="fromMin"><option value="">Min</option></select>
-                    <select id="fromSec"><option value="">Sec</option></select>
-                </div>
-            </div>
-
-            <div class="filter-group">
-                <label>TO TIME</label>
-                <div class="time-triplet">
-                    <select id="toHour"><option value="">Hour</option></select>
-                    <select id="toMin"><option value="">Min</option></select>
-                    <select id="toSec"><option value="">Sec</option></select>
-                </div>
-            </div>
-        </div>
-
-        <div class="bottom-filter-row">
-            <div class="filter-group">
-                <label>DATE</label>
-                <select id="dateSelect" onchange="syncData()">
-                    <option value="">All Dates</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label>&nbsp;</label>
-                <button class="btn-reset" onclick="resetFilters()">
-                    Reset Filter
-                </button>
-            </div>
-
-            <div class="filter-group">
-                <label>&nbsp;</label>
-                <button class="btn-sync" onclick="syncData()">
-                    Sync
-                </button>
-            </div>
-        </div>
-
-        <div class="api-controls-section" id="apiControlsSection">
-            <div class="api-left-pairs">
-                <div class="api-pair-row">
-                    <div class="filter-group">
-                        <label>INPUT AMOUNT 1</label>
-                        <select id="inputAmount1">
-                            <option value="0">0</option>
-                            <option value="7" selected>7</option>
-                            <option value="10">10</option>
-                            <option value="15">15</option>
-                            <option value="20">20</option>
-                            <option value="25">25</option>
-                            <option value="30">30</option>
-                            <option value="40">40</option>
-                            <option value="50">50</option>
-                            <option value="60">60</option>
-                            <option value="70">70</option>
-                            <option value="80">80</option>
-                            <option value="90">90</option>
-                            <option value="100">100</option>
-                            <option value="120">120</option>
-                            <option value="150">150</option>
-                            <option value="200">200</option>
-                            <option value="300">300</option>
-                            <option value="400">400</option>
-                            <option value="500">500</option>
-                            <option value="600">600</option>
-                            <option value="700">700</option>
-                            <option value="800">800</option>
-                            <option value="900">900</option>
-                            <option value="1000">1000</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>TARGET CASHOUT 1</label>
-                        <select id="targetCashout1">
-                            <option value="1.1" selected>1.1</option>
-                            <option value="1.2">1.2</option>
-                            <option value="1.3">1.3</option>
-                            <option value="1.4">1.4</option>
-                            <option value="1.5">1.5</option>
-                            <option value="2">2</option>
-                            <option value="2.5">2.5</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="10">10</option>
-                            <option value="12">12</option>
-                            <option value="15">15</option>
-                            <option value="20">20</option>
-                            <option value="25">25</option>
-                            <option value="30">30</option>
-                            <option value="40">40</option>
-                            <option value="50">50</option>
-                            <option value="60">60</option>
-                            <option value="70">70</option>
-                            <option value="80">80</option>
-                            <option value="90">90</option>
-                            <option value="100">100</option>
-                            <option value="120">120</option>
-                            <option value="150">150</option>
-                            <option value="160">160</option>
-                            <option value="170">170</option>
-                            <option value="180">180</option>
-                            <option value="190">190</option>
-                            <option value="200">200</option>
-                            <option value="300">300</option>
-                            <option value="400">400</option>
-                            <option value="500">500</option>
-                            <option value="600">600</option>
-                            <option value="700">700</option>
-                            <option value="800">800</option>
-                            <option value="900">900</option>
-                            <option value="1000">1000</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="api-pair-row">
-                    <div class="filter-group">
-                        <label>INPUT AMOUNT 2</label>
-                        <select id="inputAmount2">
-                            <option value="0" selected>0</option>
-                            <option value="7">7</option>
-                            <option value="10">10</option>
-                            <option value="15">15</option>
-                            <option value="20">20</option>
-                            <option value="25">25</option>
-                            <option value="30">30</option>
-                            <option value="40">40</option>
-                            <option value="50">50</option>
-                            <option value="60">60</option>
-                            <option value="70">70</option>
-                            <option value="80">80</option>
-                            <option value="90">90</option>
-                            <option value="100">100</option>
-                            <option value="120">120</option>
-                            <option value="150">150</option>
-                            <option value="200">200</option>
-                            <option value="300">300</option>
-                            <option value="400">400</option>
-                            <option value="500">500</option>
-                            <option value="600">600</option>
-                            <option value="700">700</option>
-                            <option value="800">800</option>
-                            <option value="900">900</option>
-                            <option value="1000">1000</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>TARGET CASHOUT 2</label>
-                        <select id="targetCashout2">
-                            <option value="1.1" selected>0</option>
-                            <option value="1.2">1.2</option>
-                            <option value="1.3">1.3</option>
-                            <option value="1.4">1.4</option>
-                            <option value="1.5">1.5</option>
-                            <option value="2">2</option>
-                            <option value="2.5">2.5</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="10">10</option>
-                            <option value="12">12</option>
-                            <option value="15">15</option>
-                            <option value="20">20</option>
-                            <option value="25">25</option>
-                            <option value="30">30</option>
-                            <option value="40">40</option>
-                            <option value="50">50</option>
-                            <option value="60">60</option>
-                            <option value="70">70</option>
-                            <option value="80">80</option>
-                            <option value="90">90</option>
-                            <option value="100">100</option>
-                            <option value="120">120</option>
-                            <option value="150">150</option>
-                            <option value="160">160</option>
-                            <option value="170">170</option>
-                            <option value="180">180</option>
-                            <option value="190">190</option>
-                            <option value="200">200</option>
-                            <option value="300">300</option>
-                            <option value="400">400</option>
-                            <option value="500">500</option>
-                            <option value="600">600</option>
-                            <option value="700">700</option>
-                            <option value="800">800</option>
-                            <option value="900">900</option>
-                            <option value="1000">1000</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="api-right-row">
-                <div class="api-inline-row">
-                    <div class="filter-group">
-                        <label>TARGET AMOUNT</label>
-                        <input type="number" id="targetReachAmount" value="0">
-                    </div>
-                    <div class="filter-group">
-                        <label>&nbsp;</label>
-                        <button class="btn-submit-api" onclick="submitApiValues()">Submit</button>
-                    </div>
-                </div>
-                <div class="api-inline-row">
-                    <div class="filter-group">
-                        <label>STOP LOSS</label>
-                        <input type="number" id="stopLossAmount" value="0">
-                    </div>
-                    <div class="filter-group">
-                        <label>&nbsp;</label>
-                        <button class="btn-manual-cashout" onclick="triggerManualCashout()">Manual Cashout</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Active Bet Status Banner -->
-        <div class="bottom-filter-row" style="border-top: 1px solid var(--border-color); padding-top: 5px;">
-            <div class="live-status-banner" id="liveStatusBanner">
-                Loading active strategy status...
-            </div>
-        </div>
-    </div>
-
     <div id="activeAppContainer" style="display: flex; flex-direction: column; gap: 6px;">
-        <!-- PAGE 1: OVERVIEW -->
+        <div class="control-panel" id="overviewControlPanel">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>FROM TIME</label>
+                    <div class="time-triplet">
+                        <select id="fromHour"><option value="">Hour</option></select>
+                        <select id="fromMin"><option value="">Min</option></select>
+                        <select id="fromSec"><option value="">Sec</option></select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label>TO TIME</label>
+                    <div class="time-triplet">
+                        <select id="toHour"><option value="">Hour</option></select>
+                        <select id="toMin"><option value="">Min</option></select>
+                        <select id="toSec"><option value="">Sec</option></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-filter-row">
+                <div class="filter-group">
+                    <label>DATE</label>
+                    <select id="dateSelect">
+                        <option value="">All Dates</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn-reset" onclick="resetFilters()">
+                        Reset Filter
+                    </button>
+                </div>
+
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn-sync" onclick="fetchCSVData()">
+                        Sync
+                    </button>
+                </div>
+            </div>
+
+            <div class="api-controls-section" id="apiControlsSection">
+                <div class="api-left-pairs">
+                    <div class="api-pair-row">
+                        <div class="filter-group">
+                            <label>INPUT AMOUNT 1 (Min 7 or 0)</label>
+                            <input type="number" id="inputAmount1" value="7" min="0" step="any">
+                        </div>
+                        <div class="filter-group">
+                            <label>TARGET CASHOUT 1 (Min 1.1)</label>
+                            <input type="number" id="targetCashout1" value="1.1" min="1.1" step="any">
+                        </div>
+                    </div>
+                    <div class="api-pair-row">
+                        <div class="filter-group">
+                            <label>INPUT AMOUNT 2 (Min 7 or 0)</label>
+                            <input type="number" id="inputAmount2" value="0" min="0" step="any">
+                        </div>
+                        <div class="filter-group">
+                            <label>TARGET CASHOUT 2 (Min 1.1)</label>
+                            <input type="number" id="targetCashout2" value="0" min="1.1" step="any">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="api-right-row">
+                    <div class="api-inline-row">
+                        <div class="filter-group">
+                            <label>TARGET AMOUNT</label>
+                            <input type="number" id="targetReachAmount" value="0">
+                        </div>
+                        <div class="filter-group">
+                            <button class="btn-submit-api" onclick="submitApiValues()">Submit</button>
+                        </div>
+                    </div>
+                    <div class="api-inline-row">
+                        <div class="filter-group">
+                            <label>STOP LOSS</label>
+                            <input type="number" id="stopLossAmount" value="0">
+                        </div>
+                        <div class="filter-group">
+                            <button class="btn-manual-cashout" onclick="triggerManualCashout()">Manual Cashout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="viewOverview" style="display: flex; flex-direction: column; gap: 6px;">
+            <!-- RUNNING BET STATUS TWO-ROW STACKED LAYOUT -->
+            <div class="running-bet-status-bar" id="runningBetStatusBar">
+                <div class="bet-status-row">
+                    <span>Loading bet status...</span>
+                </div>
+            </div>
+
             <div class="metrics-grid">
                 <div class="metric-card">
                     <span class="metric-title">Rounds</span>
@@ -1172,7 +1041,6 @@
             </div>
         </div>
 
-        <!-- PAGE 2: ANALYTICS -->
         <div id="viewAnalytics" class="analytics-view">
             <div class="latest-section" style="margin-bottom: 0;">
                 <h3 id="analyticsHeaderTitle">Target Analytics View</h3>
@@ -1181,16 +1049,42 @@
             </div>
         </div>
 
-        <!-- PAGE 3: LOGS / RAW DATA -->
         <div id="viewRawData" class="raw-data-view">
             <div class="logs-filter-toolbar">
-                <div class="filter-group">
-                    <label>HIGHEST STREAK THRESHOLD (e.g. enter 1 for <2.00x, 2 for <3.00x)</label>
-                    <div style="display: grid; grid-template-columns: 1fr 140px; gap: 6px;">
-                        <input type="number" id="streakInputFilter" placeholder="Enter number (e.g., 1, 2...)" min="0" step="any" oninput="applyFilters()">
-                        <button class="btn-reset" onclick="resetLogsFilter()">Reset Logs Filter</button>
+                <div class="dual-bet-toolbar-row">
+                    <div class="filter-group">
+                        <label>DUAL BET 1 AMOUNT</label>
+                        <input type="number" id="dualBet1Amt" value="10" min="0" step="any" oninput="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label>DUAL CASHOUT 1 (x)</label>
+                        <input type="number" id="dualCash1" value="8" min="1.1" step="any" oninput="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label>DUAL BET 2 AMOUNT</label>
+                        <input type="number" id="dualBet2Amt" value="10" min="0" step="any" oninput="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label>DUAL CASHOUT 2 (x)</label>
+                        <input type="number" id="dualCash2" value="9" min="1.1" step="any" oninput="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label>&nbsp;</label>
+                        <button class="btn-reset" onclick="resetDualBetSimulator()">Reset Dual Bet</button>
                     </div>
                 </div>
+                <div class="filter-group">
+                    <label>HIGHEST STREAK THRESHOLD (e.g. enter 1 for <2.00x, 2 for <3.00x)</label>
+                    <input type="number" id="streakInputFilter" placeholder="Enter number (e.g., 1, 2...)" min="0" step="any" oninput="applyFilters()">
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn-reset" onclick="resetLogsFilter()">Reset Logs Filter</button>
+                </div>
+            </div>
+            <div class="streak-summary-box" id="dualBetSummaryBox" style="display: flex;">
+                <h4>Dual Bet Strategy Cumulative & Peak Analysis</h4>
+                <div class="streak-summary-content" id="dualBetSummaryContent">Enter dual bets above to analyze combined profit/loss and peak performance.</div>
             </div>
             <div class="streak-summary-box" id="streakSummaryBox" style="display: none;">
                 <h4>Streak Analysis Summary</h4>
@@ -1199,9 +1093,7 @@
             <div class="table-section">
                 <div class="section-header-row">
                     <h3 id="rawHeaderTitle">Complete Records Log</h3>
-                    <div class="section-header-actions">
-                        <button class="btn-download" onclick="downloadFilteredCSV()">Download Filtered CSV</button>
-                    </div>
+                    <button class="btn-download" onclick="downloadFilteredCSV()">Download CSV</button>
                 </div>
                 <table>
                     <thead>
@@ -1250,16 +1142,24 @@
     let currentPlatform = 'aviator';
     let allRowsData = [];
     let currentFilteredData = [];
+    let initialLoadDone = false;
     let availableSortedDates = [];
-    let appliedDate = '';
 
     function clearApiInputFields() {
         document.getElementById('inputAmount1').value = '7';
         document.getElementById('targetCashout1').value = '1.1';
-        document.getElementById('inputAmount2').value = '0';
+        document.getElementById('inputAmount2').value = '7';
         document.getElementById('targetCashout2').value = '1.1';
         document.getElementById('targetReachAmount').value = '0';
         document.getElementById('stopLossAmount').value = '0';
+    }
+
+    function resetDualBetSimulator() {
+        document.getElementById('dualBet1Amt').value = '10';
+        document.getElementById('dualCash1').value = '10';
+        document.getElementById('dualBet2Amt').value = '10';
+        document.getElementById('dualCash2').value = '9';
+        applyFilters();
     }
 
     function showSubmitModal(bets, targetAmount) {
@@ -1286,7 +1186,6 @@
 
         bodyContainer.innerHTML = betsHtml + targetHtml;
         document.getElementById('customModal').classList.add('active');
-        fetchBetStatus();
     }
 
     function showManualCashoutModal() {
@@ -1300,7 +1199,6 @@
         `;
 
         document.getElementById('customModal').classList.add('active');
-        fetchBetStatus();
     }
 
     function closeModal() {
@@ -1309,9 +1207,7 @@
 
     async function fetchCurrentBalance() {
         try {
-            const response = await fetch(`${CURRENT_BALANCE_URL}?_t=${Date.now()}`, {
-                headers: { 'ngrok-skip-browser-warning': 'true' }
-            });
+            const response = await fetch(`${CURRENT_BALANCE_URL}?_t=${Date.now()}`);
             if (!response.ok) throw new Error("Network response failed");
             const data = await response.json();
             
@@ -1335,27 +1231,40 @@
             const response = await fetch(`${BET_STATUS_URL}?_t=${Date.now()}`, {
                 headers: { 'ngrok-skip-browser-warning': 'true' }
             });
-            if (!response.ok) throw new Error("Failed to fetch status");
+            if (!response.ok) throw new Error("Failed to fetch bet status");
             const data = await response.json();
             
-            const banner = document.getElementById('liveStatusBanner');
+            const statusBarEl = document.getElementById('runningBetStatusBar');
             if (Array.isArray(data) && data.length > 0) {
-                const s = data[0];
-                
-                const isManualCashout = String(s.mannualCashout).toLowerCase() === 'false';
-                const statusText = isManualCashout ? 'STOPPED' : 'RUNNING';
-                const statusColor = isManualCashout ? 'var(--accent-red)' : 'var(--accent-green)';
-                
-                banner.innerHTML = `
-                    <div><strong>Bet1:</strong> amt <span>${s.inputAmount1}</span>, target <span>${s.cashoutTarget1}x</span> | <strong>Bet2:</strong> amt <span>${s.inputAmount2}</span>, target <span>${s.cashoutTarget2}x</span> | <strong style="color: ${statusColor};">${statusText}</strong></div>
-                    <div><strong>Target:</strong> <span>${s.targetAmount}</span> | <strong>StopLoss:</strong> <span>${s.stopLoss}</span></div>
+                const item = data[0];
+                const isRunning = item.mannualCashout === true || item.mannualCashout === "true";
+                const statusText = isRunning ? "RUNNING" : "STOPPED";
+                const statusColor = isRunning ? "var(--accent-green)" : "var(--accent-red)";
+
+                statusBarEl.innerHTML = `
+                    <div class="bet-status-row">
+                        <span><strong>Bet1:</strong> amt <strong>${item.inputAmount1}</strong>, target <span style="color: var(--accent-cyan);">${item.cashoutTarget1}x</span></span>
+                        <span style="color: ${statusColor}; font-weight: bold;">${statusText}</span>
+                    </div>
+                    <div class="bet-status-row">
+                        <span><strong>Bet2:</strong> amt <strong>${item.inputAmount2}</strong>, target <span style="color: var(--accent-cyan);">${item.cashoutTarget2}x</span></span>
+                        <span>Target: <strong>${item.targetAmount}</strong> &nbsp;|&nbsp; StopLoss: <strong>${item.stopLoss}</strong></span>
+                    </div>
                 `;
             } else {
-                banner.innerHTML = `<div>No active configuration data found.</div>`;
+                statusBarEl.innerHTML = `
+                    <div class="bet-status-row">
+                        <span>No active running bets found</span>
+                    </div>
+                `;
             }
         } catch (err) {
             console.error("Error fetching bet status:", err);
-            document.getElementById('liveStatusBanner').innerHTML = `<div>Status connection offline</div>`;
+            document.getElementById('runningBetStatusBar').innerHTML = `
+                <div class="bet-status-row">
+                    <span style="color: var(--accent-red);">Error loading active bet status</span>
+                </div>
+            `;
         }
     }
 
@@ -1397,6 +1306,7 @@
                     'ngrok-skip-browser-warning': 'true'
                 }
             });
+            fetchBetStatus(); 
         } catch (err) {
             console.error("Database update network error:", err);
         }
@@ -1418,6 +1328,7 @@
                     'ngrok-skip-browser-warning': 'true'
                 }
             });
+            fetchBetStatus(); 
         } catch (err) {
             console.error("Manual cashout network error:", err);
         }
@@ -1427,7 +1338,8 @@
 
     function switchPlatform(platformVal) {
         currentPlatform = platformVal;
-        fetchCSVData(true); // force resetting to current date on platform switch
+        initialLoadDone = false;
+        fetchCSVData();
     }
 
     function parseDateToTimestamp(dateStr) {
@@ -1486,16 +1398,23 @@
         document.getElementById('viewAnalytics').style.display = val === 'analytics' ? 'flex' : 'none';
         document.getElementById('viewRawData').style.display = val === 'rawdata' ? 'flex' : 'none';
 
+        const apiSection = document.getElementById('apiControlsSection');
+        if (val === 'overview') {
+            apiSection.style.display = 'grid';
+        } else {
+            apiSection.style.display = 'none';
+        }
+
         applyFilters();
     }
 
-    function setDefaultFiltersToCurrentDay() {
+    function resetFilters() {
+        const dateSelect = document.getElementById('dateSelect');
+        
         if (availableSortedDates.length > 0) {
-            document.getElementById('dateSelect').value = availableSortedDates[0];
-            appliedDate = availableSortedDates[0];
+            dateSelect.value = availableSortedDates[0];
         } else {
-            document.getElementById('dateSelect').value = "";
-            appliedDate = "";
+            dateSelect.value = "";
         }
 
         document.getElementById('fromHour').value = "00";
@@ -1505,25 +1424,24 @@
         document.getElementById('toHour').value = "23";
         document.getElementById('toMin').value = "59";
         document.getElementById('toSec').value = "59";
-    }
 
-    function resetFilters() {
-        setDefaultFiltersToCurrentDay();
         applyFilters();
     }
 
     function resetLogsFilter() {
         document.getElementById('streakInputFilter').value = '';
-        setDefaultFiltersToCurrentDay();
+        const dateSelect = document.getElementById('dateSelect');
+        dateSelect.value = ""; 
+        document.getElementById('fromHour').value = "";
+        document.getElementById('fromMin').value = "";
+        document.getElementById('fromSec').value = "";
+        document.getElementById('toHour').value = "";
+        document.getElementById('toMin').value = "";
+        document.getElementById('toSec').value = "";
         applyFilters();
     }
 
-    function syncData() {
-        appliedDate = document.getElementById('dateSelect').value;
-        fetchCSVData(false);
-    }
-
-    async function fetchCSVData(forceCurrentDate = false) {
+    async function fetchCSVData() {
         const targetUrl = currentPlatform === 'playInject' ? PLAY_INJECT_URL : AVIATOR_URL;
         try {
             const response = await fetch(`${targetUrl}?_t=${Date.now()}`, {
@@ -1533,14 +1451,14 @@
             if (!response.ok) throw new Error("Failed to fetch logs");
 
             const csvText = await response.text();
-            processCSV(csvText, forceCurrentDate);
+            processCSV(csvText);
         } catch (error) {
             console.error("Error loading CSV:", error);
             document.getElementById('topHighestContainer').innerHTML = `<div class="no-data" style="grid-column: span 10; color: var(--accent-red);">Connection error / Failed to load data</div>`;
         }
     }
 
-    function processCSV(csvText, forceCurrentDate) {
+    function processCSV(csvText) {
         const lines = csvText.trim().split('\n').filter(line => line.length > 0);
         const rows = lines[0].toLowerCase().includes('date') ? lines.slice(1) : lines;
 
@@ -1570,12 +1488,22 @@
         availableSortedDates = Array.from(uniqueDates).sort((a, b) => parseDateToTimestamp(b) - parseDateToTimestamp(a));
 
         const dateSelect = document.getElementById('dateSelect');
-        dateSelect.innerHTML = availableSortedDates.map(d => `<option value="${d}">${d}</option>`).join('') + '<option value="">All dates</option>';
+        const currentSelected = dateSelect.value;
 
-        if (forceCurrentDate || !appliedDate) {
-            setDefaultFiltersToCurrentDay();
+        dateSelect.innerHTML = '<option value="">All Dates</option>' + 
+            availableSortedDates.map(d => `<option value="${d}">${d}</option>`).join('');
+
+        if (currentSelected && availableSortedDates.includes(currentSelected)) {
+            dateSelect.value = currentSelected;
+        } else if (!initialLoadDone) {
+            if (availableSortedDates.length > 0) {
+                dateSelect.value = availableSortedDates[0];
+            }
+            initialLoadDone = true;
         } else {
-            dateSelect.value = appliedDate;
+            if (availableSortedDates.length > 0) {
+                dateSelect.value = availableSortedDates[0];
+            }
         }
 
         applyFilters();
@@ -1597,8 +1525,6 @@
 
     function applyFilters() {
         const selectedDate = document.getElementById('dateSelect').value;
-        appliedDate = selectedDate;
-        
         const fH = document.getElementById('fromHour').value;
         const fM = document.getElementById('fromMin').value;
         const fS = document.getElementById('fromSec').value;
@@ -1611,7 +1537,7 @@
         let toSeconds = tH !== '' ? parseInt(tH, 10) * 3600 + (tM !== '' ? parseInt(tM, 10) * 60 : 59) + (tS !== '' ? parseInt(tS, 10) : 59) : null;
 
         currentFilteredData = allRowsData.filter(item => {
-            if (selectedDate && selectedDate !== "" && item.date !== selectedDate) return false;
+            if (selectedDate && item.date !== selectedDate) return false;
             if (fromSeconds !== null && item.sortKey < fromSeconds) return false;
             if (toSeconds !== null && item.sortKey > toSeconds) return false;
             return true;
@@ -1620,14 +1546,73 @@
         const isRawDataTabActive = document.getElementById('tabRawData').classList.contains('active');
         const streakSummaryBox = document.getElementById('streakSummaryBox');
         const streakSummaryContent = document.getElementById('streakSummaryContent');
+        const dualBetSummaryContent = document.getElementById('dualBetSummaryContent');
 
         if (isRawDataTabActive) {
+            // Calculate Dual Bet Simulator Summary with Peak & Lowest Tracking
+            const b1Amt = parseFloat(document.getElementById('dualBet1Amt').value) || 0;
+            const c1Target = parseFloat(document.getElementById('dualCash1').value) || 0;
+            const b2Amt = parseFloat(document.getElementById('dualBet2Amt').value) || 0;
+            const c2Target = parseFloat(document.getElementById('dualCash2').value) || 0;
+
+            let cumulativeProfit = 0;
+            let peakCombinedProfit = -Infinity;
+            let peakRoundNum = 0;
+            let peakDateTime = '-';
+
+            let lowestCombinedProfit = Infinity;
+            let lowestRoundNum = 0;
+            let lowestDateTime = '-';
+
+            currentFilteredData.forEach((item, index) => {
+                const roundNum = index + 1;
+                let roundProfit = 0;
+
+                if (b1Amt > 0) {
+                    roundProfit -= b1Amt;
+                    if (item.multiplier >= c1Target) {
+                        roundProfit += b1Amt * c1Target;
+                    }
+                }
+                if (b2Amt > 0) {
+                    roundProfit -= b2Amt;
+                    if (item.multiplier >= c2Target) {
+                        roundProfit += b2Amt * c2Target;
+                    }
+                }
+
+                cumulativeProfit += roundProfit;
+                if (cumulativeProfit > peakCombinedProfit) {
+                    peakCombinedProfit = cumulativeProfit;
+                    peakRoundNum = roundNum;
+                    peakDateTime = `${item.date} ${item.time}`;
+                }
+                if (cumulativeProfit < lowestCombinedProfit) {
+                    lowestCombinedProfit = cumulativeProfit;
+                    lowestRoundNum = roundNum;
+                    lowestDateTime = `${item.date} ${item.time}`;
+                }
+            });
+
+            if (currentFilteredData.length > 0) {
+                const pSign = cumulativeProfit >= 0 ? '+' : '';
+                const peakSign = peakCombinedProfit >= 0 ? '+' : '';
+                const lowestSign = lowestCombinedProfit >= 0 ? '+' : '';
+                dualBetSummaryContent.innerHTML = `
+                    <div>Bet1: <strong>${b1Amt}</strong> CashoutTarget <strong>${c1Target}x</strong> and Bet2: <strong>${b2Amt}</strong> CashoutTarget <strong>${c2Target}x</strong></div>
+                    <div>Cumulative Combined P/L: <strong class="${cumulativeProfit >= 0 ? 'positive' : 'negative'}">${pSign}$${cumulativeProfit.toFixed(2)}</strong></div>
+                    <div>Peak combined profit of <strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}$${peakCombinedProfit.toFixed(2)}</strong> will get at round <strong>#${peakRoundNum}</strong> at time <strong>${peakDateTime}</strong></div>
+                    <div>Lowest combined amount of <strong class="${lowestCombinedProfit >= 0 ? 'positive' : 'negative'}">${lowestSign}$${lowestCombinedProfit.toFixed(2)}</strong> reached at round <strong>#${lowestRoundNum}</strong> at time <strong>${lowestDateTime}</strong></div>
+                `;
+            } else {
+                dualBetSummaryContent.innerHTML = `<div>No records match selected filter for dual bet analysis.</div>`;
+            }
+
             const streakInputVal = document.getElementById('streakInputFilter').value.trim();
             if (streakInputVal !== "") {
                 const n = parseFloat(streakInputVal);
                 if (!isNaN(n)) {
                     const threshold = n + 1.0;
-                    
                     let streaks = [];
                     let currentStreak = [];
 
@@ -1779,7 +1764,7 @@
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", `${currentPlatform}_filtered_logs_${appliedDate || 'all_dates'}.csv`);
+        link.setAttribute("download", `${currentPlatform}_raw_logs_${document.getElementById('dateSelect').value || 'all_dates'}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -1867,7 +1852,7 @@
 
     function updateDashboardMetrics(dataArray, selectedDate) {
         document.getElementById('statRounds').innerText = dataArray.length;
-        document.getElementById('statDateSub').innerText = (selectedDate && selectedDate !== "") ? selectedDate : "All Recorded Dates";
+        document.getElementById('statDateSub').innerText = selectedDate || "All Recorded Dates";
         
         if (dataArray.length === 0) {
             document.getElementById('statBestStrategy').innerText = "-";
@@ -1914,7 +1899,7 @@
     function renderAnalyticsCards(dataArray, selectedDate) {
         const container = document.getElementById('analyticsGridContainer');
         container.innerHTML = '';
-        document.getElementById('analyticsHeaderTitle').innerText = `Target Analytics View (${(selectedDate && selectedDate !== "") ? selectedDate : 'All Dates'}) - Total Rounds: ${dataArray.length}`;
+        document.getElementById('analyticsHeaderTitle').innerText = `Target Analytics View (${selectedDate || 'All Dates'}) - Total Rounds: ${dataArray.length}`;
 
         if (dataArray.length === 0) {
             container.innerHTML = `<div class="no-data" style="grid-column: span 3;">No records match your selected filter criteria</div>`;
@@ -1989,20 +1974,20 @@
     }
 
     document.querySelectorAll('select').forEach(el => {
-        if(el.id !== 'platformSelect' && el.id !== 'dateSelect') {
+        if(el.id !== 'platformSelect') {
             el.addEventListener('click', applyFilters);
         }
     });
 
     initDropdowns();
-    document.getElementById('dateSelect').innerHTML = '<option value="">All dates</option>';
-    fetchCSVData(true); // Initial load forces current date selection
+    resetFilters();
+    fetchCSVData();
     fetchCurrentBalance();
     fetchBetStatus();
 
-    setInterval(() => fetchCSVData(false), 5000); // Polling updates keep current applied filters/dates
-    setInterval(fetchCurrentBalance, 3000);
-    setInterval(fetchBetStatus, 2000);
+    setInterval(fetchCSVData, 5000);
+    setInterval(fetchCurrentBalance, 2000);
+    setInterval(fetchBetStatus, 3000); 
 </script>
 
 </body>
