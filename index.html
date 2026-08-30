@@ -29,6 +29,11 @@
             color: var(--text-main);
             margin: 0;
             padding: 6px;
+            box-sizing: border-box;
+        }
+
+        *, *:before, *:after {
+            box-sizing: inherit;
         }
 
         .dashboard-container {
@@ -49,7 +54,6 @@
             padding: 4px 6px;
             gap: 6px;
             width: 100%;
-            box-sizing: border-box;
         }
 
         .platform-select {
@@ -65,7 +69,6 @@
             height: 28px;
             line-height: 28px;
             width: 100%;
-            box-sizing: border-box;
             display: block;
         }
 
@@ -79,7 +82,6 @@
             gap: 4px;
             width: 100%;
             height: 28px;
-            box-sizing: border-box;
         }
 
         .nav-tab-btn {
@@ -100,7 +102,6 @@
             width: 100%;
             height: 28px;
             line-height: 26px;
-            box-sizing: border-box;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -249,7 +250,6 @@
             font-size: 10px;
             outline: none;
             width: 100%;
-            box-sizing: border-box;
             height: 24px;
         }
 
@@ -333,7 +333,6 @@
             align-items: center;
         }
 
-        /* Running Bet Status Two-Row Card Layout (No Horizontal Scroll) */
         .running-bet-status-bar {
             background-color: var(--bg-panel);
             border: 1px solid var(--border-color);
@@ -344,7 +343,6 @@
             gap: 6px;
             font-size: 11px;
             color: var(--text-main);
-            box-sizing: border-box;
             width: 100%;
             overflow: hidden;
         }
@@ -530,14 +528,17 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            white-space: nowrap;
+            white-space: normal;
+            word-break: break-word;
         }
 
         th, td {
-            padding: 4px 6px;
+            padding: 6px 10px;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
             font-size: 11px;
+            white-space: normal;
+            word-break: break-word;
         }
 
         th {
@@ -588,7 +589,7 @@
 
         @media (max-width: 768px) {
             .analytics-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(1, 1fr);
                 gap: 6px;
             }
         }
@@ -675,20 +676,35 @@
             border-radius: 6px;
             padding: 6px 8px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 8px;
             align-items: flex-end;
         }
 
         .dual-bet-toolbar-row {
-            grid-column: span 2;
             display: grid;
-            grid-template-columns: repeat(4, 1fr) auto;
-            gap: 6px;
+            grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+            gap: 4px;
             align-items: flex-end;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 6px;
             margin-bottom: 2px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .dual-bet-toolbar-row {
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                gap: 2px;
+            }
+            .dual-bet-toolbar-row .filter-group input,
+            .dual-bet-toolbar-row .filter-group button {
+                font-size: 8px;
+                padding: 1px;
+            }
+            .dual-bet-toolbar-row .filter-group label {
+                font-size: 6.5px;
+            }
         }
 
         .streak-summary-box {
@@ -698,7 +714,7 @@
             padding: 8px 12px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
         .streak-summary-box h4 {
@@ -709,10 +725,43 @@
             letter-spacing: 0.5px;
         }
 
-        .streak-summary-content {
+        /* Professional Responsive Table View */
+        .dual-summary-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
             font-size: 11px;
+            word-break: break-word;
+        }
+
+        .dual-summary-table th, .dual-summary-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .dual-summary-table th {
+            background-color: var(--bg-input);
+            color: var(--text-muted);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: bold;
+        }
+
+        .dual-summary-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .dual-summary-table td {
             color: var(--text-main);
-            line-height: 1.4;
+            font-weight: 500;
         }
 
         .modal-overlay {
@@ -814,7 +863,6 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            box-sizing: border-box;
         }
 
         .modal-target-column .label {
@@ -983,7 +1031,6 @@
         </div>
 
         <div id="viewOverview" style="display: flex; flex-direction: column; gap: 6px;">
-            <!-- RUNNING BET STATUS TWO-ROW STACKED LAYOUT -->
             <div class="running-bet-status-bar" id="runningBetStatusBar">
                 <div class="bet-status-row">
                     <span>Loading bet status...</span>
@@ -1058,7 +1105,7 @@
                     </div>
                     <div class="filter-group">
                         <label>DUAL CASHOUT 1 (x)</label>
-                        <input type="number" id="dualCash1" value="8" min="1.1" step="any" oninput="applyFilters()">
+                        <input type="number" id="dualCash1" value="9" min="1.1" step="any" oninput="applyFilters()">
                     </div>
                     <div class="filter-group">
                         <label>DUAL BET 2 AMOUNT</label>
@@ -1066,7 +1113,7 @@
                     </div>
                     <div class="filter-group">
                         <label>DUAL CASHOUT 2 (x)</label>
-                        <input type="number" id="dualCash2" value="9" min="1.1" step="any" oninput="applyFilters()">
+                        <input type="number" id="dualCash2" value="8" min="1.1" step="any" oninput="applyFilters()">
                     </div>
                     <div class="filter-group">
                         <label>&nbsp;</label>
@@ -1077,19 +1124,18 @@
                     <label>HIGHEST STREAK THRESHOLD (e.g. enter 1 for <2.00x, 2 for <3.00x)</label>
                     <input type="number" id="streakInputFilter" placeholder="Enter number (e.g., 1, 2...)" min="0" step="any" oninput="applyFilters()">
                 </div>
-                <div class="filter-group">
-                    <label>&nbsp;</label>
-                    <button class="btn-reset" onclick="resetLogsFilter()">Reset Logs Filter</button>
-                </div>
             </div>
+            
             <div class="streak-summary-box" id="dualBetSummaryBox" style="display: flex;">
                 <h4>Dual Bet Strategy Cumulative & Peak Analysis</h4>
                 <div class="streak-summary-content" id="dualBetSummaryContent">Enter dual bets above to analyze combined profit/loss and peak performance.</div>
             </div>
+
             <div class="streak-summary-box" id="streakSummaryBox" style="display: none;">
                 <h4>Streak Analysis Summary</h4>
                 <div class="streak-summary-content" id="streakSummaryContent"></div>
             </div>
+
             <div class="table-section">
                 <div class="section-header-row">
                     <h3 id="rawHeaderTitle">Complete Records Log</h3>
@@ -1156,9 +1202,9 @@
 
     function resetDualBetSimulator() {
         document.getElementById('dualBet1Amt').value = '10';
-        document.getElementById('dualCash1').value = '10';
+        document.getElementById('dualCash1').value = '9';
         document.getElementById('dualBet2Amt').value = '10';
-        document.getElementById('dualCash2').value = '9';
+        document.getElementById('dualCash2').value = '8';
         applyFilters();
     }
 
@@ -1428,19 +1474,6 @@
         applyFilters();
     }
 
-    function resetLogsFilter() {
-        document.getElementById('streakInputFilter').value = '';
-        const dateSelect = document.getElementById('dateSelect');
-        dateSelect.value = ""; 
-        document.getElementById('fromHour').value = "";
-        document.getElementById('fromMin').value = "";
-        document.getElementById('fromSec').value = "";
-        document.getElementById('toHour').value = "";
-        document.getElementById('toMin').value = "";
-        document.getElementById('toSec').value = "";
-        applyFilters();
-    }
-
     async function fetchCSVData() {
         const targetUrl = currentPlatform === 'playInject' ? PLAY_INJECT_URL : AVIATOR_URL;
         try {
@@ -1549,7 +1582,6 @@
         const dualBetSummaryContent = document.getElementById('dualBetSummaryContent');
 
         if (isRawDataTabActive) {
-            // Calculate Dual Bet Simulator Summary with Peak & Lowest Tracking
             const b1Amt = parseFloat(document.getElementById('dualBet1Amt').value) || 0;
             const c1Target = parseFloat(document.getElementById('dualCash1').value) || 0;
             const b2Amt = parseFloat(document.getElementById('dualBet2Amt').value) || 0;
@@ -1594,18 +1626,39 @@
                 }
             });
 
+            const recommendedTargetAmount = peakCombinedProfit > 0 ? (peakCombinedProfit * 0.85).toFixed(2) : "0.00";
+
             if (currentFilteredData.length > 0) {
                 const pSign = cumulativeProfit >= 0 ? '+' : '';
                 const peakSign = peakCombinedProfit >= 0 ? '+' : '';
                 const lowestSign = lowestCombinedProfit >= 0 ? '+' : '';
+                
                 dualBetSummaryContent.innerHTML = `
-                    <div>Bet1: <strong>${b1Amt}</strong> CashoutTarget <strong>${c1Target}x</strong> and Bet2: <strong>${b2Amt}</strong> CashoutTarget <strong>${c2Target}x</strong></div>
-                    <div>Cumulative Combined P/L: <strong class="${cumulativeProfit >= 0 ? 'positive' : 'negative'}">${pSign}$${cumulativeProfit.toFixed(2)}</strong></div>
-                    <div>Peak combined profit of <strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}$${peakCombinedProfit.toFixed(2)}</strong> will get at round <strong>#${peakRoundNum}</strong> at time <strong>${peakDateTime}</strong></div>
-                    <div>Lowest combined amount of <strong class="${lowestCombinedProfit >= 0 ? 'positive' : 'negative'}">${lowestSign}$${lowestCombinedProfit.toFixed(2)}</strong> reached at round <strong>#${lowestRoundNum}</strong> at time <strong>${lowestDateTime}</strong></div>
+                    <table class="dual-summary-table">
+                        <tr>
+                            <th>Configuration</th>
+                            <td>Bet 1: <strong>${b1Amt}</strong> (${c1Target}x) | Bet 2: <strong>${b2Amt}</strong> (${c2Target}x)</td>
+                        </tr>
+                        <tr>
+                            <th>Cumulative Combined P/L</th>
+                            <td><strong class="${cumulativeProfit >= 0 ? 'positive' : 'negative'}">${pSign}$${cumulativeProfit.toFixed(2)}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Peak Combined Profit</th>
+                            <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}$${peakCombinedProfit.toFixed(2)}</strong> (Round #${peakRoundNum} at ${peakDateTime})</td>
+                        </tr>
+                        <tr>
+                            <th>Lowest Combined (Drawdown)</th>
+                            <td><strong class="${lowestCombinedProfit >= 0 ? 'positive' : 'negative'}">${lowestSign}$${lowestCombinedProfit.toFixed(2)}</strong> (Round #${lowestRoundNum} at ${lowestDateTime})</td>
+                        </tr>
+                        <tr>
+                            <th>Recommended Target / Stop Amount</th>
+                            <td><strong style="color: var(--accent-cyan);">+$${recommendedTargetAmount}</strong> (Optimal take-profit stop limit to lock in profit for ${selectedDate || 'all dates combined'})</td>
+                        </tr>
+                    </table>
                 `;
             } else {
-                dualBetSummaryContent.innerHTML = `<div>No records match selected filter for dual bet analysis.</div>`;
+                dualBetSummaryContent.innerHTML = `<div style="padding: 6px; color: var(--text-muted);">No records match selected filter for dual bet analysis.</div>`;
             }
 
             const streakInputVal = document.getElementById('streakInputFilter').value.trim();
@@ -1634,7 +1687,17 @@
 
                     if (streaks.length > 0) {
                         streakSummaryBox.style.display = 'flex';
-                        let summaryHtml = '';
+                        let summaryHtml = `
+                            <table class="dual-summary-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Streak Count</th>
+                                        <th>Period / Timestamp Range</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
                         const topCount = Math.min(5, streaks.length);
                         for (let i = 0; i < topCount; i++) {
                             const s = streaks[i];
@@ -1644,12 +1707,19 @@
                             const endDate = s[s.length - 1].date;
                             const ordinal = (i === 0) ? "Highest" : (i === 1) ? "2nd Highest" : (i === 2) ? "3rd Highest" : `${i+1}th Highest`;
                             
-                            summaryHtml += `<div><strong>${ordinal} streak count is ${s.length}</strong> happend from ${startDate} ${startTime} to ${endDate} ${endTime}</div>`;
+                            summaryHtml += `
+                                <tr>
+                                    <td><strong>${ordinal}</strong></td>
+                                    <td><strong style="color: var(--accent-cyan);">${s.length} rounds</strong></td>
+                                    <td>${startDate} ${startTime} &rarr; ${endDate} ${endTime}</td>
+                                </tr>
+                            `;
                         }
+                        summaryHtml += `</tbody></table>`;
                         streakSummaryContent.innerHTML = summaryHtml;
                     } else {
                         streakSummaryBox.style.display = 'flex';
-                        streakSummaryContent.innerHTML = `<div>No streaks found matching threshold &lt; ${threshold.toFixed(2)}x</div>`;
+                        streakSummaryContent.innerHTML = `<table class="dual-summary-table"><tr><td class="no-data">No streaks found matching threshold &lt; ${threshold.toFixed(2)}x</td></tr></table>`;
                     }
 
                     currentFilteredData = currentFilteredData.filter(item => item.multiplier < threshold);
