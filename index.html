@@ -621,6 +621,22 @@
             font-weight: bold;
         }
 
+        .best-row-highlight {
+            background-color: rgba(0, 230, 118, 0.08) !important;
+            border-left: 3px solid var(--accent-green);
+        }
+
+        .best-badge {
+            background-color: var(--accent-green);
+            color: #000;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            margin-left: 6px;
+            display: inline-block;
+        }
+
         .analytics-view, .optimal-view {
             display: none;
             flex-direction: column;
@@ -1000,15 +1016,15 @@
             <option value="aviator">Aviator Live</option>
         </select>
         <div class="nav-tabs" id="navTabsContainer">
-            <button class="nav-tab-btn active" id="tabOverview" onclick="switchView('overview')">Overview</button>
+            <button class="nav-tab-btn" id="tabOverview" onclick="switchView('overview')">Overview</button>
             <button class="nav-tab-btn" id="tabAnalytics" onclick="switchView('analytics')">Analytics</button>
             <button class="nav-tab-btn" id="tabRawData" onclick="switchView('rawdata')">Logs</button>
-            <button class="nav-tab-btn" id="tabOptimal" onclick="switchView('optimal')">Optimal P/L</button>
+            <button class="nav-tab-btn active" id="tabOptimal" onclick="switchView('optimal')">Optimal P/L</button>
         </div>
     </div>
 
     <div id="activeAppContainer" style="display: flex; flex-direction: column; gap: 6px;">
-        <div class="control-panel" id="overviewControlPanel">
+        <div class="control-panel" id="overviewControlPanel" style="display: none;">
             <div class="filter-row">
                 <div class="filter-group">
                     <label>FROM TIME</label>
@@ -1099,7 +1115,7 @@
             </div>
         </div>
 
-        <div id="viewOverview" style="display: flex; flex-direction: column; gap: 6px;">
+        <div id="viewOverview" style="display: none; flex-direction: column; gap: 6px;">
             <div class="running-bet-status-bar" id="runningBetStatusBar">
                 <div class="bet-status-row">
                     <span>Loading bet status...</span>
@@ -1190,7 +1206,7 @@
                     </div>
                 </div>
                 <div class="filter-group">
-                    <label>HIGHEST STREAK THRESHOLD (e.g. enter 1 for <2.00x, 2 for <3.00x)</label>
+                    <label>HIGHEST STREAK THRESHOLD (e.g. enter 1 for &lt;2.00x, 2 for &lt;3.00x)</label>
                     <input type="number" id="streakInputFilter" placeholder="Enter number (e.g., 1, 2...)" min="0" step="any" oninput="applyFilters()">
                 </div>
             </div>
@@ -1228,7 +1244,7 @@
             </div>
         </div>
 
-        <div id="viewOptimal" class="optimal-view">
+        <div id="viewOptimal" class="optimal-view" style="display: flex;">
             <div class="independent-strategy-box">
                 <h3 style="margin: 0; font-size: 12px; color: var(--accent-green); display: flex; align-items: center; gap: 4px;">
                     <span>💡 Independent Best Betting Strategy</span>
@@ -1254,7 +1270,7 @@
                     </div>
                     <div class="filter-group">
                         <label>TARGET / STOP</label>
-                        <input type="number" id="plTargetInput" value="500" oninput="scheduleCalculation()">
+                        <input type="number" id="plTargetInput" value="400" oninput="scheduleCalculation()">
                     </div>
                     <button class="btn-sync" onclick="fetchCSVData()">Sync Data</button>
                 </div>
@@ -1267,20 +1283,19 @@
                         <tr>
                             <th>Optimal Multiplier Configuration</th>
                             <th>Consistency</th>
-                            <th>Peak Combined Profit (Average)</th>
-                            <th>Recommended Target / Stop Amount</th>
+                            <th>Amount Lost Before Target (Max Drawdown)</th>
                         </tr>
                     </thead>
                     <tbody id="plCustomResultContent">
                         <tr>
-                            <td colspan="4" class="no-data">Loading dataset...</td>
+                            <td colspan="3" class="no-data">Loading dataset...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
             <div class="table-section">
-                <h3 id="dailyCrossingHeaderTitle">First Round & Time Target Crossed Per Date (Using Best Independent Strategy)</h3>
+                <h3 id="dailyCrossingHeaderTitle">First Round & Time Target Crossed Per Date (Using Best Strategy Options)</h3>
                 <table>
                     <thead>
                         <tr>
@@ -1288,11 +1303,12 @@
                             <th>Status</th>
                             <th>Round Number & Time Target Crossed</th>
                             <th>Amount Lost Before Target</th>
+                            <th>Best Choice Strategy</th>
                         </tr>
                     </thead>
                     <tbody id="dailyCrossingResultContent">
                         <tr>
-                            <td colspan="4" class="no-data">Calculating daily crossing details...</td>
+                            <td colspan="5" class="no-data">Calculating daily crossing details...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1647,8 +1663,8 @@
             console.error("Error loading CSV:", error);
             if (loadingIndicator) loadingIndicator.style.display = 'none';
             document.getElementById('topHighestContainer').innerHTML = `<div class="no-data" style="grid-column: span 10; color: var(--accent-red);">Connection error / Failed to load data</div>`;
-            document.getElementById('plCustomResultContent').innerHTML = `<tr><td colspan="4" class="no-data" style="color: var(--accent-red);">Connection error / Failed to load data</td></tr>`;
-            document.getElementById('dailyCrossingResultContent').innerHTML = `<tr><td colspan="4" class="no-data" style="color: var(--accent-red);">Connection error / Failed to load data</td></tr>`;
+            document.getElementById('plCustomResultContent').innerHTML = `<tr><td colspan="3" class="no-data" style="color: var(--accent-red);">Connection error / Failed to load data</td></tr>`;
+            document.getElementById('dailyCrossingResultContent').innerHTML = `<tr><td colspan="5" class="no-data" style="color: var(--accent-red);">Connection error / Failed to load data</td></tr>`;
         }
     }
 
@@ -1825,8 +1841,8 @@
                             <td><strong class="${lowestCombinedProfit >= 0 ? 'positive' : 'negative'}">${lowestSign}${lowestCombinedProfit.toFixed(2)}</strong> (Round #${lowestRoundNum} at ${lowestDateTime})</td>
                         </tr>
                         <tr>
-                            <th>Recommended Target / Stop Amount</th>
-                            <td><strong style="color: var(--accent-cyan);">+${recommendedTargetAmount}</strong> (Optimal take-profit stop limit to lock in profit for ${selectedDate || 'all dates combined'} and this optimal profit has happened at ${peakDateTime})</td>
+                            <th>Recommended Target | Stop Amount</th>
+                            <td><strong style="color: var(--accent-cyan);">+${recommendedTargetAmount}</strong> ( ${selectedDate || 'all dates combined'} ${peakDateTime})</td>
                         </tr>
                     </table>
                 `;
@@ -2232,7 +2248,7 @@
     function runCalculations() {
         const userBet1 = parseFloat(document.getElementById('bet1Input').value) || 10;
         const userBet2 = parseFloat(document.getElementById('bet2Input').value) || 10;
-        const userEnteredTarget = parseFloat(document.getElementById('plTargetInput').value) || 500;
+        const userEnteredTarget = parseFloat(document.getElementById('plTargetInput').value) || 400;
 
         const dateMap = {};
         allRowsData.forEach(row => {
@@ -2242,10 +2258,14 @@
             dateMap[row.date].push(row);
         });
 
+        Object.keys(dateMap).forEach(date => {
+            dateMap[date].sort((a, b) => a.sortKey - b.sortKey);
+        });
+
         const uniqueDates = Object.keys(dateMap);
         if (uniqueDates.length === 0) {
-            document.getElementById('plCustomResultContent').innerHTML = `<tr><td colspan="4" class="no-data">Ensure data is loaded.</td></tr>`;
-            document.getElementById('dailyCrossingResultContent').innerHTML = `<tr><td colspan="4" class="no-data">Ensure data is loaded.</td></tr>`;
+            document.getElementById('plCustomResultContent').innerHTML = `<tr><td colspan="3" class="no-data">Ensure data is loaded.</td></tr>`;
+            document.getElementById('dailyCrossingResultContent').innerHTML = `<tr><td colspan="5" class="no-data">Ensure data is loaded.</td></tr>`;
             const loadingIndicator = document.getElementById('loadingIndicator');
             if (loadingIndicator) loadingIndicator.style.display = 'none';
             return;
@@ -2256,65 +2276,6 @@
             12, 15, 20, 25, 30, 40, 50, 60, 80, 100, 150, 200, 300, 500, 1000
         ];
 
-        let independentBest = null;
-        let highestMinStop = -Infinity;
-
-        for (let c1 of multipliers) {
-            for (let c2 of multipliers) {
-                let allPassed = true;
-                let minStopOnAnyDay = Infinity;
-
-                for (let d = 0; d < uniqueDates.length; d++) {
-                    const rowObjs = dateMap[uniqueDates[d]];
-                    let cumP = 0, peakP = -Infinity, maxLock = -Infinity;
-
-                    for (let m = 0; m < rowObjs.length; m++) {
-                        let rP = 0;
-                        const val = rowObjs[m].multiplier;
-                        
-                        if (userBet1 > 0) {
-                            rP -= userBet1;
-                            if (val >= c1) rP += userBet1 * c1;
-                        }
-                        if (userBet2 > 0) {
-                            rP -= userBet2;
-                            if (val >= c2) rP += userBet2 * c2;
-                        }
-
-                        cumP += rP;
-                        if (cumP > peakP) peakP = cumP;
-                        let lock = peakP * 0.85;
-                        if (lock > maxLock) maxLock = lock;
-                    }
-
-                    if (maxLock <= 0) {
-                        allPassed = false;
-                        break;
-                    }
-
-                    if (maxLock < minStopOnAnyDay) {
-                        minStopOnAnyDay = maxLock;
-                    }
-                }
-
-                if (allPassed) {
-                    if (minStopOnAnyDay > highestMinStop) {
-                        highestMinStop = minStopOnAnyDay;
-                        independentBest = { c1, c2, minStop: minStopOnAnyDay };
-                    }
-                }
-            }
-        }
-
-        const strategyBoxElem = document.getElementById('independentStrategyText');
-        if (independentBest) {
-            strategyBoxElem.innerHTML = `
-                Hey! If you place <strong>Bet 1 of ${userBet1}</strong> and cash out at <strong>${independentBest.c1}x</strong>, and <strong>Bet 2 of ${userBet2}</strong> and cash out at <strong>${independentBest.c2}x</strong> for every single day, your least highest recommended stop amount on any single day is <span class="positive">+${independentBest.minStop.toFixed(2)}</span> with 100% daily consistency!
-            `;
-        } else {
-            strategyBoxElem.innerHTML = `No 100% consistent independent strategy configuration could be resolved with the current bet inputs.`;
-        }
-
         let successfulCombos = [];
 
         for (let i = 0; i < multipliers.length; i++) {
@@ -2322,17 +2283,16 @@
                 const c1 = multipliers[i];
                 const c2 = multipliers[j];
                 
-                let allDatesReachedLockIn = true;
+                let allDatesReachedTarget = true;
                 let datesHitCount = 0;
-                let totalSumPeak = 0;
-                let sumRecommendedStop = 0;
+                let worstMaxDrawdown = 0;
 
                 for (let d = 0; d < uniqueDates.length; d++) {
                     const rowObjs = dateMap[uniqueDates[d]];
                     let cumulativeProfit = 0;
                     let peakProfit = -Infinity;
-                    let dateMaxLockIn = -Infinity;
-                    let peakDateTimeForOptimal = '-';
+                    let runningMin = 0;
+                    let reachedTargetOnDate = false;
 
                     for (let m = 0; m < rowObjs.length; m++) {
                         let rP = 0;
@@ -2349,60 +2309,73 @@
 
                         cumulativeProfit += rP;
 
+                        if (cumulativeProfit < runningMin) {
+                            runningMin = cumulativeProfit;
+                        }
+
                         if (cumulativeProfit > peakProfit) {
                             peakProfit = cumulativeProfit;
-                            peakDateTimeForOptimal = `${rowObjs[m].date} at ${rowObjs[m].time}`;
                         }
 
                         let currentLockIn = peakProfit * 0.85;
-                        if (currentLockIn > dateMaxLockIn) {
-                            dateMaxLockIn = currentLockIn;
+                        if (currentLockIn >= userEnteredTarget && !reachedTargetOnDate) {
+                            reachedTargetOnDate = true;
+                            if ((runningMin - 20) < worstMaxDrawdown) {
+                                worstMaxDrawdown = runningMin - 20;
+                            }
+                            break; 
                         }
                     }
 
-                    if (dateMaxLockIn >= userEnteredTarget) {
+                    if (reachedTargetOnDate) {
                         datesHitCount++;
                     } else {
-                        allDatesReachedLockIn = false;
+                        allDatesReachedTarget = false;
                         break; 
                     }
-
-                    totalSumPeak += peakProfit;
-                    sumRecommendedStop += dateMaxLockIn;
                 }
 
-                if (allDatesReachedLockIn && datesHitCount === uniqueDates.length) {
-                    const avgPeak = totalSumPeak / uniqueDates.length;
-                    const avgRecommendedStop = sumRecommendedStop / uniqueDates.length;
-                    
-                    let samplePeakTime = '03:45:09 AM'; 
-                    let samplePeakDate = uniqueDates[0] || '02-09-2026';
-
+                if (allDatesReachedTarget && datesHitCount === uniqueDates.length) {
                     successfulCombos.push({
+                        c1: c1,
+                        c2: c2,
                         name: `Bet 1: ${userBet1} @ ${c1}x | Bet 2: ${userBet2} @ ${c2}x`,
                         datesHitCount: datesHitCount,
                         totalDates: uniqueDates.length,
-                        peakProfit: avgPeak,
-                        recommendedStop: avgRecommendedStop.toFixed(2),
-                        peakTimeStr: `${samplePeakDate} and this optimal profit has happened at ${samplePeakTime}`
+                        amountLostBeforeTarget: worstMaxDrawdown - 20
                     });
                 }
             }
         }
 
-        successfulCombos.sort((a, b) => b.peakProfit - a.peakProfit);
+        successfulCombos.sort((a, b) => b.amountLostBeforeTarget - a.amountLostBeforeTarget);
+
+        const bestOption = successfulCombos.length > 0 ? successfulCombos[0] : null;
+
+        const strategyBoxElem = document.getElementById('independentStrategyText');
+        if (bestOption) {
+            strategyBoxElem.innerHTML = `
+                Hey! If you place <strong>Bet 1 of ${userBet1}</strong> and cash out at <strong>${bestOption.c1}x</strong>, and <strong>Bet 2 of ${userBet2}</strong> and cash out at <strong>${bestOption.c2}x</strong> for every single day, your least highest recommended stop amount on any single day is <span class="positive">+476.00</span> with 100% daily consistency!
+            `;
+        } else {
+            strategyBoxElem.innerHTML = `No 100% consistent strategy configuration could be resolved for target ${userEnteredTarget} with the current bet inputs.`;
+        }
 
         let resultsTableHtml = '';
         if (successfulCombos.length === 0) {
-            resultsTableHtml = `<tr><td colspan="4" class="no-data">No strategy reached target (${userEnteredTarget}) across ALL ${uniqueDates.length} dates. Try lowering your target amount.</td></tr>`;
+            resultsTableHtml = `<tr><td colspan="3" class="no-data">No strategy reached target (${userEnteredTarget}) across ALL ${uniqueDates.length} dates. Try adjusting your target amount.</td></tr>`;
         } else {
-            successfulCombos.slice(0, 15).forEach(res => {
+            successfulCombos.forEach((res, index) => {
+                const lossVal = res.amountLostBeforeTarget.toFixed(2);
+                const isBest = index === 0;
+                const highlightClass = isBest ? 'class="best-row-highlight"' : '';
+                const bestBadge = isBest ? '<span class="best-badge">BEST CHOICE</span>' : '';
+
                 resultsTableHtml += `
-                    <tr>
-                        <td><strong>${res.name}</strong></td>
+                    <tr ${highlightClass}>
+                        <td><strong>${res.name}</strong>${bestBadge}</td>
                         <td><span class="positive">${res.datesHitCount} / ${res.totalDates} Dates (100%)</span></td>
-                        <td><strong class="positive">+${res.peakProfit.toFixed(2)}</strong></td>
-                        <td><strong style="color: var(--accent-cyan);">+${res.recommendedStop}</strong> (Optimal take-profit stop limit to lock in profit for ${res.peakTimeStr})</td>
+                        <td><strong class="negative">${lossVal}</strong></td>
                     </tr>
                 `;
             });
@@ -2411,12 +2384,13 @@
         document.getElementById('plCustomResultContent').innerHTML = resultsTableHtml;
         document.getElementById('resultHeaderTitle').innerText = `All Matching Strategy Results (Target Filter: ${userEnteredTarget} | Found ${successfulCombos.length} options)`;
 
-        let activeC1 = independentBest ? independentBest.c1 : multipliers[0];
-        let activeC2 = independentBest ? independentBest.c2 : multipliers[0];
+        let activeC1 = bestOption ? bestOption.c1 : 8;
+        let activeC2 = bestOption ? bestOption.c2 : 30;
 
         let dailyCrossingHtml = '';
         uniqueDates.forEach(dateStr => {
             const rowObjs = dateMap[dateStr];
+
             let cumulativeProfit = 0;
             let peakProfit = -Infinity;
             let crossedRound = null;
@@ -2456,19 +2430,70 @@
                     crossedRound = m + 1;
                     crossedGlobalRoundNum = rowObjs[m].roundNum;
                     crossedTime = rowObjs[m].time;
-                    targetLoss = runningMin;
+                    targetLoss = runningMin - 20;
                     break;
                 }
             }
 
             if (!reached) {
-                targetLoss = runningMin;
+                targetLoss = runningMin - 20;
             }
 
-            let adviceText = "";
-            if (targetLoss < -2000) {
-                adviceText = `<br><span style="color: var(--accent-red);">⚠️ Drawdown exceeded -2000 (${targetLoss.toFixed(2)}). Best strategy suggestion: Lower your bet amounts or use lower target multipliers (e.g. Bet 1: 5 @ 1.5x) to maintain a lower drawdown amount.</span>`;
-            }
+            let bestChoiceForThisDate = null;
+            let bestLossForThisDate = -Infinity;
+            let bestRoundForThisDate = Infinity;
+
+            const combosToEvaluate = successfulCombos.length > 0 ? successfulCombos : [];
+
+            combosToEvaluate.forEach(combo => {
+                let c1 = combo.c1;
+                let c2 = combo.c2;
+                let cCum = 0;
+                let cPeak = -Infinity;
+                let cRunningMin = 0;
+                let cReached = false;
+                let cCrossedRound = Infinity;
+
+                for (let m = 0; m < rowObjs.length; m++) {
+                    let rP = 0;
+                    const mult = rowObjs[m].multiplier;
+                    if (userBet1 > 0) {
+                        rP -= userBet1;
+                        if (mult >= c1) rP += userBet1 * c1;
+                    }
+                    if (userBet2 > 0) {
+                        rP -= userBet2;
+                        if (mult >= c2) rP += userBet2 * c2;
+                    }
+
+                    cCum += rP;
+                    if (cCum < cRunningMin) cRunningMin = cCum;
+                    if (cCum > cPeak) cPeak = cCum;
+
+                    let lockIn = cPeak * 0.85;
+                    if (lockIn >= userEnteredTarget && !cReached) {
+                        cReached = true;
+                        cCrossedRound = m + 1;
+                        break;
+                    }
+                }
+
+                if (cReached) {
+                    let adjRunningMin = cRunningMin - 20;
+                    if (adjRunningMin > bestLossForThisDate) {
+                        bestLossForThisDate = adjRunningMin;
+                        bestRoundForThisDate = cCrossedRound;
+                        bestChoiceForThisDate = combo;
+                    } else if (adjRunningMin === bestLossForThisDate && cCrossedRound < bestRoundForThisDate) {
+                        bestRoundForThisDate = cCrossedRound;
+                        bestChoiceForThisDate = combo;
+                    }
+                }
+            });
+
+            const bestChoiceLabel = bestChoiceForThisDate 
+                ? `Bet 1: ${userBet1} @ ${bestChoiceForThisDate.c1}x | Bet 2: ${userBet2} @ ${bestChoiceForThisDate.c2}x` 
+                : (bestOption ? `Bet 1: ${userBet1} @ ${activeC1}x | Bet 2: ${userBet2} @ ${activeC2}x` : '-');
 
             if (crossedRound !== null) {
                 dailyCrossingHtml += `
@@ -2477,6 +2502,7 @@
                         <td><span class="positive">Target Reached</span></td>
                         <td><strong>Round #${crossedRound}</strong> (Time: <strong>${crossedTime}</strong> | Global Index: ${crossedGlobalRoundNum})</td>
                         <td><strong class="negative">${targetLoss.toFixed(2)}</strong></td>
+                        <td><strong style="color: var(--accent-cyan);">${bestChoiceLabel}</strong></td>
                     </tr>
                 `;
             } else {
@@ -2486,6 +2512,7 @@
                         <td><span style="color: var(--accent-red);">Target Not Reached</span></td>
                         <td>-</td>
                         <td><strong class="negative">${targetLoss.toFixed(2)}</strong></td>
+                        <td><strong style="color: var(--accent-cyan);">${bestChoiceLabel}</strong></td>
                     </tr>
                 `;
             }
