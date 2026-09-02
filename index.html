@@ -1287,11 +1287,12 @@
                             <th>Date</th>
                             <th>Status</th>
                             <th>Round Number & Time Target Crossed</th>
+                            <th>Amount Lost Before Target</th>
                         </tr>
                     </thead>
                     <tbody id="dailyCrossingResultContent">
                         <tr>
-                            <td colspan="3" class="no-data">Calculating daily crossing details...</td>
+                            <td colspan="4" class="no-data">Calculating daily crossing details...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1647,7 +1648,7 @@
             if (loadingIndicator) loadingIndicator.style.display = 'none';
             document.getElementById('topHighestContainer').innerHTML = `<div class="no-data" style="grid-column: span 10; color: var(--accent-red);">Connection error / Failed to load data</div>`;
             document.getElementById('plCustomResultContent').innerHTML = `<tr><td colspan="4" class="no-data" style="color: var(--accent-red);">Connection error / Failed to load data</td></tr>`;
-            document.getElementById('dailyCrossingResultContent').innerHTML = `<tr><td colspan="3" class="no-data" style="color: var(--accent-red);">Connection error / Failed to load data</td></tr>`;
+            document.getElementById('dailyCrossingResultContent').innerHTML = `<tr><td colspan="4" class="no-data" style="color: var(--accent-red);">Connection error / Failed to load data</td></tr>`;
         }
     }
 
@@ -2244,7 +2245,7 @@
         const uniqueDates = Object.keys(dateMap);
         if (uniqueDates.length === 0) {
             document.getElementById('plCustomResultContent').innerHTML = `<tr><td colspan="4" class="no-data">Ensure data is loaded.</td></tr>`;
-            document.getElementById('dailyCrossingResultContent').innerHTML = `<tr><td colspan="3" class="no-data">Ensure data is loaded.</td></tr>`;
+            document.getElementById('dailyCrossingResultContent').innerHTML = `<tr><td colspan="4" class="no-data">Ensure data is loaded.</td></tr>`;
             const loadingIndicator = document.getElementById('loadingIndicator');
             if (loadingIndicator) loadingIndicator.style.display = 'none';
             return;
@@ -2374,7 +2375,6 @@
                     const avgPeak = totalSumPeak / uniqueDates.length;
                     const avgRecommendedStop = sumRecommendedStop / uniqueDates.length;
                     
-                    // Finding representative time string for the optimal peak
                     let samplePeakTime = '03:45:09 AM'; 
                     let samplePeakDate = uniqueDates[0] || '02-09-2026';
 
@@ -2422,6 +2422,10 @@
             let crossedRound = null;
             let crossedGlobalRoundNum = null;
             let crossedTime = '-';
+            let runningMin = 0;
+            let targetLoss = 0;
+            let tempCum = 0;
+            let reached = false;
 
             for (let m = 0; m < rowObjs.length; m++) {
                 let rP = 0;
@@ -2436,18 +2440,34 @@
                     if (mult >= activeC2) rP += userBet2 * activeC2;
                 }
 
+                tempCum += rP;
+                if (tempCum < runningMin) {
+                    runningMin = tempCum;
+                }
+
                 cumulativeProfit += rP;
                 if (cumulativeProfit > peakProfit) {
                     peakProfit = cumulativeProfit;
                 }
 
                 let currentLockIn = peakProfit * 0.85;
-                if (currentLockIn >= userEnteredTarget && crossedRound === null) {
+                if (currentLockIn >= userEnteredTarget && !reached) {
+                    reached = true;
                     crossedRound = m + 1;
                     crossedGlobalRoundNum = rowObjs[m].roundNum;
                     crossedTime = rowObjs[m].time;
+                    targetLoss = runningMin;
                     break;
                 }
+            }
+
+            if (!reached) {
+                targetLoss = runningMin;
+            }
+
+            let adviceText = "";
+            if (targetLoss < -2000) {
+                adviceText = `<br><span style="color: var(--accent-red);">⚠️ Drawdown exceeded -2000 (${targetLoss.toFixed(2)}). Best strategy suggestion: Lower your bet amounts or use lower target multipliers (e.g. Bet 1: 5 @ 1.5x) to maintain a lower drawdown amount.</span>`;
             }
 
             if (crossedRound !== null) {
@@ -2456,6 +2476,7 @@
                         <td><strong>${dateStr}</strong></td>
                         <td><span class="positive">Target Reached</span></td>
                         <td><strong>Round #${crossedRound}</strong> (Time: <strong>${crossedTime}</strong> | Global Index: ${crossedGlobalRoundNum})</td>
+                        <td><strong class="negative">${targetLoss.toFixed(2)}</strong></td>
                     </tr>
                 `;
             } else {
@@ -2464,6 +2485,7 @@
                         <td><strong>${dateStr}</strong></td>
                         <td><span style="color: var(--accent-red);">Target Not Reached</span></td>
                         <td>-</td>
+                        <td><strong class="negative">${targetLoss.toFixed(2)}</strong></td>
                     </tr>
                 `;
             }
