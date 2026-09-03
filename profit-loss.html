@@ -312,8 +312,8 @@
             <thead>
                 <tr>
                     <th>date</th>
-                    <th>bet1, cashou1, bet2, cashout2</th>
-                    <th>maxAmountRequired</th>
+                    <th>B1 C1 || B2 C2</th>
+                    <th>Max Drawdown</th>
                     <th>status</th>
                     <th>roundNumber</th>
                 </tr>
@@ -537,7 +537,7 @@
             html += `
                 <tr>
                     <td><strong>${date} ${timeVal}</strong></td>
-                    <td>bet1: ${b1}, cashou1: ${c1}, bet2: ${b2}, cashout2: ${c2}</td>
+                    <td>B1: ${b1}, C1: ${c1}, B2: ${b2}, C2: ${c2}</td>
                     <td><strong class="negative">${maxAmtReq}</strong></td>
                     <td><span class="positive">${status}</span></td>
                     <td>${roundNum}</td>
