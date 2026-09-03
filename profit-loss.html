@@ -265,16 +265,15 @@
             <thead>
                 <tr>
                     <th>Date</th>
-                    <th>Bet 1 || Cashout 1 || Bet 2 || Cashout 2</th>
+                    <th>Bet 1 || C1 || Bet 2 || C2</th>
                     <th>Status</th>
                     <th>Amount Required</th>
-                    <th>Round Date</th>
                     <th>Time</th>
                 </tr>
             </thead>
             <tbody id="apiStrategyResponseTableBody">
                 <tr>
-                    <td colspan="6" class="no-data">Click "Send Payload & Load Table" to trigger API post and display results</td>
+                    <td colspan="5" class="no-data">Click "Send Payload & Load Table" to trigger API post and display results</td>
                 </tr>
             </tbody>
         </table>
@@ -349,7 +348,7 @@
         };
 
         const tbody = document.getElementById('apiStrategyResponseTableBody');
-        tbody.innerHTML = `<tr><td colspan="6" class="no-data">Sending payload and fetching results...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="no-data">Sending payload and fetching results...</td></tr>`;
 
         try {
             const response = await fetch(POST_TRIGGER_URL, {
@@ -394,7 +393,7 @@
     function renderApiStrategyResponseTable(dataArray, fallbackBet1, fallbackBet2) {
         const tbody = document.getElementById('apiStrategyResponseTableBody');
         if (!Array.isArray(dataArray) || dataArray.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="no-data">No response records found</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="no-data">No response records found</td></tr>`;
             return;
         }
 
@@ -413,10 +412,9 @@
             html += `
                 <tr>
                     <td><strong>${item.date}</strong></td>
-                    <td>${b1} cashout1 || ${c1}x || ${b2} cashout2 || ${c2}x</td>
+                    <td>${b1} C1 ${c1}x || ${b2} C2 ${c2}x</td>
                     <td><span class="positive">${item.bestStrategyResult.status}</span></td>
                     <td><strong class="negative">${amtReqFormatted}</strong></td>
-                    <td>${resData.date}</td>
                     <td>${resData.time}</td>
                 </tr>
             `;
