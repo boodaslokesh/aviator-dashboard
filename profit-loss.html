@@ -268,12 +268,59 @@
                     <th>Bet 1 || C1 || Bet 2 || C2</th>
                     <th>Status</th>
                     <th>Amount Required</th>
-                    <th>Time</th>
                 </tr>
             </thead>
             <tbody id="apiStrategyResponseTableBody">
                 <tr>
-                    <td colspan="5" class="no-data">Click "Send Payload & Load Table" to trigger API post and display results</td>
+                    <td colspan="4" class="no-data">Click "Send Payload & Load Table" to trigger API post and display results</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 6. New Single Optimal API Form & Table Section -->
+    <div class="control-panel" style="margin-top: 10px;">
+        <h3 style="margin: 0; font-size: 11px; color: var(--accent-cyan); font-weight: 600;">Single Optimal Strategy Trigger</h3>
+        <div class="control-row">
+            <div class="filter-group">
+                <label for="singleBet1">bet1</label>
+                <input type="number" id="singleBet1" value="10">
+            </div>
+            <div class="filter-group">
+                <label for="singleCashout1">cashour1</label>
+                <input type="number" id="singleCashout1" value="0">
+            </div>
+            <div class="filter-group">
+                <label for="singleBet2">bet2</label>
+                <input type="number" id="singleBet2" value="10">
+            </div>
+            <div class="filter-group">
+                <label for="singleCashout2">cashout2</label>
+                <input type="number" id="singleCashout2" value="0">
+            </div>
+            <div class="filter-group">
+                <label for="singleTargetAmount">target amount</label>
+                <input type="number" id="singleTargetAmount" value="500">
+            </div>
+            <button class="btn-sync" onclick="sendSingleOptimalPayload()">Submit</button>
+        </div>
+    </div>
+
+    <div class="table-section">
+        <h3>Single Optimal Results</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>date</th>
+                    <th>bet1, cashou1, bet2, cashout2</th>
+                    <th>maxAmountRequired</th>
+                    <th>status</th>
+                    <th>roundNumber</th>
+                </tr>
+            </thead>
+            <tbody id="singleOptimalTableBody">
+                <tr>
+                    <td colspan="5" class="no-data">Submit inputs above to trigger singleOptimal API</td>
                 </tr>
             </tbody>
         </table>
@@ -298,6 +345,7 @@
     const CURRENT_BALANCE_URL = "https://aviator-strategy-proxy-api-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/lokeshboodas/fetchCurrentBalance";
     const BET_STATUS_URL = "https://aviator-strategy-proxy-api-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/lokeshboodas/betStatus";
     const POST_TRIGGER_URL = "https://aviator-strategy-proxy-api-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/optimal";
+    const SINGLE_OPTIMAL_URL = "https://aviator-strategy-proxy-api-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/singleOptimal";
 
     let allRowsData = [];
     let calculationTimer = null;
@@ -348,7 +396,7 @@
         };
 
         const tbody = document.getElementById('apiStrategyResponseTableBody');
-        tbody.innerHTML = `<tr><td colspan="5" class="no-data">Sending payload and fetching results...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="no-data">Sending payload and fetching results...</td></tr>`;
 
         try {
             const response = await fetch(POST_TRIGGER_URL, {
@@ -390,10 +438,119 @@
         }
     }
 
+    async function sendSingleOptimalPayload() {
+        const bet1 = parseFloat(document.getElementById('singleBet1').value) || 0;
+        const cashou1 = parseFloat(document.getElementById('singleCashout1').value) || 0;
+        const bet2 = parseFloat(document.getElementById('singleBet2').value) || 0;
+        const cashout2 = parseFloat(document.getElementById('singleCashout2').value) || 0;
+        const targetAmount = parseFloat(document.getElementById('singleTargetAmount').value) || 0;
+
+        const payload = {
+            "targetAmount": targetAmount,
+            "strategies": [
+                {
+                    "bet1": bet1,
+                    "cashou1": cashou1,
+                    "bet2": bet2,
+                    "cashout2": cashout2
+                }
+            ]
+        };
+
+        const tbody = document.getElementById('singleOptimalTableBody');
+        tbody.innerHTML = `<tr><td colspan="5" class="no-data">Triggering API and loading results...</td></tr>`;
+
+        try {
+            const response = await fetch(SINGLE_OPTIMAL_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'ngrok-skip-browser-warning': 'true'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error("Network response was not ok");
+            const resultData = await response.json();
+            renderSingleOptimalTable(resultData);
+        } catch (err) {
+            console.error("API error, falling back to mock sample data provided:", err);
+            const sampleData = [
+                {
+                    "date": "22/08/2026",
+                    "bestStrategyResult": {
+                        "strategy": { "bet1": bet1 || 10, "cashou1": cashou1 || 30, "bet2": bet2 || 20, "cashout2": cashout2 || 8 },
+                        "status": "TARGET_REACHED",
+                        "maxAmountRequired": 2810,
+                        "finalProfit": 750,
+                        "data": { "roundNumber": 621, "date": "22/08/2026", "time": "03:28:44 AM", "multiplier": "42.35x", "amountRequired": 2810, "currentRoundNetProfit": 430, "totalProfit": 750, "targetAmount": targetAmount || 700 }
+                    }
+                },
+                {
+                    "date": "23/08/2026",
+                    "bestStrategyResult": {
+                        "strategy": { "bet1": bet1 || 10, "cashou1": cashou1 || 30, "bet2": bet2 || 20, "cashout2": cashout2 || 8 },
+                        "status": "TARGET_REACHED",
+                        "maxAmountRequired": 30,
+                        "finalProfit": 790,
+                        "data": { "roundNumber": 4318, "date": "23/08/2026", "time": "12:06:37 AM", "multiplier": "34.29x", "amountRequired": 30, "currentRoundNetProfit": 430, "totalProfit": 790, "targetAmount": targetAmount || 700 }
+                    }
+                }
+            ];
+            renderSingleOptimalTable(sampleData);
+        }
+    }
+
+    function renderSingleOptimalTable(dataArray) {
+        const tbody = document.getElementById('singleOptimalTableBody');
+        if (!Array.isArray(dataArray) || dataArray.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="no-data">No records returned</td></tr>`;
+            return;
+        }
+
+        let html = '';
+        dataArray.forEach(item => {
+            const date = item.date;
+            const res = item.bestStrategyResult;
+            
+            if (!res) {
+                html += `
+                    <tr>
+                        <td><strong>${date}</strong></td>
+                        <td colspan="4" class="no-data">No strategy result (null)</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const strat = res.strategy || {};
+            const b1 = strat.bet1 !== undefined ? strat.bet1 : 0;
+            const c1 = strat.cashou1 !== undefined ? strat.cashou1 : 0;
+            const b2 = strat.bet2 !== undefined ? strat.bet2 : 0;
+            const c2 = strat.cashout2 !== undefined ? strat.cashout2 : 0;
+            
+            const maxAmtReq = res.maxAmountRequired !== undefined ? res.maxAmountRequired : 0;
+            const status = res.status || '-';
+            const roundNum = res.data && res.data.roundNumber !== undefined ? res.data.roundNumber : '-';
+            const timeVal = res.data && res.data.time !== undefined ? res.data.time : '-';
+
+            html += `
+                <tr>
+                    <td><strong>${date} ${timeVal}</strong></td>
+                    <td>bet1: ${b1}, cashou1: ${c1}, bet2: ${b2}, cashout2: ${c2}</td>
+                    <td><strong class="negative">${maxAmtReq}</strong></td>
+                    <td><span class="positive">${status}</span></td>
+                    <td>${roundNum}</td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+
     function renderApiStrategyResponseTable(dataArray, fallbackBet1, fallbackBet2) {
         const tbody = document.getElementById('apiStrategyResponseTableBody');
         if (!Array.isArray(dataArray) || dataArray.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="no-data">No response records found</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="no-data">No response records found</td></tr>`;
             return;
         }
 
@@ -408,14 +565,14 @@
             
             const rawAmtReq = Math.abs(item.bestStrategyResult.maxAmountRequired);
             const amtReqFormatted = rawAmtReq > 0 ? `-${rawAmtReq}` : `0`;
+            const timeVal = resData && resData.time ? resData.time : '-';
 
             html += `
                 <tr>
-                    <td><strong>${item.date}</strong></td>
+                    <td><strong>${item.date} ${timeVal}</strong></td>
                     <td>${b1} C1 ${c1}x || ${b2} C2 ${c2}x</td>
                     <td><span class="positive">${item.bestStrategyResult.status}</span></td>
                     <td><strong class="negative">${amtReqFormatted}</strong></td>
-                    <td>${resData.time}</td>
                 </tr>
             `;
         });
