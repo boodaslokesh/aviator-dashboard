@@ -722,7 +722,7 @@
 
         .dual-bet-toolbar-row {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
             gap: 4px;
             align-items: flex-end;
             border-bottom: 1px solid var(--border-color);
@@ -733,8 +733,8 @@
 
         @media (max-width: 768px) {
             .dual-bet-toolbar-row {
-                grid-template-columns: repeat(5, minmax(0, 1fr));
-                gap: 2px;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 4px;
             }
             .dual-bet-toolbar-row .filter-group input,
             .dual-bet-toolbar-row .filter-group button {
@@ -1162,24 +1162,28 @@
             <div class="logs-filter-toolbar">
                 <div class="dual-bet-toolbar-row">
                     <div class="filter-group">
-                        <label>DUAL BET 1 AMOUNT</label>
+                        <label>DUAL BET 1 AMT</label>
                         <input type="number" id="dualBet1Amt" value="10" min="0" step="any" oninput="applyFilters()">
                     </div>
                     <div class="filter-group">
-                        <label>DUAL CASHOUT 1 (x)</label>
+                        <label>DUAL CASH 1 (x)</label>
                         <input type="number" id="dualCash1" value="9" min="1.1" step="any" oninput="applyFilters()">
                     </div>
                     <div class="filter-group">
-                        <label>DUAL BET 2 AMOUNT</label>
+                        <label>DUAL BET 2 AMT</label>
                         <input type="number" id="dualBet2Amt" value="10" min="0" step="any" oninput="applyFilters()">
                     </div>
                     <div class="filter-group">
-                        <label>DUAL CASHOUT 2 (x)</label>
+                        <label>DUAL CASH 2 (x)</label>
                         <input type="number" id="dualCash2" value="8" min="1.1" step="any" oninput="applyFilters()">
                     </div>
                     <div class="filter-group">
+                        <label>TARGET AMT</label>
+                        <input type="number" id="dualTargetAmt" value="100" min="0" step="any" oninput="applyFilters()">
+                    </div>
+                    <div class="filter-group">
                         <label>&nbsp;</label>
-                        <button class="btn-reset" onclick="resetDualBetSimulator()">Reset Dual Bet</button>
+                        <button class="btn-reset" onclick="resetDualBetSimulator()">Reset</button>
                     </div>
                 </div>
                 <div class="filter-group">
@@ -1193,7 +1197,6 @@
                 <div class="streak-summary-content" id="dualBetSummaryContent">Enter dual bets above to analyze combined profit/loss and peak performance.</div>
             </div>
 
-            <!-- NEW TABLE ADDED UNDER DUAL BET STRATEGY FOR ALL DATES -->
             <div class="streak-summary-box" id="dualBetAllDatesBox" style="display: flex;">
                 <h4>Peak Combined Profit & Drawdown For All Dates</h4>
                 <div class="streak-summary-content">
@@ -1204,10 +1207,11 @@
                                 <th>Peak Combined Profit</th>
                                 <th>Peak Profit Date & Time</th>
                                 <th>Max Drawdown at Same Time</th>
+                                <th>Target Status</th>
                             </tr>
                         </thead>
                         <tbody id="dualBetAllDatesBody">
-                            <tr><td colspan="4" class="no-data">Loading data for all dates...</td></tr>
+                            <tr><td colspan="5" class="no-data">Loading data for all dates...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1289,6 +1293,7 @@
         document.getElementById('dualCash1').value = '9';
         document.getElementById('dualBet2Amt').value = '10';
         document.getElementById('dualCash2').value = '8';
+        document.getElementById('dualTargetAmt').value = '100';
         applyFilters();
     }
 
@@ -1689,7 +1694,7 @@
             const b1Amt = parseFloat(document.getElementById('dualBet1Amt').value) || 0;
             const c1Target = parseFloat(document.getElementById('dualCash1').value) || 0;
             const b2Amt = parseFloat(document.getElementById('dualBet2Amt').value) || 0;
-            const c2Target = parseFloat(document.getElementById('dualCash2').value) || 0;
+            c2Target = parseFloat(document.getElementById('dualCash2').value) || 0;
 
             let cumulativeProfit = 0;
             let peakCombinedProfit = -Infinity;
@@ -1765,7 +1770,6 @@
                 dualBetSummaryContent.innerHTML = `<div style="padding: 6px; color: var(--text-muted);">No records match selected filter for dual bet analysis.</div>`;
             }
 
-            // POPULATE ALL DATES TABLE FOR DUAL BET STRATEGY
             renderDualBetAllDatesTable(b1Amt, c1Target, b2Amt, c2Target);
 
             const streakInputVal = document.getElementById('streakInputFilter').value.trim();
@@ -1851,8 +1855,10 @@
         const tbody = document.getElementById('dualBetAllDatesBody');
         if (!tbody) return;
 
+        const userTarget = parseFloat(document.getElementById('dualTargetAmt')?.value) || 0;
+
         if (availableSortedDates.length === 0 || allRowsData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="no-data">No data available for dates</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="no-data">No data available for dates</td></tr>`;
             return;
         }
 
@@ -1867,7 +1873,6 @@
             let peakDateTime = '-';
             let peakRunningProfits = [];
 
-            // Pass 1: compute cumulative profit per round to find peak combined profit and exact time
             dateRows.forEach(item => {
                 let roundProfit = 0;
                 if (b1Amt > 0) {
@@ -1894,8 +1899,6 @@
                 }
             });
 
-            // Pass 2: calculate drawdown relative to peak or running minimum at that exact peak point
-            // Drawdown at peak time can be evaluated as the lowest cumulative profit up to that peak point, or distance from peak
             let maxDrawdownAtPeakTime = 0;
             let runningMin = Infinity;
             for (let i = 0; i < peakRunningProfits.length; i++) {
@@ -1911,12 +1914,18 @@
             const peakSign = peakCombinedProfit >= 0 ? '+' : '';
             const ddSign = maxDrawdownAtPeakTime >= 0 ? '+' : '';
 
+            const isCrossed = peakCombinedProfit >= userTarget;
+            const statusBadge = isCrossed 
+                ? `<span class="target-status-badge badge-reached">Target reached</span>` 
+                : `<span class="target-status-badge badge-not-reached" style="color: var(--accent-red);">Not reached</span>`;
+
             html += `
                 <tr>
                     <td><strong>${dateStr}</strong></td>
                     <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}${peakCombinedProfit.toFixed(2)}</strong></td>
                     <td><strong style="color: var(--accent-cyan);">${peakDateTime}</strong></td>
                     <td><strong class="${maxDrawdownAtPeakTime >= 0 ? 'positive' : 'negative'}">${ddSign}${maxDrawdownAtPeakTime.toFixed(2)}</strong></td>
+                    <td>${statusBadge}</td>
                 </tr>
             `;
         });
