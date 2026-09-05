@@ -1738,12 +1738,12 @@
                 }
             });
 
-            const recommendedTargetAmount = peakCombinedProfit > 0 ? (peakCombinedProfit * 0.85).toFixed(0) : "0";
+            const recommendedTargetAmount = peakCombinedProfit > 0 ? (peakCombinedProfit * 0.85).toFixed(2) : "0.00";
 
             if (currentFilteredData.length > 0) {
-                const pSign = cumulativeProfit > 0 ? '+' : '';
-                const peakSign = peakCombinedProfit > 0 ? '+' : '';
-                const lowestSign = lowestCombinedProfit > 0 ? '+' : '';
+                const pSign = cumulativeProfit >= 0 ? '+' : '';
+                const peakSign = peakCombinedProfit >= 0 ? '+' : '';
+                const lowestSign = lowestCombinedProfit >= 0 ? '+' : '';
                 
                 dualBetSummaryContent.innerHTML = `
                     <table class="dual-summary-table">
@@ -1753,15 +1753,15 @@
                         </tr>
                         <tr>
                             <th>Cumulative Combined P/L</th>
-                            <td><strong class="${cumulativeProfit >= 0 ? 'positive' : 'negative'}">${pSign}${cumulativeProfit.toFixed(0)}</strong></td>
+                            <td><strong class="${cumulativeProfit >= 0 ? 'positive' : 'negative'}">${pSign}${cumulativeProfit.toFixed(2)}</strong></td>
                         </tr>
                         <tr>
                             <th>Peak Combined Profit</th>
-                            <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}${peakCombinedProfit.toFixed(0)}</strong> (Round #${peakRoundNum} at ${peakDateTime})</td>
+                            <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}${peakCombinedProfit.toFixed(2)}</strong> (Round #${peakRoundNum} at ${peakDateTime})</td>
                         </tr>
                         <tr>
                             <th>Lowest Combined (Drawdown)</th>
-                            <td><strong class="${lowestCombinedProfit >= 0 ? 'positive' : 'negative'}">${lowestSign}${lowestCombinedProfit.toFixed(0)}</strong> (Round #${lowestRoundNum} at ${lowestDateTime})</td>
+                            <td><strong class="${lowestCombinedProfit >= 0 ? 'positive' : 'negative'}">${lowestSign}${lowestCombinedProfit.toFixed(2)}</strong> (Round #${lowestRoundNum} at ${lowestDateTime})</td>
                         </tr>
                         <tr>
                             <th>Recommended Target | Stop Amount</th>
@@ -1854,6 +1854,16 @@
         renderRawDataTable(currentFilteredData, selectedDate);
     }
 
+    function formatAmount(val) {
+        let num = typeof val === 'number' ? val : parseFloat(val);
+        if (isNaN(num)) return val;
+        let fixed = num.toFixed(2);
+        if (fixed.endsWith('.00')) {
+            return fixed.slice(0, -3);
+        }
+        return fixed;
+    }
+
     function renderDualBetAllDatesTable(b1Amt, c1Target, b2Amt, c2Target) {
         const tbody = document.getElementById('dualBetAllDatesBody');
         if (!tbody) return;
@@ -1911,7 +1921,7 @@
                     hasCrossedTarget = true;
                     targetCrossTime = item.time;
                     targetCrossDrawdown = runningMin;
-                    targetCrossAmount = cumulativeProfit.toFixed(0);
+                    targetCrossAmount = cumulativeProfit;
                 }
 
                 if (cumulativeProfit > peakCombinedProfit) {
@@ -1932,41 +1942,24 @@
                 }
             }
 
-            const peakFormatted = Math.round(peakCombinedProfit).toString();
-            const peakClass = peakCombinedProfit < 0 ? 'negative' : 'positive';
-            const peakColorStyle = peakCombinedProfit < 0 ? 'color: var(--accent-red);' : 'color: var(--accent-green);';
+            const peakSign = peakCombinedProfit >= 0 ? '+' : '';
+            const ddSign = maxDrawdownAtPeakTime >= 0 ? '+' : '';
+            const crossDdSign = targetCrossDrawdown >= 0 ? '+' : '';
+            const crossAmtSign = (typeof targetCrossAmount === 'number' && targetCrossAmount >= 0) ? '+' : '';
 
-            const ddFormatted = Math.round(maxDrawdownAtPeakTime).toString();
-            const ddClass = maxDrawdownAtPeakTime < 0 ? 'negative' : 'positive';
-            const ddColorStyle = maxDrawdownAtPeakTime < 0 ? 'color: var(--accent-red);' : 'color: var(--accent-green);';
-
-            let crossDdFormatted = '-';
-            let crossDdColorStyle = '';
-            if (hasCrossedTarget) {
-                crossDdFormatted = Math.round(targetCrossDrawdown).toString();
-                crossDdColorStyle = targetCrossDrawdown < 0 ? 'color: var(--accent-red);' : 'color: var(--accent-green);';
-            }
-
-            let crossAmtFormatted = '-';
-            let crossAmtColorStyle = '';
-            if (hasCrossedTarget) {
-                const numericAmt = parseFloat(targetCrossAmount);
-                crossAmtFormatted = Math.round(numericAmt).toString();
-                crossAmtColorStyle = numericAmt < 0 ? 'color: var(--accent-red);' : 'color: var(--accent-green);';
-            }
-
+            const isCrossed = hasCrossedTarget;
             const statusBadge = isCrossed 
-                ? `<span style="color: var(--accent-green); font-size: 14px; font-weight: bold;">&#10004;</span>` 
-                : `<span style="color: var(--accent-red); font-size: 14px; font-weight: bold;">&#10006;</span>`;
+                ? `<span style="color: var(--accent-green); font-size: 16px; font-weight: bold;">&#10003;</span>` 
+                : `<span style="color: var(--accent-red); font-size: 16px; font-weight: bold;">&#10007;</span>`;
 
             html += `
                 <tr>
                     <td><strong>${dateStr}</strong></td>
-                    <td><strong class="${peakClass}" style="${peakColorStyle}">${peakFormatted}</strong></td>
+                    <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}${formatAmount(peakCombinedProfit)}</strong></td>
                     <td><strong style="color: var(--accent-cyan);">${peakDateTime}</strong></td>
-                    <td><strong class="${ddClass}" style="${ddColorStyle}">${ddFormatted}</strong></td>
-                    <td><strong style="${crossDdColorStyle}">${crossDdFormatted}</strong></td>
-                    <td><strong style="${crossAmtColorStyle}">${crossAmtFormatted}</strong></td>
+                    <td><strong class="${maxDrawdownAtPeakTime >= 0 ? 'positive' : 'negative'}">${ddSign}${formatAmount(maxDrawdownAtPeakTime)}</strong></td>
+                    <td><strong class="${targetCrossDrawdown >= 0 ? 'positive' : 'negative'}">${isCrossed ? crossDdSign + formatAmount(targetCrossDrawdown) : '-'}</strong></td>
+                    <td><strong class="${typeof targetCrossAmount === 'number' && targetCrossAmount >= 0 ? 'positive' : 'negative'}">${isCrossed ? crossAmtSign + formatAmount(targetCrossAmount) : '-'}</strong></td>
                     <td><strong style="color: var(--accent-cyan);">${targetCrossTime}</strong></td>
                     <td>${statusBadge}</td>
                 </tr>
@@ -2191,11 +2184,11 @@
         strategyResults.forEach(strat => {
             const tr = document.createElement('tr');
             const wClass = strat.windowPL >= 0 ? 'positive' : 'negative';
-            const wSign = strat.windowPL > 0 ? '+' : '';
+            const wSign = strat.windowPL >= 0 ? '+' : '';
 
             tr.innerHTML = `
                 <td><strong>${strat.target}</strong></td>
-                <td class="${wClass}">${wSign}${strat.windowPL.toFixed(0)}</td>
+                <td class="${wClass}">${wSign}${strat.windowPL.toFixed(2)}</td>
                 <td>${strat.hits}</td>
             `;
             tbody.appendChild(tr);
@@ -2219,9 +2212,9 @@
             const card = document.createElement('div');
             card.className = 'target-card';
 
-            const hitSign = res.hitAmt > 0 ? '+' : '';
-            const peakSign = res.peakProfit > 0 ? '+' : '';
-            const finalSign = res.finalProfit > 0 ? '+' : '';
+            const hitSign = res.hitAmt >= 0 ? '+' : '';
+            const peakSign = res.peakProfit >= 0 ? '+' : '';
+            const finalSign = res.finalProfit >= 0 ? '+' : '';
 
             const hitClass = res.hitAmt >= 0 ? 'positive' : 'negative';
             const peakClass = res.peakProfit >= 0 ? 'positive' : 'negative';
@@ -2239,7 +2232,7 @@
                 <div class="target-metrics-rows">
                     <div class="target-metric-row">
                         <span class="target-metric-label">Hit Amt:</span>
-                        <span class="target-metric-val ${hitClass}">${hitSign}${Math.round(res.hitAmt)}</span>
+                        <span class="target-metric-val ${hitClass}">${hitSign}${res.hitAmt}</span>
                     </div>
                     <div class="target-metric-row">
                         <span class="target-metric-label">Hit Rd:</span>
@@ -2247,7 +2240,7 @@
                     </div>
                     <div class="target-metric-row">
                         <span class="target-metric-label">Peak Profit:</span>
-                        <span class="target-metric-val ${peakClass}">${peakSign}${Math.round(res.peakProfit)}</span>
+                        <span class="target-metric-val ${peakClass}">${peakSign}${res.peakProfit}</span>
                     </div>
                     <div class="target-metric-row">
                         <span class="target-metric-label">Peak Time & Date:</span>
@@ -2259,7 +2252,7 @@
                     </div>
                     <div class="target-metric-row">
                         <span class="target-metric-label">Lowest Profit:</span>
-                        <span class="target-metric-val ${lowestClass}">${Math.round(res.lowestProfit)}</span>
+                        <span class="target-metric-val ${lowestClass}">${res.lowestProfit}</span>
                     </div>
                     <div class="target-metric-row">
                         <span class="target-metric-label">Lowest Rd:</span>
@@ -2267,7 +2260,7 @@
                     </div>
                     <div class="target-metric-row" style="border-top: 1px solid var(--border-color); margin-top: 1px; padding-top: 3px;">
                         <span class="target-metric-label">Final Profit:</span>
-                        <span class="target-metric-val ${finalClass}">${finalSign}${Math.round(res.finalProfit)}</span>
+                        <span class="target-metric-val ${finalClass}">${finalSign}${res.finalProfit}</span>
                     </div>
                     <div class="target-metric-row">
                         <span class="target-metric-label">Total Rounds:</span>
