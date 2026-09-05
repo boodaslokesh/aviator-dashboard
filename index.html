@@ -1207,11 +1207,12 @@
                                 <th>Peak Combined Profit</th>
                                 <th>Peak Profit Date & Time</th>
                                 <th>Max Drawdown at Same Time</th>
+                                <th>Target Cross Time</th>
                                 <th>Target Status</th>
                             </tr>
                         </thead>
                         <tbody id="dualBetAllDatesBody">
-                            <tr><td colspan="5" class="no-data">Loading data for all dates...</td></tr>
+                            <tr><td colspan="6" class="no-data">Loading data for all dates...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1858,7 +1859,7 @@
         const userTarget = parseFloat(document.getElementById('dualTargetAmt')?.value) || 0;
 
         if (availableSortedDates.length === 0 || allRowsData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="no-data">No data available for dates</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="no-data">No data available for dates</td></tr>`;
             return;
         }
 
@@ -1872,6 +1873,8 @@
             let peakCombinedProfit = -Infinity;
             let peakDateTime = '-';
             let peakRunningProfits = [];
+            let targetCrossTime = 'Not crossed';
+            let hasCrossedTarget = false;
 
             dateRows.forEach(item => {
                 let roundProfit = 0;
@@ -1892,6 +1895,11 @@
                     dateTime: `${item.time}`,
                     profit: cumulativeProfit
                 });
+
+                if (!hasCrossedTarget && userTarget > 0 && cumulativeProfit >= userTarget) {
+                    hasCrossedTarget = true;
+                    targetCrossTime = item.time;
+                }
 
                 if (cumulativeProfit > peakCombinedProfit) {
                     peakCombinedProfit = cumulativeProfit;
@@ -1925,6 +1933,7 @@
                     <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}${peakCombinedProfit.toFixed(2)}</strong></td>
                     <td><strong style="color: var(--accent-cyan);">${peakDateTime}</strong></td>
                     <td><strong class="${maxDrawdownAtPeakTime >= 0 ? 'positive' : 'negative'}">${ddSign}${maxDrawdownAtPeakTime.toFixed(2)}</strong></td>
+                    <td><strong style="color: var(--accent-cyan);">${targetCrossTime}</strong></td>
                     <td>${statusBadge}</td>
                 </tr>
             `;
@@ -2256,4 +2265,4 @@
 </script>
 
 </body>
-</html>
+</html>[span_0](start_span)[span_0](end_span)
