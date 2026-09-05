@@ -1194,7 +1194,7 @@
                 <div class="streak-summary-content" id="dualBetSummaryContent">Enter dual bets above to analyze combined profit/loss and peak performance.</div>
             </div>
 
-            <!-- NEW TABLE SECTION ADDED UNDER DUAL BET STRATEGY -->
+            <!-- Peak Combined Profit & Peak/Lowest Drawdown by Date Table Section -->
             <div class="streak-summary-box" id="dualBetPeakTableBox" style="display: flex;">
                 <h4>Peak Combined Profit & Peak/Lowest Drawdown by Date</h4>
                 <div class="table-section" style="background: transparent; border: none; padding: 0;">
@@ -1735,7 +1735,7 @@
                 }
             });
 
-            // Group by dates to fill out the peak/lowest table per date
+            // Group by dates to fill out the peak/lowest table per date with timestamps
             let dateGroups = {};
             currentFilteredData.forEach(item => {
                 if (!dateGroups[item.date]) {
