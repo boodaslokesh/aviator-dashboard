@@ -1194,6 +1194,29 @@
                 <div class="streak-summary-content" id="dualBetSummaryContent">Enter dual bets above to analyze combined profit/loss and peak performance.</div>
             </div>
 
+            <!-- NEW TABLE SECTION ADDED UNDER DUAL BET STRATEGY -->
+            <div class="streak-summary-box" id="dualBetPeakTableBox" style="display: flex;">
+                <h4>Peak Combined Profit & Peak/Lowest Drawdown by Date</h4>
+                <div class="table-section" style="background: transparent; border: none; padding: 0;">
+                    <table class="dual-summary-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Peak Combined Profit</th>
+                                <th>Peak Time</th>
+                                <th>Lowest Drawdown</th>
+                                <th>Lowest Drawdown Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dualBetPeakTableBody">
+                            <tr>
+                                <td colspan="5" class="no-data">No data available</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="streak-summary-box" id="streakSummaryBox" style="display: none;">
                 <h4>Streak Analysis Summary</h4>
                 <div class="streak-summary-content" id="streakSummaryContent"></div>
@@ -1665,6 +1688,7 @@
         const streakSummaryBox = document.getElementById('streakSummaryBox');
         const streakSummaryContent = document.getElementById('streakSummaryContent');
         const dualBetSummaryContent = document.getElementById('dualBetSummaryContent');
+        const dualBetPeakTableBody = document.getElementById('dualBetPeakTableBody');
 
         if (isRawDataTabActive) {
             const b1Amt = parseFloat(document.getElementById('dualBet1Amt').value) || 0;
@@ -1710,6 +1734,64 @@
                     lowestDateTime = `${item.date} ${item.time}`;
                 }
             });
+
+            // Group by dates to fill out the peak/lowest table per date
+            let dateGroups = {};
+            currentFilteredData.forEach(item => {
+                if (!dateGroups[item.date]) {
+                    dateGroups[item.date] = [];
+                }
+                dateGroups[item.date].push(item);
+            });
+
+            let tableHtml = '';
+            Object.keys(dateGroups).forEach(dKey => {
+                let dRows = dateGroups[dKey];
+                let dCumProfit = 0;
+                let dPeakProf = -Infinity;
+                let dPeakTime = '-';
+                let dLowProf = Infinity;
+                let dLowTime = '-';
+
+                dRows.forEach(item => {
+                    let rProf = 0;
+                    if (b1Amt > 0) {
+                        rProf -= b1Amt;
+                        if (item.multiplier >= c1Target) rProf += b1Amt * c1Target;
+                    }
+                    if (b2Amt > 0) {
+                        rProf -= b2Amt;
+                        if (item.multiplier >= c2Target) rProf += b2Amt * c2Target;
+                    }
+                    dCumProfit += rProf;
+                    if (dCumProfit > dPeakProf) {
+                        dPeakProf = dCumProfit;
+                        dPeakTime = item.time;
+                    }
+                    if (dCumProfit < dLowProf) {
+                        dLowProf = dCumProfit;
+                        dLowTime = item.time;
+                    }
+                });
+
+                let pSign = dPeakProf >= 0 ? '+' : '';
+                let lSign = dLowProf >= 0 ? '+' : '';
+                tableHtml += `
+                    <tr>
+                        <td><strong>${dKey}</strong></td>
+                        <td class="${dPeakProf >= 0 ? 'positive' : 'negative'}">${pSign}${dPeakProf.toFixed(2)}</td>
+                        <td>${dPeakTime}</td>
+                        <td class="${dLowProf >= 0 ? 'positive' : 'negative'}">${lSign}${dLowProf.toFixed(2)}</td>
+                        <td>${dLowTime}</td>
+                    </tr>
+                `;
+            });
+
+            if (tableHtml === '') {
+                dualBetPeakTableBody.innerHTML = `<tr><td colspan="5" class="no-data">No records match criteria</td></tr>`;
+            } else {
+                dualBetPeakTableBody.innerHTML = tableHtml;
+            }
 
             const recommendedTargetAmount = peakCombinedProfit > 0 ? (peakCombinedProfit * 0.85).toFixed(2) : "0.00";
 
