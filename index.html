@@ -967,7 +967,6 @@
             opacity: 0.85;
         }
 
-        /* Styles for Optimal P/L embedded view container */
         .optimal-view {
             display: none;
             flex-direction: column;
@@ -1192,6 +1191,26 @@
             <div class="streak-summary-box" id="dualBetSummaryBox" style="display: flex;">
                 <h4>Dual Bet Strategy Cumulative & Peak Analysis</h4>
                 <div class="streak-summary-content" id="dualBetSummaryContent">Enter dual bets above to analyze combined profit/loss and peak performance.</div>
+            </div>
+
+            <!-- NEW TABLE ADDED UNDER DUAL BET STRATEGY FOR ALL DATES -->
+            <div class="streak-summary-box" id="dualBetAllDatesBox" style="display: flex;">
+                <h4>Peak Combined Profit & Drawdown For All Dates</h4>
+                <div class="streak-summary-content">
+                    <table class="dual-summary-table" id="dualBetAllDatesTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Peak Combined Profit</th>
+                                <th>Peak Profit Date & Time</th>
+                                <th>Max Drawdown at Same Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dualBetAllDatesBody">
+                            <tr><td colspan="4" class="no-data">Loading data for all dates...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="streak-summary-box" id="streakSummaryBox" style="display: none;">
@@ -1532,15 +1551,20 @@
 
     function resetFilters() {
         const dateSelect = document.getElementById('dateSelect');
-        dateSelect.value = ""; // Default to "All Dates"
+        
+        if (availableSortedDates.length > 0) {
+            dateSelect.value = availableSortedDates[0];
+        } else {
+            dateSelect.value = "";
+        }
 
-        document.getElementById('fromHour').value = "";
-        document.getElementById('fromMin').value = "";
-        document.getElementById('fromSec').value = "";
+        document.getElementById('fromHour').value = "00";
+        document.getElementById('fromMin').value = "00";
+        document.getElementById('fromSec').value = "00";
 
-        document.getElementById('toHour').value = "";
-        document.getElementById('toMin').value = "";
-        document.getElementById('toSec').value = "";
+        document.getElementById('toHour').value = "23";
+        document.getElementById('toMin').value = "59";
+        document.getElementById('toSec').value = "59";
 
         applyFilters();
     }
@@ -1609,10 +1633,14 @@
         if (currentSelected && availableSortedDates.includes(currentSelected)) {
             dateSelect.value = currentSelected;
         } else if (!initialLoadDone) {
-            dateSelect.value = ""; // Default to All Dates
+            if (availableSortedDates.length > 0) {
+                dateSelect.value = availableSortedDates[0];
+            }
             initialLoadDone = true;
         } else {
-            dateSelect.value = currentSelected;
+            if (availableSortedDates.length > 0) {
+                dateSelect.value = availableSortedDates[0];
+            }
         }
 
         applyFilters();
@@ -1702,8 +1730,6 @@
                 }
             });
 
-            // Synchronized peak drawdown time matches peak combined profit time
-            const peakDrawdownTime = peakDateTime;
             const recommendedTargetAmount = peakCombinedProfit > 0 ? (peakCombinedProfit * 0.85).toFixed(2) : "0.00";
 
             if (currentFilteredData.length > 0) {
@@ -1726,8 +1752,8 @@
                             <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}${peakCombinedProfit.toFixed(2)}</strong> (Round #${peakRoundNum} at ${peakDateTime})</td>
                         </tr>
                         <tr>
-                            <th>Peak Drawdown</th>
-                            <td><strong class="${lowestCombinedProfit >= 0 ? 'positive' : 'negative'}">${lowestSign}${lowestCombinedProfit.toFixed(2)}</strong> (Time: ${peakDrawdownTime})</td>
+                            <th>Lowest Combined (Drawdown)</th>
+                            <td><strong class="${lowestCombinedProfit >= 0 ? 'positive' : 'negative'}">${lowestSign}${lowestCombinedProfit.toFixed(2)}</strong> (Round #${lowestRoundNum} at ${lowestDateTime})</td>
                         </tr>
                         <tr>
                             <th>Recommended Target | Stop Amount</th>
@@ -1738,6 +1764,9 @@
             } else {
                 dualBetSummaryContent.innerHTML = `<div style="padding: 6px; color: var(--text-muted);">No records match selected filter for dual bet analysis.</div>`;
             }
+
+            // POPULATE ALL DATES TABLE FOR DUAL BET STRATEGY
+            renderDualBetAllDatesTable(b1Amt, c1Target, b2Amt, c2Target);
 
             const streakInputVal = document.getElementById('streakInputFilter').value.trim();
             if (streakInputVal !== "") {
@@ -1816,6 +1845,83 @@
         renderLatestValues(currentFilteredData);
         renderAnalyticsCards(currentFilteredData, selectedDate);
         renderRawDataTable(currentFilteredData, selectedDate);
+    }
+
+    function renderDualBetAllDatesTable(b1Amt, c1Target, b2Amt, c2Target) {
+        const tbody = document.getElementById('dualBetAllDatesBody');
+        if (!tbody) return;
+
+        if (availableSortedDates.length === 0 || allRowsData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="no-data">No data available for dates</td></tr>`;
+            return;
+        }
+
+        let html = '';
+
+        availableSortedDates.forEach(dateStr => {
+            const dateRows = allRowsData.filter(item => item.date === dateStr);
+            if (dateRows.length === 0) return;
+
+            let cumulativeProfit = 0;
+            let peakCombinedProfit = -Infinity;
+            let peakDateTime = '-';
+            let peakRunningProfits = [];
+
+            // Pass 1: compute cumulative profit per round to find peak combined profit and exact time
+            dateRows.forEach(item => {
+                let roundProfit = 0;
+                if (b1Amt > 0) {
+                    roundProfit -= b1Amt;
+                    if (item.multiplier >= c1Target) {
+                        roundProfit += b1Amt * c1Target;
+                    }
+                }
+                if (b2Amt > 0) {
+                    roundProfit -= b2Amt;
+                    if (item.multiplier >= c2Target) {
+                        roundProfit += b2Amt * c2Target;
+                    }
+                }
+                cumulativeProfit += roundProfit;
+                peakRunningProfits.push({
+                    dateTime: `${item.time}`,
+                    profit: cumulativeProfit
+                });
+
+                if (cumulativeProfit > peakCombinedProfit) {
+                    peakCombinedProfit = cumulativeProfit;
+                    peakDateTime = `${item.time}`;
+                }
+            });
+
+            // Pass 2: calculate drawdown relative to peak or running minimum at that exact peak point
+            // Drawdown at peak time can be evaluated as the lowest cumulative profit up to that peak point, or distance from peak
+            let maxDrawdownAtPeakTime = 0;
+            let runningMin = Infinity;
+            for (let i = 0; i < peakRunningProfits.length; i++) {
+                if (peakRunningProfits[i].profit < runningMin) {
+                    runningMin = peakRunningProfits[i].profit;
+                }
+                if (peakRunningProfits[i].dateTime === peakDateTime) {
+                    maxDrawdownAtPeakTime = runningMin;
+                    break;
+                }
+            }
+
+            const peakSign = peakCombinedProfit >= 0 ? '+' : '';
+            const ddSign = maxDrawdownAtPeakTime >= 0 ? '+' : '';
+
+            html += `
+                <tr>
+                    <td><strong>${dateStr}</strong></td>
+                    <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}${peakCombinedProfit.toFixed(2)}</strong></td>
+                    <td><strong style="color: var(--accent-cyan);">${peakDateTime}</strong></td>
+                    <td><strong class="${maxDrawdownAtPeakTime >= 0 ? 'positive' : 'negative'}">${ddSign}${maxDrawdownAtPeakTime.toFixed(2)}</strong></td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
     }
 
     function updateTopHighestDisplay(dataArray) {
