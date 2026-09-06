@@ -964,7 +964,6 @@
             flex-direction: column;
             gap: 6px;
             width: 100%;
-            height: 80vh;
         }
 
         .optimal-header-bar {
@@ -990,16 +989,6 @@
 
         .optimal-header-bar .btn-raw-data-redirect:hover {
             opacity: 0.85;
-        }
-
-        .optimal-view iframe {
-            width: 1000px;
-            flex-grow: 1;
-            height: calc(100% - 40px);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background-color: var(--bg-panel);
-            width: 100%;
         }
 
         /* Transparent Watermark for Aviator Live */
@@ -1368,12 +1357,82 @@
             </div>
         </div>
 
-        <div id="viewOptimal" class="optimal-view">
-            <div class="optimal-header-bar">
-                <span>Optimal P/L Dashboard</span>
-                <button class="btn-raw-data-redirect" onclick="switchView('rawdatatable')">Raw Data</button>
+        <!-- Optimal P/L Page with Time Range Filter -->
+        <div id="viewOptimal" class="raw-data-view">
+            <div class="control-panel" style="margin-bottom: 6px;">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>FROM TIME</label>
+                        <div class="time-triplet">
+                            <select id="optFromHour" onchange="applyOptimalPL()"><option value="">Hour</option></select>
+                            <select id="optFromMin" onchange="applyOptimalPL()"><option value="">Min</option></select>
+                            <select id="optFromSec" onchange="applyOptimalPL()"><option value="">Sec</option></select>
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>TO TIME</label>
+                        <div class="time-triplet">
+                            <select id="optToHour" onchange="applyOptimalPL()"><option value="">Hour</option></select>
+                            <select id="optToMin" onchange="applyOptimalPL()"><option value="">Min</option></select>
+                            <select id="optToSec" onchange="applyOptimalPL()"><option value="">Sec</option></select>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <iframe id="optimalIframe" src="profit-loss.html"></iframe>
+
+            <div class="logs-filter-toolbar">
+                <div class="dual-bet-toolbar-row">
+                    <div class="filter-group">
+                        <label>DUAL BET 1 AMT</label>
+                        <input type="number" id="optDualBet1Amt" value="10" min="0" step="any" oninput="applyOptimalPL()">
+                    </div>
+                    <div class="filter-group">
+                        <label>DUAL CASH 1 (x)</label>
+                        <input type="number" id="optDualCash1" value="20" min="1.1" step="any" oninput="applyOptimalPL()">
+                    </div>
+                    <div class="filter-group">
+                        <label>DUAL BET 2 AMT</label>
+                        <input type="number" id="optDualBet2Amt" value="10" min="0" step="any" oninput="applyOptimalPL()">
+                    </div>
+                    <div class="filter-group">
+                        <label>DUAL CASH 2 (x)</label>
+                        <input type="number" id="optDualCash2" value="60" min="1.1" step="any" oninput="applyOptimalPL()">
+                    </div>
+                    <div class="filter-group">
+                        <label>TARGET AMT</label>
+                        <input type="number" id="optDualTargetAmt" value="500" min="0" step="any" oninput="applyOptimalPL()">
+                    </div>
+                    <div class="filter-group">
+                        <label>&nbsp;</label>
+                        <button class="btn-reset" onclick="resetOptimalInputs()">Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="streak-summary-box" style="display: flex;">
+                <h4>Optimal P/L - Peak Combined Profit & Drawdown For All Dates with Time Range</h4>
+                <div class="streak-summary-content">
+                    <table class="dual-summary-table" id="optDualBetAllDatesTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Peak Combined Profit</th>
+                                <th>Peak Profit Time</th>
+                                <th>Max Drawdown Peak</th>
+                                <th>Target Amount Crossed</th>
+                                <th>Max Drawdown Target</th>
+                                <th>Target Cross Time</th>
+                                <th>Target Status</th>
+                                <th>Cumulative Combined P/L</th>
+                            </tr>
+                        </thead>
+                        <tbody id="optDualBetAllDatesBody">
+                            <tr><td colspan="9" class="no-data">Loading data for optimal time range across all dates...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1438,6 +1497,22 @@
         document.getElementById('fpToMin').value = "59";
         document.getElementById('fpToSec').value = "59";
         applyFilterPL();
+    }
+
+    function resetOptimalInputs() {
+        document.getElementById('optDualBet1Amt').value = '10';
+        document.getElementById('optDualCash1').value = '20';
+        document.getElementById('optDualBet2Amt').value = '10';
+        document.getElementById('optDualCash2').value = '60';
+        document.getElementById('optDualTargetAmt').value = '500';
+        
+        document.getElementById('optFromHour').value = "00";
+        document.getElementById('optFromMin').value = "00";
+        document.getElementById('optFromSec').value = "00";
+        document.getElementById('optToHour').value = "23";
+        document.getElementById('optToMin').value = "59";
+        document.getElementById('optToSec').value = "59";
+        applyOptimalPL();
     }
 
     function showSubmitModal(bets, targetAmount) {
@@ -1647,6 +1722,8 @@
         document.getElementById('toHour').innerHTML = hourHtml;
         document.getElementById('fpFromHour').innerHTML = hourHtml;
         document.getElementById('fpToHour').innerHTML = hourHtml;
+        document.getElementById('optFromHour').innerHTML = hourHtml;
+        document.getElementById('optToHour').innerHTML = hourHtml;
 
         const minHtml = '<option value="">Min</option>' + Array.from({length: 60}, (_, i) => {
             const m = String(i).padStart(2, '0');
@@ -1656,6 +1733,8 @@
         document.getElementById('toMin').innerHTML = minHtml;
         document.getElementById('fpFromMin').innerHTML = minHtml;
         document.getElementById('fpToMin').innerHTML = minHtml;
+        document.getElementById('optFromMin').innerHTML = minHtml;
+        document.getElementById('optToMin').innerHTML = minHtml;
 
         const secHtml = '<option value="">Sec</option>' + Array.from({length: 60}, (_, i) => {
             const s = String(i).padStart(2, '0');
@@ -1665,6 +1744,8 @@
         document.getElementById('toSec').innerHTML = secHtml;
         document.getElementById('fpFromSec').innerHTML = secHtml;
         document.getElementById('fpToSec').innerHTML = secHtml;
+        document.getElementById('optFromSec').innerHTML = secHtml;
+        document.getElementById('optToSec').innerHTML = secHtml;
     }
 
     function switchView(val) {
@@ -1685,9 +1766,7 @@
         const apiSection = document.getElementById('apiControlsSection');
         const overviewControlPanel = document.getElementById('overviewControlPanel');
         
-        if (val === 'optimal') {
-            overviewControlPanel.style.display = 'none';
-        } else if (val === 'filterpl') {
+        if (val === 'optimal' || val === 'filterpl') {
             overviewControlPanel.style.display = 'none';
         } else {
             overviewControlPanel.style.display = 'flex';
@@ -1700,7 +1779,9 @@
 
         if (val === 'filterpl') {
             applyFilterPL();
-        } else if (val !== 'optimal') {
+        } else if (val === 'optimal') {
+            applyOptimalPL();
+        } else {
             applyFilters();
         }
     }
@@ -1803,6 +1884,9 @@
         if (document.getElementById('viewFilterPL').style.display === 'flex') {
             applyFilterPL();
         }
+        if (document.getElementById('viewOptimal').style.display === 'flex') {
+            applyOptimalPL();
+        }
     }
 
     function parseTimeToSeconds(timeStr) {
@@ -1838,6 +1922,141 @@
         const userTarget = parseFloat(document.getElementById('fpDualTargetAmt').value) || 0;
 
         const tbody = document.getElementById('fpDualBetAllDatesBody');
+        if (!tbody) return;
+
+        if (availableSortedDates.length === 0 || allRowsData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="no-data">No data available for dates</td></tr>`;
+            return;
+        }
+
+        let html = '';
+
+        availableSortedDates.forEach(dateStr => {
+            const dateRows = allRowsData.filter(item => {
+                if (item.date !== dateStr) return false;
+                if (fromSeconds !== null && item.sortKey < fromSeconds) return false;
+                if (toSeconds !== null && item.sortKey > toSeconds) return false;
+                return true;
+            });
+
+            if (dateRows.length === 0) {
+                html += `
+                    <tr>
+                        <td><strong>${dateStr}</strong></td>
+                        <td colspan="8" class="no-data">No records in selected time range</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let cumulativeProfit = 0;
+            let peakCombinedProfit = -Infinity;
+            let peakDateTime = '-';
+            let peakRunningProfits = [];
+            let targetCrossTime = 'Not crossed';
+            let targetCrossDrawdown = 0;
+            let targetCrossAmount = '-';
+            let hasCrossedTarget = false;
+            let runningMin = Infinity;
+
+            dateRows.forEach(item => {
+                let roundProfit = 0;
+                if (b1Amt > 0) {
+                    roundProfit -= b1Amt;
+                    if (item.multiplier >= c1Target) {
+                        roundProfit += b1Amt * c1Target;
+                    }
+                }
+                if (b2Amt > 0) {
+                    roundProfit -= b2Amt;
+                    if (item.multiplier >= c2Target) {
+                        roundProfit += b2Amt * c2Target;
+                    }
+                }
+                cumulativeProfit += roundProfit;
+
+                if (cumulativeProfit < runningMin) {
+                    runningMin = cumulativeProfit;
+                }
+
+                peakRunningProfits.push({
+                    dateTime: `${item.time}`,
+                    profit: cumulativeProfit
+                });
+
+                if (!hasCrossedTarget && userTarget > 0 && cumulativeProfit >= userTarget) {
+                    hasCrossedTarget = true;
+                    targetCrossTime = item.time;
+                    targetCrossDrawdown = runningMin;
+                    targetCrossAmount = cumulativeProfit;
+                }
+
+                if (cumulativeProfit > peakCombinedProfit) {
+                    peakCombinedProfit = cumulativeProfit;
+                    peakDateTime = `${item.time}`;
+                }
+            });
+
+            let maxDrawdownAtPeakTime = 0;
+            let peakMin = Infinity;
+            for (let i = 0; i < peakRunningProfits.length; i++) {
+                if (peakRunningProfits[i].profit < peakMin) {
+                    peakMin = peakRunningProfits[i].profit;
+                }
+                if (peakRunningProfits[i].dateTime === peakDateTime) {
+                    maxDrawdownAtPeakTime = peakMin;
+                    break;
+                }
+            }
+
+            const peakSign = peakCombinedProfit >= 0 ? '+' : '';
+            const ddSign = maxDrawdownAtPeakTime >= 0 ? '+' : '';
+            const crossDdSign = targetCrossDrawdown >= 0 ? '+' : '';
+            const crossAmtSign = (typeof targetCrossAmount === 'number' && targetCrossAmount >= 0) ? '+' : '';
+            const finalPlSign = cumulativeProfit >= 0 ? '+' : '';
+
+            const isCrossed = hasCrossedTarget;
+            const statusBadge = isCrossed 
+                ? `<span style="color: var(--accent-green); font-size: 16px; font-weight: bold;">&#10003;</span>` 
+                : `<span style="color: var(--accent-red); font-size: 16px; font-weight: bold;">&#10007;</span>`;
+
+            html += `
+                <tr>
+                    <td><strong>${dateStr}</strong></td>
+                    <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}${formatAmount(peakCombinedProfit)}</strong></td>
+                    <td><strong style="color: var(--accent-cyan);">${peakDateTime}</strong></td>
+                    <td><strong class="${maxDrawdownAtPeakTime >= 0 ? 'positive' : 'negative'}">${ddSign}${formatAmount(maxDrawdownAtPeakTime)}</strong></td>
+                    <td><strong class="${typeof targetCrossAmount === 'number' && targetCrossAmount >= 0 ? 'positive' : 'negative'}">${isCrossed ? crossAmtSign + formatAmount(targetCrossAmount) : '-'}</strong></td>
+                    <td><strong class="${targetCrossDrawdown >= 0 ? 'positive' : 'negative'}">${isCrossed ? crossDdSign + formatAmount(targetCrossDrawdown) : '-'}</strong></td>
+                    <td><strong style="color: var(--accent-cyan);">${targetCrossTime}</strong></td>
+                    <td>${statusBadge}</td>
+                    <td><strong class="${cumulativeProfit >= 0 ? 'positive' : 'negative'}">${finalPlSign}${formatAmount(cumulativeProfit)}</strong></td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function applyOptimalPL() {
+        const fH = document.getElementById('optFromHour').value;
+        const fM = document.getElementById('optFromMin').value;
+        const fS = document.getElementById('optFromSec').value;
+
+        const tH = document.getElementById('optToHour').value;
+        const tM = document.getElementById('optToMin').value;
+        const tS = document.getElementById('optToSec').value;
+
+        let fromSeconds = fH !== '' ? parseInt(fH, 10) * 3600 + (fM !== '' ? parseInt(fM, 10) * 60 : 0) + (fS !== '' ? parseInt(fS, 10) : 0) : null;
+        let toSeconds = tH !== '' ? parseInt(tH, 10) * 3600 + (tM !== '' ? parseInt(tM, 10) * 60 : 59) + (tS !== '' ? parseInt(tS, 10) : 59) : null;
+
+        const b1Amt = parseFloat(document.getElementById('optDualBet1Amt').value) || 0;
+        const c1Target = parseFloat(document.getElementById('optDualCash1').value) || 0;
+        const b2Amt = parseFloat(document.getElementById('optDualBet2Amt').value) || 0;
+        const c2Target = parseFloat(document.getElementById('optDualCash2').value) || 0;
+        const userTarget = parseFloat(document.getElementById('optDualTargetAmt').value) || 0;
+
+        const tbody = document.getElementById('optDualBetAllDatesBody');
         if (!tbody) return;
 
         if (availableSortedDates.length === 0 || allRowsData.length === 0) {
@@ -2571,6 +2790,7 @@
     initDropdowns();
     resetFilters();
     resetFilterPLInputs();
+    resetOptimalInputs();
     fetchCSVData();
     fetchCurrentBalance();
     fetchBetStatus();
