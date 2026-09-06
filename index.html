@@ -1205,16 +1205,17 @@
                             <tr>
                                 <th>Date</th>
                                 <th>Peak Combined Profit</th>
-                                <th>Peak Profit Date & Time</th>
-                                <th>Max Drawdown at Same Time</th>
-                                <th>Max Drawdown at Target Cross Time</th>
+                                <th>Peak Profit Time</th>
+                                <th>Max Drawdown Peak</th>
                                 <th>Target Amount Crossed</th>
+                                <th>Max Drawdown Target</th>
                                 <th>Target Cross Time</th>
                                 <th>Target Status</th>
+                                <th>Cumulative Combined P/L</th>
                             </tr>
                         </thead>
                         <tbody id="dualBetAllDatesBody">
-                            <tr><td colspan="8" class="no-data">Loading data for all dates...</td></tr>
+                            <tr><td colspan="9" class="no-data">Loading data for all dates...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1871,7 +1872,7 @@
         const userTarget = parseFloat(document.getElementById('dualTargetAmt')?.value) || 0;
 
         if (availableSortedDates.length === 0 || allRowsData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" class="no-data">No data available for dates</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="no-data">No data available for dates</td></tr>`;
             return;
         }
 
@@ -1946,6 +1947,7 @@
             const ddSign = maxDrawdownAtPeakTime >= 0 ? '+' : '';
             const crossDdSign = targetCrossDrawdown >= 0 ? '+' : '';
             const crossAmtSign = (typeof targetCrossAmount === 'number' && targetCrossAmount >= 0) ? '+' : '';
+            const finalPlSign = cumulativeProfit >= 0 ? '+' : '';
 
             const isCrossed = hasCrossedTarget;
             const statusBadge = isCrossed 
@@ -1958,10 +1960,11 @@
                     <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}${formatAmount(peakCombinedProfit)}</strong></td>
                     <td><strong style="color: var(--accent-cyan);">${peakDateTime}</strong></td>
                     <td><strong class="${maxDrawdownAtPeakTime >= 0 ? 'positive' : 'negative'}">${ddSign}${formatAmount(maxDrawdownAtPeakTime)}</strong></td>
-                    <td><strong class="${targetCrossDrawdown >= 0 ? 'positive' : 'negative'}">${isCrossed ? crossDdSign + formatAmount(targetCrossDrawdown) : '-'}</strong></td>
                     <td><strong class="${typeof targetCrossAmount === 'number' && targetCrossAmount >= 0 ? 'positive' : 'negative'}">${isCrossed ? crossAmtSign + formatAmount(targetCrossAmount) : '-'}</strong></td>
+                    <td><strong class="${targetCrossDrawdown >= 0 ? 'positive' : 'negative'}">${isCrossed ? crossDdSign + formatAmount(targetCrossDrawdown) : '-'}</strong></td>
                     <td><strong style="color: var(--accent-cyan);">${targetCrossTime}</strong></td>
                     <td>${statusBadge}</td>
+                    <td><strong class="${cumulativeProfit >= 0 ? 'positive' : 'negative'}">${finalPlSign}${formatAmount(cumulativeProfit)}</strong></td>
                 </tr>
             `;
         });
