@@ -1368,27 +1368,7 @@
             </div>
         </div>
 
-        <div id="viewOptimal" class="optimal-view" style="display: none; flex-direction: column; gap: 6px; width: 100%;">
-            <div class="control-panel" style="margin-bottom: 0;">
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label>FROM TIME</label>
-                        <div class="time-triplet">
-                            <select id="optFromHour" onchange="applyOptimalFilter()"><option value="">Hour</option></select>
-                            <select id="optFromMin" onchange="applyOptimalFilter()"><option value="">Min</option></select>
-                            <select id="optFromSec" onchange="applyOptimalFilter()"><option value="">Sec</option></select>
-                        </div>
-                    </div>
-                    <div class="filter-group">
-                        <label>TO TIME</label>
-                        <div class="time-triplet">
-                            <select id="optToHour" onchange="applyOptimalFilter()"><option value="">Hour</option></select>
-                            <select id="optToMin" onchange="applyOptimalFilter()"><option value="">Min</option></select>
-                            <select id="optToSec" onchange="applyOptimalFilter()"><option value="">Sec</option></select>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div id="viewOptimal" class="optimal-view">
             <div class="optimal-header-bar">
                 <span>Optimal P/L Dashboard</span>
                 <button class="btn-raw-data-redirect" onclick="switchView('rawdatatable')">Raw Data</button>
@@ -1458,29 +1438,6 @@
         document.getElementById('fpToMin').value = "59";
         document.getElementById('fpToSec').value = "59";
         applyFilterPL();
-    }
-
-    function applyOptimalFilter() {
-        const fH = document.getElementById('optFromHour').value;
-        const fM = document.getElementById('optFromMin').value;
-        const fS = document.getElementById('optFromSec').value;
-        const tH = document.getElementById('optToHour').value;
-        const tM = document.getElementById('optToMin').value;
-        const tS = document.getElementById('optToSec').value;
-
-        let fromSeconds = fH !== '' ? parseInt(fH, 10) * 3600 + (fM !== '' ? parseInt(fM, 10) * 60 : 0) + (fS !== '' ? parseInt(fS, 10) : 0) : null;
-        let toSeconds = tH !== '' ? parseInt(tH, 10) * 3600 + (tM !== '' ? parseInt(tM, 10) * 60 : 59) + (tS !== '' ? parseInt(tS, 10) : 59) : null;
-
-        const filtered = allRowsData.filter(item => {
-            if (fromSeconds !== null && item.sortKey < fromSeconds) return false;
-            if (toSeconds !== null && item.sortKey > toSeconds) return false;
-            return true;
-        });
-
-        const iframe = document.getElementById('optimalIframe');
-        if (iframe && iframe.contentWindow && typeof iframe.contentWindow.updateData === 'function') {
-            iframe.contentWindow.updateData(filtered);
-        }
     }
 
     function showSubmitModal(bets, targetAmount) {
@@ -1690,8 +1647,6 @@
         document.getElementById('toHour').innerHTML = hourHtml;
         document.getElementById('fpFromHour').innerHTML = hourHtml;
         document.getElementById('fpToHour').innerHTML = hourHtml;
-        document.getElementById('optFromHour').innerHTML = hourHtml;
-        document.getElementById('optToHour').innerHTML = hourHtml;
 
         const minHtml = '<option value="">Min</option>' + Array.from({length: 60}, (_, i) => {
             const m = String(i).padStart(2, '0');
@@ -1701,8 +1656,6 @@
         document.getElementById('toMin').innerHTML = minHtml;
         document.getElementById('fpFromMin').innerHTML = minHtml;
         document.getElementById('fpToMin').innerHTML = minHtml;
-        document.getElementById('optFromMin').innerHTML = minHtml;
-        document.getElementById('optToMin').innerHTML = minHtml;
 
         const secHtml = '<option value="">Sec</option>' + Array.from({length: 60}, (_, i) => {
             const s = String(i).padStart(2, '0');
@@ -1712,8 +1665,6 @@
         document.getElementById('toSec').innerHTML = secHtml;
         document.getElementById('fpFromSec').innerHTML = secHtml;
         document.getElementById('fpToSec').innerHTML = secHtml;
-        document.getElementById('optFromSec').innerHTML = secHtml;
-        document.getElementById('optToSec').innerHTML = secHtml;
     }
 
     function switchView(val) {
@@ -1749,9 +1700,7 @@
 
         if (val === 'filterpl') {
             applyFilterPL();
-        } else if (val === 'optimal') {
-            applyOptimalFilter();
-        } else {
+        } else if (val !== 'optimal') {
             applyFilters();
         }
     }
@@ -1853,9 +1802,6 @@
         applyFilters();
         if (document.getElementById('viewFilterPL').style.display === 'flex') {
             applyFilterPL();
-        }
-        if (document.getElementById('viewOptimal').style.display === 'flex') {
-            applyOptimalFilter();
         }
     }
 
