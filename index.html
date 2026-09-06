@@ -1845,7 +1845,8 @@
             return;
         }
 
-        let html = '';
+        let computedRows = [];
+        let rawDateResults = [];
 
         availableSortedDates.forEach(dateStr => {
             const dateRows = allRowsData.filter(item => {
@@ -1856,12 +1857,7 @@
             });
 
             if (dateRows.length === 0) {
-                html += `
-                    <tr>
-                        <td><strong>${dateStr}</strong></td>
-                        <td colspan="8" class="no-data">No records in selected time range</td>
-                    </tr>
-                `;
+                rawDateResults.push({ dateStr, isEmpty: true });
                 return;
             }
 
@@ -1925,30 +1921,103 @@
                 }
             }
 
-            const peakSign = peakCombinedProfit >= 0 ? '+' : '';
-            const ddSign = maxDrawdownAtPeakTime >= 0 ? '+' : '';
-            const crossDdSign = targetCrossDrawdown >= 0 ? '+' : '';
-            const crossAmtSign = (typeof targetCrossAmount === 'number' && targetCrossAmount >= 0) ? '+' : '';
-            const finalPlSign = cumulativeProfit >= 0 ? '+' : '';
+            const rowObj = {
+                dateStr,
+                peakCombinedProfit,
+                peakDateTime,
+                maxDrawdownAtPeakTime,
+                targetCrossAmount,
+                targetCrossDrawdown,
+                targetCrossTime,
+                hasCrossedTarget,
+                cumulativeProfit,
+                isEmpty: false
+            };
+            computedRows.push(rowObj);
+            rawDateResults.push(rowObj);
+        });
 
-            const isCrossed = hasCrossedTarget;
-            const statusBadge = isCrossed 
-                ? `<span style="color: var(--accent-green); font-size: 16px; font-weight: bold;">&#10003;</span>` 
-                : `<span style="color: var(--accent-red); font-size: 16px; font-weight: bold;">&#10007;</span>`;
+        let peakProfits = computedRows.map(r => r.peakCombinedProfit);
+        let minPeak = peakProfits.length > 0 ? Math.min(...peakProfits) : null;
+        let maxPeak = peakProfits.length > 0 ? Math.max(...peakProfits) : null;
 
-            html += `
-                <tr>
-                    <td><strong>${dateStr}</strong></td>
-                    <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}${formatAmount(peakCombinedProfit)}</strong></td>
-                    <td><strong style="color: var(--accent-cyan);">${peakDateTime}</strong></td>
-                    <td><strong class="${maxDrawdownAtPeakTime >= 0 ? 'positive' : 'negative'}">${ddSign}${formatAmount(maxDrawdownAtPeakTime)}</strong></td>
-                    <td><strong class="${typeof targetCrossAmount === 'number' && targetCrossAmount >= 0 ? 'positive' : 'negative'}">${isCrossed ? crossAmtSign + formatAmount(targetCrossAmount) : '-'}</strong></td>
-                    <td><strong class="${targetCrossDrawdown >= 0 ? 'positive' : 'negative'}">${isCrossed ? crossDdSign + formatAmount(targetCrossDrawdown) : '-'}</strong></td>
-                    <td><strong style="color: var(--accent-cyan);">${targetCrossTime}</strong></td>
-                    <td>${statusBadge}</td>
-                    <td><strong class="${cumulativeProfit >= 0 ? 'positive' : 'negative'}">${finalPlSign}${formatAmount(cumulativeProfit)}</strong></td>
-                </tr>
-            `;
+        let drawdowns = computedRows.map(r => r.maxDrawdownAtPeakTime);
+        let minDD = drawdowns.length > 0 ? Math.min(...drawdowns) : null;
+        let maxDD = drawdowns.length > 0 ? Math.max(...drawdowns) : null;
+
+        let crossedAmounts = computedRows.filter(r => r.hasCrossedTarget).map(r => r.targetCrossAmount);
+        let minCrossAmt = crossedAmounts.length > 0 ? Math.min(...crossedAmounts) : null;
+        let maxCrossAmt = crossedAmounts.length > 0 ? Math.max(...crossedAmounts) : null;
+
+        let crossedDDs = computedRows.filter(r => r.hasCrossedTarget).map(r => r.targetCrossDrawdown);
+        let minCrossDD = crossedDDs.length > 0 ? Math.min(...crossedDDs) : null;
+        let maxCrossDD = crossedDDs.length > 0 ? Math.max(...crossedDDs) : null;
+
+        let cumulativeProfits = computedRows.map(r => r.cumulativeProfit);
+        let minCum = cumulativeProfits.length > 0 ? Math.min(...cumulativeProfits) : null;
+        let maxCum = cumulativeProfits.length > 0 ? Math.max(...cumulativeProfits) : null;
+
+        let html = '';
+
+        rawDateResults.forEach(r => {
+            if (r.isEmpty) {
+                html += `
+                    <tr>
+                        <td><strong>${r.dateStr}</strong></td>
+                        <td colspan="8" class="no-data">No records in selected time range</td>
+                    </tr>
+                `;
+            } else {
+                const peakSign = r.peakCombinedProfit >= 0 ? '+' : '';
+                const ddSign = r.maxDrawdownAtPeakTime >= 0 ? '+' : '';
+                const crossDdSign = r.targetCrossDrawdown >= 0 ? '+' : '';
+                const crossAmtSign = (typeof r.targetCrossAmount === 'number' && r.targetCrossAmount >= 0) ? '+' : '';
+                const finalPlSign = r.cumulativeProfit >= 0 ? '+' : '';
+
+                let peakStr = `${peakSign}${formatAmount(r.peakCombinedProfit)}`;
+                if (r.peakCombinedProfit === minPeak) peakStr += ' (L)';
+                if (r.peakCombinedProfit === maxPeak) peakStr += ' (H)';
+
+                let ddStr = `${ddSign}${formatAmount(r.maxDrawdownAtPeakTime)}`;
+                if (r.maxDrawdownAtPeakTime === minDD) ddStr += ' (L)';
+                if (r.maxDrawdownAtPeakTime === maxDD) ddStr += ' (H)';
+
+                let crossAmtStr = '-';
+                if (r.hasCrossedTarget) {
+                    crossAmtStr = `${crossAmtSign}${formatAmount(r.targetCrossAmount)}`;
+                    if (r.targetCrossAmount === minCrossAmt) crossAmtStr += ' (L)';
+                    if (r.targetCrossAmount === maxCrossAmt) crossAmtStr += ' (H)';
+                }
+
+                let crossDDStr = '-';
+                if (r.hasCrossedTarget) {
+                    crossDDStr = `${crossDdSign}${formatAmount(r.targetCrossDrawdown)}`;
+                    if (r.targetCrossDrawdown === minCrossDD) crossDDStr += ' (L)';
+                    if (r.targetCrossDrawdown === maxCrossDD) crossDDStr += ' (H)';
+                }
+
+                let cumStr = `${finalPlSign}${formatAmount(r.cumulativeProfit)}`;
+                if (r.cumulativeProfit === minCum) cumStr += ' (L)';
+                if (r.cumulativeProfit === maxCum) cumStr += ' (H)';
+
+                const statusBadge = r.hasCrossedTarget 
+                    ? `<span style="color: var(--accent-green); font-size: 16px; font-weight: bold;">&#10003;</span>` 
+                    : `<span style="color: var(--accent-red); font-size: 16px; font-weight: bold;">&#10007;</span>`;
+
+                html += `
+                    <tr>
+                        <td><strong>${r.dateStr}</strong></td>
+                        <td><strong class="${r.peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakStr}</strong></td>
+                        <td><strong style="color: var(--accent-cyan);">${r.peakDateTime}</strong></td>
+                        <td><strong class="${r.maxDrawdownAtPeakTime >= 0 ? 'positive' : 'negative'}">${ddStr}</strong></td>
+                        <td><strong class="${typeof r.targetCrossAmount === 'number' && r.targetCrossAmount >= 0 ? 'positive' : 'negative'}">${crossAmtStr}</strong></td>
+                        <td><strong class="${r.targetCrossDrawdown >= 0 ? 'positive' : 'negative'}">${crossDDStr}</strong></td>
+                        <td><strong style="color: var(--accent-cyan);">${r.targetCrossTime}</strong></td>
+                        <td>${statusBadge}</td>
+                        <td><strong class="${r.cumulativeProfit >= 0 ? 'positive' : 'negative'}">${cumStr}</strong></td>
+                    </tr>
+                `;
+            }
         });
 
         tbody.innerHTML = html;
@@ -2161,7 +2230,7 @@
             return;
         }
 
-        let html = '';
+        let computedRows = [];
 
         availableSortedDates.forEach(dateStr => {
             const dateRows = allRowsData.filter(item => item.date === dateStr);
@@ -2228,28 +2297,94 @@
                 }
             }
 
-            const peakSign = peakCombinedProfit >= 0 ? '+' : '';
-            const ddSign = maxDrawdownAtPeakTime >= 0 ? '+' : '';
-            const crossDdSign = targetCrossDrawdown >= 0 ? '+' : '';
-            const crossAmtSign = (typeof targetCrossAmount === 'number' && targetCrossAmount >= 0) ? '+' : '';
-            const finalPlSign = cumulativeProfit >= 0 ? '+' : '';
+            computedRows.push({
+                dateStr,
+                peakCombinedProfit,
+                peakDateTime,
+                maxDrawdownAtPeakTime,
+                targetCrossAmount,
+                targetCrossDrawdown,
+                targetCrossTime,
+                hasCrossedTarget,
+                cumulativeProfit
+            });
+        });
 
-            const isCrossed = hasCrossedTarget;
-            const statusBadge = isCrossed 
+        if (computedRows.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="no-data">No records available</td></tr>`;
+            return;
+        }
+
+        let peakProfits = computedRows.map(r => r.peakCombinedProfit);
+        let minPeak = Math.min(...peakProfits);
+        let maxPeak = Math.max(...peakProfits);
+
+        let drawdowns = computedRows.map(r => r.maxDrawdownAtPeakTime);
+        let minDD = Math.min(...drawdowns);
+        let maxDD = Math.max(...drawdowns);
+
+        let crossedAmounts = computedRows.filter(r => r.hasCrossedTarget).map(r => r.targetCrossAmount);
+        let minCrossAmt = crossedAmounts.length > 0 ? Math.min(...crossedAmounts) : null;
+        let maxCrossAmt = crossedAmounts.length > 0 ? Math.max(...crossedAmounts) : null;
+
+        let crossedDDs = computedRows.filter(r => r.hasCrossedTarget).map(r => r.targetCrossDrawdown);
+        let minCrossDD = crossedDDs.length > 0 ? Math.min(...crossedDDs) : null;
+        let maxCrossDD = crossedDDs.length > 0 ? Math.max(...crossedDDs) : null;
+
+        let cumulativeProfits = computedRows.map(r => r.cumulativeProfit);
+        let minCum = Math.min(...cumulativeProfits);
+        let maxCum = Math.max(...cumulativeProfits);
+
+        let html = '';
+
+        computedRows.forEach(r => {
+            const peakSign = r.peakCombinedProfit >= 0 ? '+' : '';
+            const ddSign = r.maxDrawdownAtPeakTime >= 0 ? '+' : '';
+            const crossDdSign = r.targetCrossDrawdown >= 0 ? '+' : '';
+            const crossAmtSign = (typeof r.targetCrossAmount === 'number' && r.targetCrossAmount >= 0) ? '+' : '';
+            const finalPlSign = r.cumulativeProfit >= 0 ? '+' : '';
+
+            let peakStr = `${peakSign}${formatAmount(r.peakCombinedProfit)}`;
+            if (r.peakCombinedProfit === minPeak) peakStr += ' (L)';
+            if (r.peakCombinedProfit === maxPeak) peakStr += ' (H)';
+
+            let ddStr = `${ddSign}${formatAmount(r.maxDrawdownAtPeakTime)}`;
+            if (r.maxDrawdownAtPeakTime === minDD) ddStr += ' (L)';
+            if (r.maxDrawdownAtPeakTime === maxDD) ddStr += ' (H)';
+
+            let crossAmtStr = '-';
+            if (r.hasCrossedTarget) {
+                crossAmtStr = `${crossAmtSign}${formatAmount(r.targetCrossAmount)}`;
+                if (r.targetCrossAmount === minCrossAmt) crossAmtStr += ' (L)';
+                if (r.targetCrossAmount === maxCrossAmt) crossAmtStr += ' (H)';
+            }
+
+            let crossDDStr = '-';
+            if (r.hasCrossedTarget) {
+                crossDDStr = `${crossDdSign}${formatAmount(r.targetCrossDrawdown)}`;
+                if (r.targetCrossDrawdown === minCrossDD) crossDDStr += ' (L)';
+                if (r.targetCrossDrawdown === maxCrossDD) crossDDStr += ' (H)';
+            }
+
+            let cumStr = `${finalPlSign}${formatAmount(r.cumulativeProfit)}`;
+            if (r.cumulativeProfit === minCum) cumStr += ' (L)';
+            if (r.cumulativeProfit === maxCum) cumStr += ' (H)';
+
+            const statusBadge = r.hasCrossedTarget 
                 ? `<span style="color: var(--accent-green); font-size: 16px; font-weight: bold;">&#10003;</span>` 
                 : `<span style="color: var(--accent-red); font-size: 16px; font-weight: bold;">&#10007;</span>`;
 
             html += `
                 <tr>
-                    <td><strong>${dateStr}</strong></td>
-                    <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}${formatAmount(peakCombinedProfit)}</strong></td>
-                    <td><strong style="color: var(--accent-cyan);">${peakDateTime}</strong></td>
-                    <td><strong class="${maxDrawdownAtPeakTime >= 0 ? 'positive' : 'negative'}">${ddSign}${formatAmount(maxDrawdownAtPeakTime)}</strong></td>
-                    <td><strong class="${typeof targetCrossAmount === 'number' && targetCrossAmount >= 0 ? 'positive' : 'negative'}">${isCrossed ? crossAmtSign + formatAmount(targetCrossAmount) : '-'}</strong></td>
-                    <td><strong class="${targetCrossDrawdown >= 0 ? 'positive' : 'negative'}">${isCrossed ? crossDdSign + formatAmount(targetCrossDrawdown) : '-'}</strong></td>
-                    <td><strong style="color: var(--accent-cyan);">${targetCrossTime}</strong></td>
+                    <td><strong>${r.dateStr}</strong></td>
+                    <td><strong class="${r.peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakStr}</strong></td>
+                    <td><strong style="color: var(--accent-cyan);">${r.peakDateTime}</strong></td>
+                    <td><strong class="${r.maxDrawdownAtPeakTime >= 0 ? 'positive' : 'negative'}">${ddStr}</strong></td>
+                    <td><strong class="${typeof r.targetCrossAmount === 'number' && r.targetCrossAmount >= 0 ? 'positive' : 'negative'}">${crossAmtStr}</strong></td>
+                    <td><strong class="${r.targetCrossDrawdown >= 0 ? 'positive' : 'negative'}">${crossDDStr}</strong></td>
+                    <td><strong style="color: var(--accent-cyan);">${r.targetCrossTime}</strong></td>
                     <td>${statusBadge}</td>
-                    <td><strong class="${cumulativeProfit >= 0 ? 'positive' : 'negative'}">${finalPlSign}${formatAmount(cumulativeProfit)}</strong></td>
+                    <td><strong class="${r.cumulativeProfit >= 0 ? 'positive' : 'negative'}">${cumStr}</strong></td>
                 </tr>
             `;
         });
