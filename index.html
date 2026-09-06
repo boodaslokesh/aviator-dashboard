@@ -1328,6 +1328,7 @@
                                 <th>Peak Combined Profit</th>
                                 <th>Peak Profit Time</th>
                                 <th>Max Drawdown Peak</th>
+                                <th>Lowest Combined Drawdown</th>
                                 <th>Target Amount Crossed</th>
                                 <th>Max Drawdown Target</th>
                                 <th>Target Cross Time</th>
@@ -1336,7 +1337,7 @@
                             </tr>
                         </thead>
                         <tbody id="fpDualBetAllDatesBody">
-                            <tr><td colspan="9" class="no-data">Loading data for specific time range across all dates...</td></tr>
+                            <tr><td colspan="10" class="no-data">Loading data for specific time range across all dates...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1841,7 +1842,7 @@
         if (!tbody) return;
 
         if (availableSortedDates.length === 0 || allRowsData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" class="no-data">No data available for dates</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="10" class="no-data">No data available for dates</td></tr>`;
             return;
         }
 
@@ -1870,6 +1871,7 @@
             let targetCrossAmount = '-';
             let hasCrossedTarget = false;
             let runningMin = Infinity;
+            let lowestCombinedProfit = Infinity;
 
             dateRows.forEach(item => {
                 let roundProfit = 0;
@@ -1889,6 +1891,9 @@
 
                 if (cumulativeProfit < runningMin) {
                     runningMin = cumulativeProfit;
+                }
+                if (cumulativeProfit < lowestCombinedProfit) {
+                    lowestCombinedProfit = cumulativeProfit;
                 }
 
                 peakRunningProfits.push({
@@ -1926,6 +1931,7 @@
                 peakCombinedProfit,
                 peakDateTime,
                 maxDrawdownAtPeakTime,
+                lowestCombinedProfit,
                 targetCrossAmount,
                 targetCrossDrawdown,
                 targetCrossTime,
@@ -1944,6 +1950,10 @@
         let drawdowns = computedRows.map(r => r.maxDrawdownAtPeakTime);
         let minDD = drawdowns.length > 0 ? Math.min(...drawdowns) : null;
         let maxDD = drawdowns.length > 0 ? Math.max(...drawdowns) : null;
+
+        let lowestProfits = computedRows.map(r => r.lowestCombinedProfit);
+        let minLowest = lowestProfits.length > 0 ? Math.min(...lowestProfits) : null;
+        let maxLowest = lowestProfits.length > 0 ? Math.max(...lowestProfits) : null;
 
         let crossedAmounts = computedRows.filter(r => r.hasCrossedTarget).map(r => r.targetCrossAmount);
         let minCrossAmt = crossedAmounts.length > 0 ? Math.min(...crossedAmounts) : null;
@@ -1964,12 +1974,13 @@
                 html += `
                     <tr>
                         <td><strong>${r.dateStr}</strong></td>
-                        <td colspan="8" class="no-data">No records in selected time range</td>
+                        <td colspan="10" class="no-data">No records in selected time range</td>
                     </tr>
                 `;
             } else {
                 const peakSign = r.peakCombinedProfit >= 0 ? '+' : '';
                 const ddSign = r.maxDrawdownAtPeakTime >= 0 ? '+' : '';
+                const lowestSign = r.lowestCombinedProfit >= 0 ? '+' : '';
                 const crossDdSign = r.targetCrossDrawdown >= 0 ? '+' : '';
                 const crossAmtSign = (typeof r.targetCrossAmount === 'number' && r.targetCrossAmount >= 0) ? '+' : '';
                 const finalPlSign = r.cumulativeProfit >= 0 ? '+' : '';
@@ -1981,6 +1992,10 @@
                 let ddStr = `${ddSign}${formatAmount(r.maxDrawdownAtPeakTime)}`;
                 if (r.maxDrawdownAtPeakTime === minDD) ddStr += ' (L)';
                 if (r.maxDrawdownAtPeakTime === maxDD) ddStr += ' (H)';
+
+                let lowestStr = `${lowestSign}${formatAmount(r.lowestCombinedProfit)}`;
+                if (r.lowestCombinedProfit === minLowest) lowestStr += ' (L)';
+                if (r.lowestCombinedProfit === maxLowest) lowestStr += ' (H)';
 
                 let crossAmtStr = '-';
                 if (r.hasCrossedTarget) {
@@ -2010,6 +2025,7 @@
                         <td><strong class="${r.peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakStr}</strong></td>
                         <td><strong style="color: var(--accent-cyan);">${r.peakDateTime}</strong></td>
                         <td><strong class="${r.maxDrawdownAtPeakTime >= 0 ? 'positive' : 'negative'}">${ddStr}</strong></td>
+                        <td><strong class="${r.lowestCombinedProfit >= 0 ? 'positive' : 'negative'}">${lowestStr}</strong></td>
                         <td><strong class="${typeof r.targetCrossAmount === 'number' && r.targetCrossAmount >= 0 ? 'positive' : 'negative'}">${crossAmtStr}</strong></td>
                         <td><strong class="${r.targetCrossDrawdown >= 0 ? 'positive' : 'negative'}">${crossDDStr}</strong></td>
                         <td><strong style="color: var(--accent-cyan);">${r.targetCrossTime}</strong></td>
