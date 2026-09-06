@@ -191,7 +191,7 @@
     <!-- 1. Independent Strategy Box first -->
     <div class="independent-strategy-box">
         <div class="strategy-narrative" id="independentStrategyText">
-            Loading optimal parameters from full data logs[cite: 3]...
+            Loading optimal parameters from full data logs...
         </div>
     </div>
 
@@ -210,7 +210,16 @@
                 <label for="plTargetInput">Target P/L</label>
                 <input type="number" id="plTargetInput" value="400">
             </div>
+            <div class="filter-group">
+                <label for="fromTimeInput">From Time</label>
+                <input type="text" id="fromTimeInput" value="12:00:00 AM" placeholder="12:00:00 AM">
+            </div>
+            <div class="filter-group">
+                <label for="toTimeInput">To Time</label>
+                <input type="text" id="toTimeInput" value="12:00:00 PM" placeholder="12:00:00 PM">
+            </div>
             <button class="btn-sync" onclick="scheduleCalculation()">Run Analysis</button>
+            <button class="btn-sync" style="background: var(--border-color); color: var(--text-main);" onclick="resetTimeFilter()">Reset</button>
             <span id="loadingIndicator" class="loading-overlay" style="display:none;">Loading...</span>
         </div>
     </div>
@@ -393,7 +402,6 @@
             const resultData = await response.json();
             renderApiStrategyResponseTable(resultData, dynamicBet1, dynamicBet2);
         } catch (err) {
-            // Dynamically generate fallback results using all unique dates from allRowsData
             const dateMapFallback = {};
             allRowsData.forEach(r => { if (!dateMapFallback[r.date]) dateMapFallback[r.date] = r; });
             const uniqueDateKeys = Object.keys(dateMapFallback);
@@ -459,7 +467,6 @@
             const resultData = await response.json();
             renderSingleOptimalTable(resultData);
         } catch (err) {
-            // Dynamically generate fallback results using all unique dates from allRowsData
             const dateMapFallback = {};
             allRowsData.forEach(r => { if (!dateMapFallback[r.date]) dateMapFallback[r.date] = r; });
             const uniqueDateKeys = Object.keys(dateMapFallback);
@@ -631,21 +638,55 @@
         }, 150);
     }
 
+    function resetTimeFilter() {
+        document.getElementById('fromTimeInput').value = "12:00:00 AM";
+        document.getElementById('toTimeInput').value = "12:00:00 PM";
+        scheduleCalculation();
+    }
+
+    function parseTimeToSeconds(timeStr) {
+        if (!timeStr || timeStr === '-') return 0;
+        try {
+            const parts = timeStr.trim().split(' ');
+            if (parts.length < 2) return 0;
+            const hms = parts[0].split(':');
+            let hours = parseInt(hms[0], 10) || 0;
+            const minutes = parseInt(hms[1], 10) || 0;
+            const seconds = parseInt(hms[2], 10) || 0;
+            const modifier = parts[1].toUpperCase();
+
+            if (modifier === 'PM' && hours < 12) hours += 12;
+            if (modifier === 'AM' && hours === 12) hours = 0;
+
+            return hours * 3600 + minutes * 60 + seconds;
+        } catch (e) {
+            return 0;
+        }
+    }
+
     function runCalculations() {
         const userBet1 = parseFloat(document.getElementById('bet1Input').value) || 10;
         const userBet2 = parseFloat(document.getElementById('bet2Input').value) || 10;
         const userEnteredTarget = parseFloat(document.getElementById('plTargetInput').value) || 400;
 
+        const fromTimeStr = document.getElementById('fromTimeInput').value || "12:00:00 AM";
+        const toTimeStr = document.getElementById('toTimeInput').value || "12:00:00 PM";
+        const fromSeconds = parseTimeToSeconds(fromTimeStr);
+        const toSeconds = parseTimeToSeconds(toTimeStr);
+
         const dateMap = {};
         allRowsData.forEach(row => {
-            if (!dateMap[row.date]) dateMap[row.date] = [];
-            dateMap[row.date].push(row);
+            const rowSeconds = parseTimeToSeconds(row.time);
+            if (rowSeconds >= fromSeconds && rowSeconds <= toSeconds) {
+                if (!dateMap[row.date]) dateMap[row.date] = [];
+                dateMap[row.date].push(row);
+            }
         });
 
         const uniqueDates = Object.keys(dateMap);
         if (uniqueDates.length === 0) {
-            document.getElementById('plCustomResultContent').innerHTML = `<tr><td colspan="4" class="no-data">Ensure data is loaded.</td></tr>`;
-            document.getElementById('dailyCrossingResultContent').innerHTML = `<tr><td colspan="4" class="no-data">Ensure data is loaded.</td></tr>`;
+            document.getElementById('plCustomResultContent').innerHTML = `<tr><td colspan="4" class="no-data">No data found in the given time range (${fromTimeStr} to ${toTimeStr}).</td></tr>`;
+            document.getElementById('dailyCrossingResultContent').innerHTML = `<tr><td colspan="4" class="no-data">No data found in the given time range.</td></tr>`;
             const ind = document.getElementById('loadingIndicator');
             if (ind) ind.style.display = 'none';
             return;
@@ -709,10 +750,10 @@
         const strategyBoxElem = document.getElementById('independentStrategyText');
         if (independentBest) {
             strategyBoxElem.innerHTML = `
-                Hey! If you place <strong>Bet 1 of ${userBet1}</strong> and cash out at <strong>${independentBest.c1}x</strong>, and <strong>Bet 2 of ${userBet2}</strong> and cash out at <strong>${independentBest.c2}x</strong> for every single day, your least highest recommended stop amount on any single day is <span class="positive">+${independentBest.minStop.toFixed(2)}</span> with 100% daily consistency![cite: 3]
+                Hey! If you place <strong>Bet 1 of ${userBet1}</strong> and cash out at <strong>${independentBest.c1}x</strong>, and <strong>Bet 2 of ${userBet2}</strong> and cash out at <strong>${independentBest.c2}x</strong> for every single day within range (${fromTimeStr} - ${toTimeStr}), your least highest recommended stop amount on any single day is <span class="positive">+${independentBest.minStop.toFixed(2)}</span> with 100% daily consistency!
             `;
         } else {
-            strategyBoxElem.innerHTML = `No 100% consistent independent strategy configuration could be resolved with the current bet inputs.`;
+            strategyBoxElem.innerHTML = `No 100% consistent independent strategy configuration could be resolved with the current bet inputs and time range.`;
         }
 
         let successfulCombos = [];
@@ -783,7 +824,7 @@
 
         let resultsTableHtml = '';
         if (successfulCombos.length === 0) {
-            resultsTableHtml = `<tr><td colspan="4" class="no-data">No strategy reached target (${userEnteredTarget}) across ALL ${uniqueDates.length} dates. Try lowering your target amount.</td></tr>`;
+            resultsTableHtml = `<tr><td colspan="4" class="no-data">No strategy reached target (${userEnteredTarget}) across ALL ${uniqueDates.length} dates within range. Try lowering your target amount.</td></tr>`;
         } else {
             successfulCombos.slice(0, 15).forEach((res, index) => {
                 const isBest = index === 0;
