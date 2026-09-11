@@ -1129,7 +1129,7 @@
 
         <div id="viewOverview" style="display: flex; flex-direction: column; gap: 6px; position: relative;">
             <!-- Transparent Background Watermark for Aviator Live -->
-            <div class="aviator-watermark">Playinject Live</div>
+            <div class="aviator-watermark">AVIATOR Live</div>
 
             <div class="running-bet-status-bar" id="runningBetStatusBar">
                 <div class="bet-status-row">
@@ -1201,19 +1201,19 @@
                 <div class="dual-bet-toolbar-row">
                     <div class="filter-group">
                         <label>DUAL BET 1 AMT</label>
-                        <input type="number" id="dualBet1Amt" value="10" min="0" step="any" oninput="applyFilters()">
+                        <input type="number" id="dualBet1Amt" value="5" min="0" step="any" oninput="applyFilters()">
                     </div>
                     <div class="filter-group">
                         <label>DUAL CASH 1 (x)</label>
-                        <input type="number" id="dualCash1" value="20" min="1.1" step="any" oninput="applyFilters()">
+                        <input type="number" id="dualCash1" value="1.5" min="1.1" step="any" oninput="applyFilters()">
                     </div>
                     <div class="filter-group">
                         <label>DUAL BET 2 AMT</label>
-                        <input type="number" id="dualBet2Amt" value="10" min="0" step="any" oninput="applyFilters()">
+                        <input type="number" id="dualBet2Amt" value="5" min="0" step="any" oninput="applyFilters()">
                     </div>
                     <div class="filter-group">
                         <label>DUAL CASH 2 (x)</label>
-                        <input type="number" id="dualCash2" value="60" min="1.1" step="any" oninput="applyFilters()">
+                        <input type="number" id="dualCash2" value="2" min="1.1" step="any" oninput="applyFilters()">
                     </div>
                     <div class="filter-group">
                         <label>TARGET AMT</label>
@@ -1259,6 +1259,28 @@
                 </div>
             </div>
 
+            <!-- Streak Calculation & Capital Analysis Row above Streak Analysis Summary -->
+            <div class="streak-summary-box" id="streakCalcBox" style="display: flex;">
+                <h4>Streak Calculation & Capital Analysis</h4>
+                <div class="dual-bet-toolbar-row" style="margin-bottom: 6px; border-bottom: none; padding-bottom: 0;">
+                    <div class="filter-group">
+                        <label>BET AMOUNT</label>
+                        <input type="number" id="calcBetAmt" value="10" min="0" step="any">
+                    </div>
+                    <div class="filter-group">
+                        <label>STREAK VALUE</label>
+                        <input type="number" id="calcStreakVal" value="3" min="1" step="1">
+                    </div>
+                    <div class="filter-group">
+                        <label>&nbsp;</label>
+                        <button class="btn-submit-api" onclick="calculateStreakAnalysis()">Submit</button>
+                    </div>
+                </div>
+                <div class="streak-summary-content" id="streakCalcContent">
+                    Enter bet amount and streak value above and click Submit to view calculation.
+                </div>
+            </div>
+
             <div class="streak-summary-box" id="streakSummaryBox" style="display: none;">
                 <h4>Streak Analysis Summary</h4>
                 <div class="streak-summary-content" id="streakSummaryContent"></div>
@@ -1293,23 +1315,23 @@
                 <div class="dual-bet-toolbar-row">
                     <div class="filter-group">
                         <label>DUAL BET 1 AMT</label>
-                        <input type="number" id="fpDualBet1Amt" value="10" min="0" step="any" oninput="applyFilterPL()">
+                        <input type="number" id="fpDualBet1Amt" value="5" min="0" step="any" oninput="applyFilterPL()">
                     </div>
                     <div class="filter-group">
                         <label>DUAL CASH 1 (x)</label>
-                        <input type="number" id="fpDualCash1" value="20" min="1.1" step="any" oninput="applyFilterPL()">
+                        <input type="number" id="fpDualCash1" value="1.5" min="1.1" step="any" oninput="applyFilterPL()">
                     </div>
                     <div class="filter-group">
                         <label>DUAL BET 2 AMT</label>
-                        <input type="number" id="fpDualBet2Amt" value="10" min="0" step="any" oninput="applyFilterPL()">
+                        <input type="number" id="fpDualBet2Amt" value="5" min="0" step="any" oninput="applyFilterPL()">
                     </div>
                     <div class="filter-group">
                         <label>DUAL CASH 2 (x)</label>
-                        <input type="number" id="fpDualCash2" value="60" min="1.1" step="any" oninput="applyFilterPL()">
+                        <input type="number" id="fpDualCash2" value="2" min="1.1" step="any" oninput="applyFilterPL()">
                     </div>
                     <div class="filter-group">
                         <label>TARGET AMT</label>
-                        <input type="number" id="fpDualTargetAmt" value="500" min="0" step="any" oninput="applyFilterPL()">
+                        <input type="number" id="fpDualTargetAmt" value="200" min="0" step="any" oninput="applyFilterPL()">
                     </div>
                     <div class="filter-group">
                         <label>&nbsp;</label>
@@ -1328,7 +1350,6 @@
                                 <th>Peak Combined Profit</th>
                                 <th>Peak Profit Time</th>
                                 <th>Max Drawdown Peak</th>
-                                <th>Lowest Combined Drawdown</th>
                                 <th>Target Amount Crossed</th>
                                 <th>Max Drawdown Target</th>
                                 <th>Target Cross Time</th>
@@ -1337,7 +1358,7 @@
                             </tr>
                         </thead>
                         <tbody id="fpDualBetAllDatesBody">
-                            <tr><td colspan="10" class="no-data">Loading data for specific time range across all dates...</td></tr>
+                            <tr><td colspan="9" class="no-data">Loading data for specific time range across all dates...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1842,7 +1863,7 @@
         if (!tbody) return;
 
         if (availableSortedDates.length === 0 || allRowsData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="10" class="no-data">No data available for dates</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="no-data">No data available for dates</td></tr>`;
             return;
         }
 
@@ -1871,7 +1892,6 @@
             let targetCrossAmount = '-';
             let hasCrossedTarget = false;
             let runningMin = Infinity;
-            let lowestCombinedProfit = Infinity;
 
             dateRows.forEach(item => {
                 let roundProfit = 0;
@@ -1891,9 +1911,6 @@
 
                 if (cumulativeProfit < runningMin) {
                     runningMin = cumulativeProfit;
-                }
-                if (cumulativeProfit < lowestCombinedProfit) {
-                    lowestCombinedProfit = cumulativeProfit;
                 }
 
                 peakRunningProfits.push({
@@ -1931,7 +1948,6 @@
                 peakCombinedProfit,
                 peakDateTime,
                 maxDrawdownAtPeakTime,
-                lowestCombinedProfit,
                 targetCrossAmount,
                 targetCrossDrawdown,
                 targetCrossTime,
@@ -1950,10 +1966,6 @@
         let drawdowns = computedRows.map(r => r.maxDrawdownAtPeakTime);
         let minDD = drawdowns.length > 0 ? Math.min(...drawdowns) : null;
         let maxDD = drawdowns.length > 0 ? Math.max(...drawdowns) : null;
-
-        let lowestProfits = computedRows.map(r => r.lowestCombinedProfit);
-        let minLowest = lowestProfits.length > 0 ? Math.min(...lowestProfits) : null;
-        let maxLowest = lowestProfits.length > 0 ? Math.max(...lowestProfits) : null;
 
         let crossedAmounts = computedRows.filter(r => r.hasCrossedTarget).map(r => r.targetCrossAmount);
         let minCrossAmt = crossedAmounts.length > 0 ? Math.min(...crossedAmounts) : null;
@@ -1974,13 +1986,12 @@
                 html += `
                     <tr>
                         <td><strong>${r.dateStr}</strong></td>
-                        <td colspan="10" class="no-data">No records in selected time range</td>
+                        <td colspan="8" class="no-data">No records in selected time range</td>
                     </tr>
                 `;
             } else {
                 const peakSign = r.peakCombinedProfit >= 0 ? '+' : '';
                 const ddSign = r.maxDrawdownAtPeakTime >= 0 ? '+' : '';
-                const lowestSign = r.lowestCombinedProfit >= 0 ? '+' : '';
                 const crossDdSign = r.targetCrossDrawdown >= 0 ? '+' : '';
                 const crossAmtSign = (typeof r.targetCrossAmount === 'number' && r.targetCrossAmount >= 0) ? '+' : '';
                 const finalPlSign = r.cumulativeProfit >= 0 ? '+' : '';
@@ -1992,10 +2003,6 @@
                 let ddStr = `${ddSign}${formatAmount(r.maxDrawdownAtPeakTime)}`;
                 if (r.maxDrawdownAtPeakTime === minDD) ddStr += ' (L)';
                 if (r.maxDrawdownAtPeakTime === maxDD) ddStr += ' (H)';
-
-                let lowestStr = `${lowestSign}${formatAmount(r.lowestCombinedProfit)}`;
-                if (r.lowestCombinedProfit === minLowest) lowestStr += ' (L)';
-                if (r.lowestCombinedProfit === maxLowest) lowestStr += ' (H)';
 
                 let crossAmtStr = '-';
                 if (r.hasCrossedTarget) {
@@ -2025,7 +2032,6 @@
                         <td><strong class="${r.peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakStr}</strong></td>
                         <td><strong style="color: var(--accent-cyan);">${r.peakDateTime}</strong></td>
                         <td><strong class="${r.maxDrawdownAtPeakTime >= 0 ? 'positive' : 'negative'}">${ddStr}</strong></td>
-                        <td><strong class="${r.lowestCombinedProfit >= 0 ? 'positive' : 'negative'}">${lowestStr}</strong></td>
                         <td><strong class="${typeof r.targetCrossAmount === 'number' && r.targetCrossAmount >= 0 ? 'positive' : 'negative'}">${crossAmtStr}</strong></td>
                         <td><strong class="${r.targetCrossDrawdown >= 0 ? 'positive' : 'negative'}">${crossDDStr}</strong></td>
                         <td><strong style="color: var(--accent-cyan);">${r.targetCrossTime}</strong></td>
@@ -2037,6 +2043,100 @@
         });
 
         tbody.innerHTML = html;
+    }
+
+    function calculateStreakAnalysis() {
+        const betAmt = parseFloat(document.getElementById('calcBetAmt').value) || 0;
+        const targetStreak = parseInt(document.getElementById('calcStreakVal').value, 10) || 1;
+        
+        const streakInputVal = document.getElementById('streakInputFilter').value.trim();
+        const n = streakInputVal !== "" ? parseFloat(streakInputVal) : 1;
+        const threshold = n + 1.0;
+
+        let streaks = [];
+        let currentStreak = [];
+
+        currentFilteredData.forEach(item => {
+            if (item.multiplier < threshold) {
+                currentStreak.push(item);
+            } else {
+                if (currentStreak.length > 0) {
+                    streaks.push([...currentStreak]);
+                    currentStreak = [];
+                }
+            }
+        });
+        if (currentStreak.length > 0) {
+            streaks.push([...currentStreak]);
+        }
+
+        const lengthMap = {};
+        streaks.forEach(s => {
+            const len = s.length;
+            if (!lengthMap[len]) {
+                lengthMap[len] = 0;
+            }
+            lengthMap[len]++;
+        });
+
+        const targetCount = lengthMap[targetStreak] || 0;
+        let baseCapital = targetCount * betAmt;
+
+        const higherLengths = Object.keys(lengthMap)
+            .map(Number)
+            .filter(len => len > targetStreak)
+            .sort((a, b) => a - b);
+
+        let deductionRowsHtml = '';
+        let totalDeduction = 0;
+
+        higherLengths.forEach(len => {
+            const count = lengthMap[len];
+            const deduction = count * betAmt;
+            totalDeduction += deduction;
+            deductionRowsHtml += `
+                <tr>
+                    <td><strong>Streak Length ${len} Rounds</strong></td>
+                    <td>${count} occurrences $\times$ ${betAmt}</td>
+                    <td><strong class="negative">-${deduction}</strong></td>
+                </tr>
+            `;
+        });
+
+        const finalNet = baseCapital - totalDeduction;
+
+        const container = document.getElementById('streakCalcContent');
+        
+        let formulaPartsStr = `${baseCapital}`;
+        higherLengths.forEach(len => {
+            const count = lengthMap[len];
+            formulaPartsStr += ` - (${count} $\times$ ${betAmt})`;
+        });
+
+        container.innerHTML = `
+            <table class="dual-summary-table">
+                <thead>
+                    <tr>
+                        <th>Metric / Calculation Step</th>
+                        <th>Details / Breakdown</th>
+                        <th>Result / Capital</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Target Streak (${targetStreak} Rounds)</strong></td>
+                        <td>${targetCount} occurrences $\times$ ${betAmt}</td>
+                        <td><strong class="positive">+${baseCapital}</strong></td>
+                    </tr>
+                    ${deductionRowsHtml}
+                    <tr>
+                        <td><strong>Final Net Calculation</strong></td>
+                        <td>${formulaPartsStr}</td>
+                        <td><strong class="${finalNet >= 0 ? 'positive' : 'negative'}">${finalNet}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
     }
 
     function applyFilters() {
@@ -2145,6 +2245,7 @@
             }
 
             renderDualBetAllDatesTable(b1Amt, c1Target, b2Amt, c2Target);
+            calculateStreakAnalysis();
 
             const streakInputVal = document.getElementById('streakInputFilter').value.trim();
             if (streakInputVal !== "") {
@@ -2168,9 +2269,34 @@
                         streaks.push([...currentStreak]);
                     }
 
-                    streaks.sort((a, b) => b.length - a.length);
+                    const lengthMap = {};
+                    streaks.forEach(s => {
+                        const len = s.length;
+                        if (!lengthMap[len]) {
+                            lengthMap[len] = {
+                                count: 0,
+                                periods: []
+                            };
+                        }
+                        lengthMap[len].count++;
+                        lengthMap[len].periods.push({
+                            start: `${s[0].date} ${s[0].time}`,
+                            end: `${s[s.length - 1].date} ${s[s.length - 1].time}`,
+                            timestamp: parseDateToTimestamp(s[0].date) + s[0].sortKey
+                        });
+                    });
 
-                    if (streaks.length > 0) {
+                    let aggregatedStreaks = Object.keys(lengthMap).map(len => {
+                        return {
+                            length: parseInt(len, 10),
+                            occurrences: lengthMap[len].count,
+                            periods: lengthMap[len].periods
+                        };
+                    });
+
+                    aggregatedStreaks.sort((a, b) => b.length - a.length);
+
+                    if (aggregatedStreaks.length > 0) {
                         streakSummaryBox.style.display = 'flex';
                         let summaryHtml = `
                             <table class="dual-summary-table">
@@ -2178,25 +2304,24 @@
                                     <tr>
                                         <th>Rank</th>
                                         <th>Streak Count</th>
+                                        <th>Occurrences</th>
                                         <th>Period / Timestamp Range</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                         `;
-                        const topCount = Math.min(5, streaks.length);
+                        const topCount = Math.min(10, aggregatedStreaks.length);
                         for (let i = 0; i < topCount; i++) {
-                            const s = streaks[i];
-                            const startTime = s[0].time;
-                            const startDate = s[0].date;
-                            const endTime = s[s.length - 1].time;
-                            const endDate = s[s.length - 1].date;
+                            const item = aggregatedStreaks[i];
                             const ordinal = (i === 0) ? "Highest" : (i === 1) ? "2nd Highest" : (i === 2) ? "3rd Highest" : `${i+1}th Highest`;
+                            const periodStr = item.periods.map(p => `${p.start} → ${p.end}`).join('<br>');
                             
                             summaryHtml += `
                                 <tr>
                                     <td><strong>${ordinal}</strong></td>
-                                    <td><strong style="color: var(--accent-cyan);">${s.length} rounds</strong></td>
-                                    <td>${startDate} ${startTime} &rarr; ${endDate} ${endTime}</td>
+                                    <td><strong style="color: var(--accent-cyan);">${item.length} rounds</strong></td>
+                                    <td><strong style="color: var(--accent-green);">${item.occurrences} times</strong></td>
+                                    <td>${periodStr}</td>
                                 </tr>
                             `;
                         }
@@ -2598,7 +2723,7 @@
             return;
         }
 
-        const targets = [2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 20.0, 30.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 200.0, 300.0, 350.0, 400.0, 500.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 2000.0, 3000.0, 4000.0, 5000.0];
+        const targets = [1.5, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 20.0, 30.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 200.0, 300.0, 350.0, 400.0, 500.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 2000.0, 3000.0, 4000.0, 5000.0];
         let strategyResults = [];
         let bestStrat = "-";
         let maxProfit = -Infinity;
@@ -2644,7 +2769,7 @@
             return;
         }
 
-        const keyTargets = [8, 9, 10, 15, 20, 7, 6, 5, 4, 3, 2, 30, 40, 50, 60, 70, 80, 90, 100, 500, 1000, 2000, 5000, 8000];
+        const keyTargets = [1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 500, 1000, 2000, 5000, 8000];
 
         keyTargets.forEach(t => {
             const res = simulateDetailedStrategy(dataArray, t, 10);
