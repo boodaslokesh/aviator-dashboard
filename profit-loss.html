@@ -58,8 +58,8 @@
         .control-row {
             display: flex;
             flex-direction: row;
-            flex-wrap: wrap;
-            gap: 6px;
+            flex-wrap: nowrap;
+            gap: 4px;
             align-items: flex-end;
             width: 100%;
         }
@@ -69,12 +69,7 @@
             flex-direction: column;
             gap: 2px;
             flex: 1;
-            min-width: 70px;
-        }
-
-        .filter-group.time-group {
-            flex: 2;
-            min-width: 140px;
+            min-width: 0;
         }
 
         .filter-group label {
@@ -87,7 +82,7 @@
             text-overflow: ellipsis;
         }
 
-        input, select {
+        input {
             background-color: var(--bg-input);
             border: 1px solid var(--border-color);
             color: var(--text-main);
@@ -99,19 +94,8 @@
             height: 26px;
         }
 
-        input:focus, select:focus {
+        input:focus {
             border-color: var(--accent-cyan);
-        }
-
-        .time-select-row {
-            display: flex;
-            gap: 2px;
-        }
-
-        .time-select-row select {
-            padding: 2px 1px;
-            font-size: 9px;
-            text-align: center;
         }
 
         .btn-sync {
@@ -119,7 +103,7 @@
             color: #070b14;
             border: none;
             font-weight: bold;
-            padding: 0 10px;
+            padding: 0 8px;
             border-radius: 3px;
             cursor: pointer;
             font-size: 10px;
@@ -199,25 +183,6 @@
             font-weight: bold;
             display: inline-block;
             margin-left: 4px;
-            align-self: center;
-        }
-
-        @media (max-width: 600px) {
-            .control-row {
-                flex-wrap: nowrap;
-            }
-            .filter-group {
-                min-width: 0;
-                flex: 1;
-            }
-            .filter-group.time-group {
-                flex: 2;
-                min-width: 0;
-            }
-            .btn-sync {
-                padding: 0 6px;
-                font-size: 9px;
-            }
         }
     </style>
 </head>
@@ -232,40 +197,18 @@
 
     <!-- 2. Control Panel next -->
     <div class="control-panel">
-        <!-- Row 1: Bet 1, Bet 2, Target P/L, Reset -->
         <div class="control-row">
             <div class="filter-group">
-                <label for="bet1Input">Bet 1</label>
+                <label for="bet1Input">Bet 1 Amount</label>
                 <input type="number" id="bet1Input" value="10">
             </div>
             <div class="filter-group">
-                <label for="bet2Input">Bet 2</label>
+                <label for="bet2Input">Bet 2 Amount</label>
                 <input type="number" id="bet2Input" value="10">
             </div>
             <div class="filter-group">
-                <label for="plTargetInput">Target</label>
+                <label for="plTargetInput">Target P/L</label>
                 <input type="number" id="plTargetInput" value="400">
-            </div>
-            <button class="btn-sync" style="background: var(--border-color); color: var(--text-main);" onclick="resetTimeFilter()">Reset</button>
-        </div>
-
-        <!-- Row 2: From Time, To Time, Run Analysis, Loading Indicator -->
-        <div class="control-row" style="margin-top: 4px;">
-            <div class="filter-group time-group">
-                <label>From (HH:MM:SS)</label>
-                <div class="time-select-row">
-                    <select id="fromHour"></select>
-                    <select id="fromMinute"></select>
-                    <select id="fromSecond"></select>
-                </div>
-            </div>
-            <div class="filter-group time-group">
-                <label>To (HH:MM:SS)</label>
-                <div class="time-select-row">
-                    <select id="toHour"></select>
-                    <select id="toMinute"></select>
-                    <select id="toSecond"></select>
-                </div>
             </div>
             <button class="btn-sync" onclick="scheduleCalculation()">Run Analysis</button>
             <span id="loadingIndicator" class="loading-overlay" style="display:none;">Loading...</span>
@@ -312,7 +255,7 @@
         </table>
     </div>
 
-    <!-- 5. All Matching Strategy Results last -->
+    <!-- 5. All Matching Strategy Results -->
     <div class="table-section">
         <div class="section-header-row" style="display: flex; justify-content: space-between; align-items: center;">
             <h3 id="resultHeaderTitle">All Matching Strategy Results</h3>
@@ -335,7 +278,27 @@
         </table>
     </div>
 
-    <!-- 6. New Single Optimal API Form & Table Section -->
+    <!-- 6. NEW TABLE SECTION: Multi-Day Cumulative Net Profit Aggregator -->
+    <div class="table-section">
+        <h3>Multi-Day Net Profit Strategy Aggregator (+10,000 / +15,000+ Target)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Strategy Configuration (C1 & C2)</th>
+                    <th>Performance Summary</th>
+                    <th>Total Net Cumulative P/L</th>
+                    <th>Status / Goal Check</th>
+                </tr>
+            </thead>
+            <tbody id="multiDayAggregatorTableBody">
+                <tr>
+                    <td colspan="4" class="no-data">Run analysis to view multi-day aggregated profit performance</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 7. Single Optimal API Form & Table Section -->
     <div class="control-panel" style="margin-top: 10px;">
         <h3 style="margin: 0; font-size: 11px; color: var(--accent-cyan); font-weight: 600;">Single Optimal Strategy Trigger</h3>
         <div class="control-row">
@@ -392,39 +355,6 @@
 
     let allRowsData = [];
     let calculationTimer = null;
-
-    function initTimeDropdowns() {
-        const hours = Array.from({length: 24}, (_, i) => String(i).padStart(2, '0'));
-        const minutesSeconds = Array.from({length: 60}, (_, i) => String(i).padStart(2, '0'));
-
-        const populate = (id, arr, defaultVal) => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.innerHTML = arr.map(val => `<option value="${val}" ${val === defaultVal ? 'selected' : ''}>${val}</option>`).join('');
-        };
-
-        populate('fromHour', hours, '00');
-        populate('fromMinute', minutesSeconds, '00');
-        populate('fromSecond', minutesSeconds, '00');
-
-        populate('toHour', hours, '23');
-        populate('toMinute', minutesSeconds, '59');
-        populate('toSecond', minutesSeconds, '59');
-    }
-
-    function getFromTime() {
-        const h = document.getElementById('fromHour').value || '00';
-        const m = document.getElementById('fromMinute').value || '00';
-        const s = document.getElementById('fromSecond').value || '00';
-        return `${h}:${m}:${s}`;
-    }
-
-    function getToTime() {
-        const h = document.getElementById('toHour').value || '23';
-        const m = document.getElementById('toMinute').value || '59';
-        const s = document.getElementById('toSecond').value || '59';
-        return `${h}:${m}:${s}`;
-    }
 
     async function fetchCurrentBalance() {
         try {
@@ -494,7 +424,7 @@
                     "status": "TARGET_REACHED",
                     "maxAmountRequired": 120,
                     "finalProfit": 560,
-                    "data": { "roundNumber": 101, "date": dt, "time": dateMapFallback[dt].time || "00:00:00", "multiplier": "34.29x", "amountRequired": 120, "currentRoundNetProfit": 410, "totalProfit": 560, "targetAmount": targetAmountVal }
+                    "data": { "roundNumber": 101, "date": dt, "time": dateMapFallback[dt].time || "12:00:00 AM", "multiplier": "34.29x", "amountRequired": 120, "currentRoundNetProfit": 410, "totalProfit": 560, "targetAmount": targetAmountVal }
                 }
             })) : [
                 {
@@ -504,7 +434,7 @@
                         "status": "TARGET_REACHED",
                         "maxAmountRequired": 1940,
                         "finalProfit": 560,
-                        "data": { "roundNumber": 567, "date": "22/08/2026", "time": "03:13:25", "multiplier": "103.86x", "amountRequired": 1940, "currentRoundNetProfit": 360, "totalProfit": 560, "targetAmount": targetAmountVal }
+                        "data": { "roundNumber": 567, "date": "22/08/2026", "time": "03:13:25 AM", "multiplier": "103.86x", "amountRequired": 1940, "currentRoundNetProfit": 360, "totalProfit": 560, "targetAmount": targetAmountVal }
                     }
                 }
             ];
@@ -559,7 +489,7 @@
                     "status": "TARGET_REACHED",
                     "maxAmountRequired": 150,
                     "finalProfit": 750,
-                    "data": { "roundNumber": 202, "date": dt, "time": dateMapFallback[dt].time || "00:00:00", "multiplier": "42.35x", "amountRequired": 150, "currentRoundNetProfit": 430, "totalProfit": 750, "targetAmount": targetAmount || 700 }
+                    "data": { "roundNumber": 202, "date": dt, "time": dateMapFallback[dt].time || "12:00:00 AM", "multiplier": "42.35x", "amountRequired": 150, "currentRoundNetProfit": 430, "totalProfit": 750, "targetAmount": targetAmount || 700 }
                 }
             })) : [
                 {
@@ -569,7 +499,7 @@
                         "status": "TARGET_REACHED",
                         "maxAmountRequired": 2810,
                         "finalProfit": 750,
-                        "data": { "roundNumber": 621, "date": "22/08/2026", "time": "03:28:44", "multiplier": "42.35x", "amountRequired": 2810, "currentRoundNetProfit": 430, "totalProfit": 750, "targetAmount": targetAmount || 700 }
+                        "data": { "roundNumber": 621, "date": "22/08/2026", "time": "03:28:44 AM", "multiplier": "42.35x", "amountRequired": 2810, "currentRoundNetProfit": 430, "totalProfit": 750, "targetAmount": targetAmount || 700 }
                     }
                 }
             ];
@@ -611,8 +541,8 @@
 
             html += `
                 <tr>
-                    <td><strong>${date} ${timeVal}</strong></td>
-                    <td>B1: ${b1}, C1: ${c1}, B2: ${b2}, C2: ${c2}</td>
+                    <td><strong>${date}${timeVal}</strong></td>
+                    <td>B1: ${b1}, C1:${c1}, B2: ${b2}, C2:${c2}</td>
                     <td><strong class="negative">${maxAmtReq}</strong></td>
                     <td><span class="positive">${status}</span></td>
                 </tr>
@@ -643,8 +573,8 @@
 
             html += `
                 <tr>
-                    <td><strong>${item.date} ${timeVal}</strong></td>
-                    <td>${b1} C1 ${c1}x || ${b2} C2 ${c2}x</td>
+                    <td><strong>${item.date}${timeVal}</strong></td>
+                    <td>${b1} C1${c1}x || ${b2} C2${c2}x</td>
                     <td><span class="positive">${item.bestStrategyResult.status}</span></td>
                     <td><strong class="negative">${amtReqFormatted}</strong></td>
                 </tr>
@@ -674,28 +604,6 @@
         }
     }
 
-    function convertTo24HourFormat(timeStr) {
-        if (!timeStr || timeStr === '-') return '00:00:00';
-        let cleanTime = timeStr.trim();
-        const upper = cleanTime.toUpperCase();
-        if (upper.includes('AM') || upper.includes('PM')) {
-            const parts = cleanTime.split(' ');
-            if (parts.length >= 2) {
-                const hms = parts[0].split(':');
-                let hours = parseInt(hms[0], 10) || 0;
-                const minutes = hms[1] || '00';
-                const seconds = hms[2] || '00';
-                const modifier = parts[1].toUpperCase();
-
-                if (modifier === 'PM' && hours < 12) hours += 12;
-                if (modifier === 'AM' && hours === 12) hours = 0;
-
-                return `${String(hours).padStart(2, '0')}:${minutes}:${seconds}`;
-            }
-        }
-        return cleanTime;
-    }
-
     function processCSV(csvText) {
         const lines = csvText.trim().split('\n').filter(l => l.trim().length > 0);
         const rows = lines.length > 0 && lines[0].toLowerCase().includes('date') ? lines.slice(1) : lines;
@@ -706,11 +614,11 @@
             if (parts.length >= 3) {
                 let rawDate = parts[0].replace(/\\/g, '');
                 let standardizedDate = rawDate.replace(/\//g, '-');
-                let foundTime = '00:00:00';
+                let foundTime = '-';
                 let foundMultStr = parts[parts.length - 1].replace(/x/gi, '').trim();
 
-                if (parts[1] && (parts[1].includes(':') || parts[1].toUpperCase().includes('AM') || parts[1].toUpperCase().includes('PM'))) {
-                    foundTime = convertTo24HourFormat(parts[1]);
+                if (parts[1] && parts[1].includes(':')) {
+                    foundTime = parts[1];
                     foundMultStr = parts[2].replace(/x/gi, '').trim();
                 }
 
@@ -741,54 +649,22 @@
         }, 150);
     }
 
-    function resetTimeFilter() {
-        document.getElementById('fromHour').value = "00";
-        document.getElementById('fromMinute').value = "00";
-        document.getElementById('fromSecond').value = "00";
-
-        document.getElementById('toHour').value = "23";
-        document.getElementById('toMinute').value = "59";
-        document.getElementById('toSecond').value = "59";
-        scheduleCalculation();
-    }
-
-    function parseTimeToSeconds(timeStr) {
-        if (!timeStr || timeStr === '-') return 0;
-        try {
-            const clean = convertTo24HourFormat(timeStr);
-            const hms = clean.split(':');
-            const hours = parseInt(hms[0], 10) || 0;
-            const minutes = parseInt(hms[1], 10) || 0;
-            const seconds = parseInt(hms[2], 10) || 0;
-            return hours * 3600 + minutes * 60 + seconds;
-        } catch (e) {
-            return 0;
-        }
-    }
-
     function runCalculations() {
         const userBet1 = parseFloat(document.getElementById('bet1Input').value) || 10;
         const userBet2 = parseFloat(document.getElementById('bet2Input').value) || 10;
         const userEnteredTarget = parseFloat(document.getElementById('plTargetInput').value) || 400;
 
-        const fromTimeStr = getFromTime();
-        const toTimeStr = getToTime();
-        const fromSeconds = parseTimeToSeconds(fromTimeStr);
-        const toSeconds = parseTimeToSeconds(toTimeStr);
-
         const dateMap = {};
         allRowsData.forEach(row => {
-            const rowSeconds = parseTimeToSeconds(row.time);
-            if (rowSeconds >= fromSeconds && rowSeconds <= toSeconds) {
-                if (!dateMap[row.date]) dateMap[row.date] = [];
-                dateMap[row.date].push(row);
-            }
+            if (!dateMap[row.date]) dateMap[row.date] = [];
+            dateMap[row.date].push(row);
         });
 
         const uniqueDates = Object.keys(dateMap);
         if (uniqueDates.length === 0) {
-            document.getElementById('plCustomResultContent').innerHTML = `<tr><td colspan="4" class="no-data">No data found in the given time range (${fromTimeStr} to ${toTimeStr}).</td></tr>`;
-            document.getElementById('dailyCrossingResultContent').innerHTML = `<tr><td colspan="4" class="no-data">No data found in the given time range.</td></tr>`;
+            document.getElementById('plCustomResultContent').innerHTML = `<tr><td colspan="4" class="no-data">Ensure data is loaded.</td></tr>`;
+            document.getElementById('dailyCrossingResultContent').innerHTML = `<tr><td colspan="4" class="no-data">Ensure data is loaded.</td></tr>`;
+            document.getElementById('multiDayAggregatorTableBody').innerHTML = `<tr><td colspan="4" class="no-data">Ensure data is loaded.</td></tr>`;
             const ind = document.getElementById('loadingIndicator');
             if (ind) ind.style.display = 'none';
             return;
@@ -852,13 +728,14 @@
         const strategyBoxElem = document.getElementById('independentStrategyText');
         if (independentBest) {
             strategyBoxElem.innerHTML = `
-                Hey! If you place <strong>Bet 1 of ${userBet1}</strong> and cash out at <strong>${independentBest.c1}x</strong>, and <strong>Bet 2 of ${userBet2}</strong> and cash out at <strong>${independentBest.c2}x</strong> for every single day within range (${fromTimeStr} - ${toTimeStr}), your least highest recommended stop amount on any single day is <span class="positive">+${independentBest.minStop.toFixed(2)}</span> with 100% daily consistency!
+                Hey! If you place <strong>Bet 1 of ${userBet1}</strong> and cash out at <strong>${independentBest.c1}x</strong>, and <strong>Bet 2 of ${userBet2}</strong> and cash out at <strong>${independentBest.c2}x</strong> for every single day, your least highest recommended stop amount on any single day is <span class="positive">+${independentBest.minStop.toFixed(2)}</span> with 100% daily consistency!
             `;
         } else {
-            strategyBoxElem.innerHTML = `No 100% consistent independent strategy configuration could be resolved with the current bet inputs and time range.`;
+            strategyBoxElem.innerHTML = `No 100% consistent independent strategy configuration could be resolved with the current bet inputs.`;
         }
 
         let successfulCombos = [];
+        let multiDayAggregatorResults = [];
 
         for (let i = 0; i < multipliers.length; i++) {
             for (let j = 0; j < multipliers.length; j++) {
@@ -869,6 +746,7 @@
                 let datesHitCount = 0;
                 let totalSumPeak = 0;
                 let sumRecommendedStop = 0;
+                let cumulativeNetProfitAcrossAllDays = 0;
 
                 for (let d = 0; d < uniqueDates.length; d++) {
                     const rowObjs = dateMap[uniqueDates[d]];
@@ -896,37 +774,50 @@
                         if (currentLockIn > dateMaxLockIn) dateMaxLockIn = currentLockIn;
                     }
 
+                    cumulativeNetProfitAcrossAllDays += dateMaxLockIn;
+
                     if (dateMaxLockIn >= userEnteredTarget) {
                         datesHitCount++;
                     } else {
                         allDatesReachedLockIn = false;
-                        break; 
                     }
 
                     totalSumPeak += peakProfit;
                     sumRecommendedStop += dateMaxLockIn;
                 }
 
+                const avgPeak = totalSumPeak / uniqueDates.length;
+                const avgRecommendedStop = sumRecommendedStop / uniqueDates.length;
+
                 if (allDatesReachedLockIn && datesHitCount === uniqueDates.length) {
-                    const avgPeak = totalSumPeak / uniqueDates.length;
-                    const avgRecommendedStop = sumRecommendedStop / uniqueDates.length;
-                    
                     successfulCombos.push({
-                        name: `Bet 1: ${userBet1} @ ${c1}x | Bet 2: ${userBet2} @ ${c2}x`,
+                        name: `Bet 1: ${userBet1} @${c1}x | Bet 2: ${userBet2} @${c2}x`,
                         datesHitCount: datesHitCount,
                         totalDates: uniqueDates.length,
                         peakProfit: avgPeak,
                         recommendedStop: avgRecommendedStop.toFixed(2)
                     });
                 }
+
+                // Collect for multi-day accumulator targeting +10000 / +15000+ overall
+                if (cumulativeNetProfitAcrossAllDays >= 10000) {
+                    multiDayAggregatorResults.push({
+                        config: `Bet 1: ${userBet1} (${c1}x) || Bet 2: ${userBet2} (${c2}x)`,
+                        hitCount: datesHitCount,
+                        totalDays: uniqueDates.length,
+                        totalNetProfit: cumulativeNetProfitAcrossAllDays,
+                        avgDaily: cumulativeNetProfitAcrossAllDays / uniqueDates.length
+                    });
+                }
             }
         }
 
         successfulCombos.sort((a, b) => b.peakProfit - a.peakProfit);
+        multiDayAggregatorResults.sort((a, b) => b.totalNetProfit - a.totalNetProfit);
 
         let resultsTableHtml = '';
         if (successfulCombos.length === 0) {
-            resultsTableHtml = `<tr><td colspan="4" class="no-data">No strategy reached target (${userEnteredTarget}) across ALL ${uniqueDates.length} dates within range. Try lowering your target amount.</td></tr>`;
+            resultsTableHtml = `<tr><td colspan="4" class="no-data">No strategy reached target (${userEnteredTarget}) across ALL${uniqueDates.length} dates. Try lowering your target amount.</td></tr>`;
         } else {
             successfulCombos.slice(0, 15).forEach((res, index) => {
                 const isBest = index === 0;
@@ -936,15 +827,35 @@
                 resultsTableHtml += `
                     <tr style="${rowStyle}">
                         <td><strong>${res.name}</strong>${bestBadge}</td>
-                        <td><span class="positive">${res.datesHitCount} / ${res.totalDates} Dates (100%)</span></td>
+                        <td><span class="positive">${res.datesHitCount} /${res.totalDates} Dates (100%)</span></td>
                         <td><strong class="positive">+${res.peakProfit.toFixed(2)}</strong></td>
                         <td><strong style="color: var(--accent-cyan);">+${res.recommendedStop}</strong></td>
                     </tr>
                 `;
             });
         }
-
         document.getElementById('plCustomResultContent').innerHTML = resultsTableHtml;
+
+        // Render Multi-Day Aggregator Table
+        let aggregatorHtml = '';
+        if (multiDayAggregatorResults.length === 0) {
+            aggregatorHtml = `<tr><td colspan="4" class="no-data">No strategies achieved a cumulative total net profit of +10,000+ across all dates.</td></tr>`;
+        } else {
+            multiDayAggregatorResults.slice(0, 10).forEach((item, idx) => {
+                const isTopTarget = item.totalNetProfit >= 15000;
+                let badge = isTopTarget ? `<span style="background: var(--accent-cyan); color: #000; padding: 1px 5px; border-radius: 3px; font-size: 8px; font-weight: bold; margin-left: 5px;">🔥 +15k TARGET</span>` : ``;
+                
+                aggregatorHtml += `
+                    <tr>
+                        <td><strong>${item.config}</strong>${badge}</td>
+                        <td><span class="positive">${item.hitCount} / ${item.totalDays} Consistent Days</span></td>
+                        <td><strong class="positive">+${item.totalNetProfit.toFixed(2)}</strong></td>
+                        <td><span style="color: var(--accent-green);">Optimal Profit Achieved (Avg: +${item.avgDaily.toFixed(2)}/day)</span></td>
+                    </tr>
+                `;
+            });
+        }
+        document.getElementById('multiDayAggregatorTableBody').innerHTML = aggregatorHtml;
 
         let activeC1 = independentBest ? independentBest.c1 : multipliers[0];
         let activeC2 = independentBest ? independentBest.c2 : multipliers[0];
@@ -1014,7 +925,6 @@
         if (loadingIndicator) loadingIndicator.style.display = 'none';
     }
 
-    initTimeDropdowns();
     fetchCSVData();
     fetchCurrentBalance();
     fetchBetStatus();
