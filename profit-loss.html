@@ -223,15 +223,16 @@
 </head>
 <body>
 <div class="dashboard-container">
-    <!-- 1. Independent Strategy Box -->
+    <!-- 1. Independent Strategy Box first -->
     <div class="independent-strategy-box">
         <div class="strategy-narrative" id="independentStrategyText">
-            Loading optimal cumulative strategy across all historical days...
+            Loading optimal parameters from full data logs...
         </div>
     </div>
 
-    <!-- 2. Control Panel -->
+    <!-- 2. Control Panel next -->
     <div class="control-panel">
+        <!-- Row 1: Bet 1, Bet 2, Target P/L, Reset -->
         <div class="control-row">
             <div class="filter-group">
                 <label for="bet1Input">Bet 1</label>
@@ -248,6 +249,7 @@
             <button class="btn-sync" style="background: var(--border-color); color: var(--text-main);" onclick="resetTimeFilter()">Reset</button>
         </div>
 
+        <!-- Row 2: From Time, To Time, Run Analysis, Loading Indicator -->
         <div class="control-row" style="margin-top: 4px;">
             <div class="filter-group time-group">
                 <label>From (HH:MM:SS)</label>
@@ -270,16 +272,16 @@
         </div>
     </div>
 
-    <!-- 3. Strategy Performance Matrix (Cumulative Overall Profit Ranking) -->
+    <!-- 3. Strategy Performance Matrix next -->
     <div class="table-section">
-        <h3 id="suppHeaderTitle">Best Cumulative Cashout Strategy Ranking (All Days Combined Net P/L)</h3>
+        <h3 id="suppHeaderTitle">Strategy Performance Matrix</h3>
         <table>
             <thead>
                 <tr>
-                    <th>Cashout Strategy (C1 & C2)</th>
-                    <th>Evaluation Status</th>
-                    <th>Grand Total Cumulative P/L</th>
-                    <th>Avg Recommended Stop</th>
+                    <th>Strategy Configuration</th>
+                    <th>Consistency</th>
+                    <th>Avg Peak Profit</th>
+                    <th>Recommended Stop</th>
                 </tr>
             </thead>
             <tbody id="plCustomResultContent">
@@ -290,7 +292,7 @@
         </table>
     </div>
 
-    <!-- 4. First Round & Time Target Crossed Per Date -->
+    <!-- 4. First Round & Time Target Crossed Per Date next -->
     <div class="table-section">
         <h3 id="dailyCrossingHeaderTitle">First Round & Time Target Crossed Per Date</h3>
         <table>
@@ -310,7 +312,7 @@
         </table>
     </div>
 
-    <!-- 5. All Matching Strategy Results -->
+    <!-- 5. All Matching Strategy Results last -->
     <div class="table-section">
         <div class="section-header-row" style="display: flex; justify-content: space-between; align-items: center;">
             <h3 id="resultHeaderTitle">All Matching Strategy Results</h3>
@@ -333,7 +335,7 @@
         </table>
     </div>
 
-    <!-- 6. Single Optimal API Form & Table Section -->
+    <!-- 6. New Single Optimal API Form & Table Section -->
     <div class="control-panel" style="margin-top: 10px;">
         <h3 style="margin: 0; font-size: 11px; color: var(--accent-cyan); font-weight: 600;">Single Optimal Strategy Trigger</h3>
         <div class="control-row">
@@ -343,7 +345,7 @@
             </div>
             <div class="filter-group">
                 <label for="singleCashout1">cashour1</label>
-                <input type="number" id="singleCashout1" value="20">
+                <input type="number" id="singleCashout1" value="0">
             </div>
             <div class="filter-group">
                 <label for="singleBet2">bet2</label>
@@ -351,7 +353,7 @@
             </div>
             <div class="filter-group">
                 <label for="singleCashout2">cashout2</label>
-                <input type="number" id="singleCashout2" value="200">
+                <input type="number" id="singleCashout2" value="0">
             </div>
             <div class="filter-group">
                 <label for="singleTargetAmount">target amount</label>
@@ -456,10 +458,11 @@
         const payload = {
             "targetAmount": targetAmountVal,
             "strategies": [
-                { "bet1": dynamicBet1, "cashou1": 20, "bet2": dynamicBet2, "cashout2": 200 },
-                { "bet1": dynamicBet1, "cashou1": 200, "bet2": dynamicBet2, "cashout2": 20 },
-                { "bet1": dynamicBet1, "cashou1": 10, "bet2": dynamicBet2, "cashout2": 50 },
-                { "bet1": dynamicBet1, "cashou1": 50, "bet2": dynamicBet2, "cashout2": 10 }
+                { "bet1": dynamicBet1, "cashou1": 9, "bet2": dynamicBet2, "cashout2": 30 },
+                { "bet1": dynamicBet1, "cashou1": 30, "bet2": dynamicBet2, "cashout2": 9 },
+                { "bet1": dynamicBet1, "cashou1": 8, "bet2": dynamicBet2, "cashout2": 30 },
+                { "bet1": dynamicBet1, "cashou1": 30, "bet2": dynamicBet2, "cashout2": 8 },
+                { "bet1": dynamicBet1, "cashou1": 12, "bet2": dynamicBet2, "cashout2": 12 }
             ]
         };
 
@@ -487,13 +490,24 @@
             const mockData = uniqueDateKeys.length > 0 ? uniqueDateKeys.map(dt => ({
                 "date": dt,
                 "bestStrategyResult": {
-                    "strategy": { "bet1": dynamicBet1, "cashou1": 20, "bet2": dynamicBet2, "cashout2": 200 },
+                    "strategy": { "bet1": dynamicBet1, "cashou1": 9, "bet2": dynamicBet2, "cashout2": 30 },
                     "status": "TARGET_REACHED",
                     "maxAmountRequired": 120,
                     "finalProfit": 560,
-                    "data": { "roundNumber": 101, "date": dt, "time": dateMapFallback[dt].time || "00:00:00", "multiplier": "200.00x", "amountRequired": 120, "currentRoundNetProfit": 410, "totalProfit": 560, "targetAmount": targetAmountVal }
+                    "data": { "roundNumber": 101, "date": dt, "time": dateMapFallback[dt].time || "00:00:00", "multiplier": "34.29x", "amountRequired": 120, "currentRoundNetProfit": 410, "totalProfit": 560, "targetAmount": targetAmountVal }
                 }
-            })) : [];
+            })) : [
+                {
+                    "date": "22/08/2026",
+                    "bestStrategyResult": {
+                        "strategy": { "bet1": dynamicBet1, "cashou1": 8, "bet2": dynamicBet2, "cashout2": 30 },
+                        "status": "TARGET_REACHED",
+                        "maxAmountRequired": 1940,
+                        "finalProfit": 560,
+                        "data": { "roundNumber": 567, "date": "22/08/2026", "time": "03:13:25", "multiplier": "103.86x", "amountRequired": 1940, "currentRoundNetProfit": 360, "totalProfit": 560, "targetAmount": targetAmountVal }
+                    }
+                }
+            ];
             renderApiStrategyResponseTable(mockData, dynamicBet1, dynamicBet2);
         }
     }
@@ -541,13 +555,24 @@
             const sampleData = uniqueDateKeys.length > 0 ? uniqueDateKeys.map(dt => ({
                 "date": dt,
                 "bestStrategyResult": {
-                    "strategy": { "bet1": bet1 || 10, "cashou1": cashou1 || 20, "bet2": bet2 || 10, "cashout2": cashout2 || 200 },
+                    "strategy": { "bet1": bet1 || 10, "cashou1": cashou1 || 30, "bet2": bet2 || 20, "cashout2": cashout2 || 8 },
                     "status": "TARGET_REACHED",
                     "maxAmountRequired": 150,
                     "finalProfit": 750,
-                    "data": { "roundNumber": 202, "date": dt, "time": dateMapFallback[dt].time || "00:00:00", "multiplier": "200.00x", "amountRequired": 150, "currentRoundNetProfit": 430, "totalProfit": 750, "targetAmount": targetAmount || 700 }
+                    "data": { "roundNumber": 202, "date": dt, "time": dateMapFallback[dt].time || "00:00:00", "multiplier": "42.35x", "amountRequired": 150, "currentRoundNetProfit": 430, "totalProfit": 750, "targetAmount": targetAmount || 700 }
                 }
-            })) : [];
+            })) : [
+                {
+                    "date": "22/08/2026",
+                    "bestStrategyResult": {
+                        "strategy": { "bet1": bet1 || 10, "cashou1": cashou1 || 30, "bet2": bet2 || 20, "cashout2": cashout2 || 8 },
+                        "status": "TARGET_REACHED",
+                        "maxAmountRequired": 2810,
+                        "finalProfit": 750,
+                        "data": { "roundNumber": 621, "date": "22/08/2026", "time": "03:28:44", "multiplier": "42.35x", "amountRequired": 2810, "currentRoundNetProfit": 430, "totalProfit": 750, "targetAmount": targetAmount || 700 }
+                    }
+                }
+            ];
             renderSingleOptimalTable(sampleData);
         }
     }
@@ -701,7 +726,6 @@
         });
 
         runCalculations();
-        const loadingIndicator = document.getElementById('loadingIndicator');
         if (loadingIndicator) loadingIndicator.style.display = 'none';
     }
 
@@ -776,17 +800,16 @@
         ];
 
         let independentBest = null;
-        let highestGlobalCumulativeProfit = -Infinity;
+        let highestMinStop = -Infinity;
 
-        // Sweeping through all multipliers to find the combination that gives the maximum grand total cumulative profit across all days combined (handling positive and negative days seamlessly)
         for (let c1 of multipliers) {
             for (let c2 of multipliers) {
-                let totalCumulativeProfitAcrossAllDays = 0;
-                let sumRecommendedStop = 0;
+                let allPassed = true;
+                let minStopOnAnyDay = Infinity;
 
                 for (let d = 0; d < uniqueDates.length; d++) {
                     const rowObjs = dateMap[uniqueDates[d]];
-                    let dayCumP = 0, peakP = -Infinity, maxLock = -Infinity;
+                    let cumP = 0, peakP = -Infinity, maxLock = -Infinity;
 
                     for (let m = 0; m < rowObjs.length; m++) {
                         let rP = 0;
@@ -801,24 +824,27 @@
                             if (val >= c2) rP += userBet2 * c2;
                         }
 
-                        dayCumP += rP;
-                        if (dayCumP > peakP) peakP = dayCumP;
+                        cumP += rP;
+                        if (cumP > peakP) peakP = cumP;
                         let lock = peakP * 0.85;
                         if (lock > maxLock) maxLock = lock;
                     }
 
-                    totalCumulativeProfitAcrossAllDays += dayCumP;
-                    sumRecommendedStop += maxLock;
+                    if (maxLock <= 0) {
+                        allPassed = false;
+                        break;
+                    }
+
+                    if (maxLock < minStopOnAnyDay) {
+                        minStopOnAnyDay = maxLock;
+                    }
                 }
 
-                if (totalCumulativeProfitAcrossAllDays > highestGlobalCumulativeProfit) {
-                    highestGlobalCumulativeProfit = totalCumulativeProfitAcrossAllDays;
-                    independentBest = { 
-                        c1, 
-                        c2, 
-                        cumulativeProfit: totalCumulativeProfitAcrossAllDays, 
-                        avgStop: sumRecommendedStop / uniqueDates.length 
-                    };
+                if (allPassed) {
+                    if (minStopOnAnyDay > highestMinStop) {
+                        highestMinStop = minStopOnAnyDay;
+                        independentBest = { c1, c2, minStop: minStopOnAnyDay };
+                    }
                 }
             }
         }
@@ -826,10 +852,10 @@
         const strategyBoxElem = document.getElementById('independentStrategyText');
         if (independentBest) {
             strategyBoxElem.innerHTML = `
-                Across all historical days combined (${uniqueDates.length} days), using <strong>Bet 1: ${userBet1} @ ${independentBest.c1}x</strong> and <strong>Bet 2: ${userBet2} @ ${independentBest.c2}x</strong> produces the highest overall cumulative net profit of <span class="${independentBest.cumulativeProfit >= 0 ? 'positive' : 'negative'}">${independentBest.cumulativeProfit >= 0 ? '+' : ''}${independentBest.cumulativeProfit.toFixed(2)}</span> (incorporating both profitable and loss-making days)!
+                Hey! If you place <strong>Bet 1 of ${userBet1}</strong> and cash out at <strong>${independentBest.c1}x</strong>, and <strong>Bet 2 of ${userBet2}</strong> and cash out at <strong>${independentBest.c2}x</strong> for every single day within range (${fromTimeStr} - ${toTimeStr}), your least highest recommended stop amount on any single day is <span class="positive">+${independentBest.minStop.toFixed(2)}</span> with 100% daily consistency!
             `;
         } else {
-            strategyBoxElem.innerHTML = `No configuration could be resolved with the current settings.`;
+            strategyBoxElem.innerHTML = `No 100% consistent independent strategy configuration could be resolved with the current bet inputs and time range.`;
         }
 
         let successfulCombos = [];
@@ -839,7 +865,9 @@
                 const c1 = multipliers[i];
                 const c2 = multipliers[j];
                 
-                let totalCumulativeProfit = 0;
+                let allDatesReachedLockIn = true;
+                let datesHitCount = 0;
+                let totalSumPeak = 0;
                 let sumRecommendedStop = 0;
 
                 for (let d = 0; d < uniqueDates.length; d++) {
@@ -868,38 +896,53 @@
                         if (currentLockIn > dateMaxLockIn) dateMaxLockIn = currentLockIn;
                     }
 
-                    totalCumulativeProfit += cumulativeProfit;
+                    if (dateMaxLockIn >= userEnteredTarget) {
+                        datesHitCount++;
+                    } else {
+                        allDatesReachedLockIn = false;
+                        break; 
+                    }
+
+                    totalSumPeak += peakProfit;
                     sumRecommendedStop += dateMaxLockIn;
                 }
 
-                const avgRecommendedStop = sumRecommendedStop / uniqueDates.length;
-                
-                successfulCombos.push({
-                    name: `Bet 1: ${userBet1} @ ${c1}x | Bet 2: ${userBet2} @ ${c2}x`,
-                    cumulativeProfit: totalCumulativeProfit,
-                    recommendedStop: avgRecommendedStop.toFixed(2)
-                });
+                if (allDatesReachedLockIn && datesHitCount === uniqueDates.length) {
+                    const avgPeak = totalSumPeak / uniqueDates.length;
+                    const avgRecommendedStop = sumRecommendedStop / uniqueDates.length;
+                    
+                    successfulCombos.push({
+                        name: `Bet 1: ${userBet1} @ ${c1}x | Bet 2: ${userBet2} @ ${c2}x`,
+                        datesHitCount: datesHitCount,
+                        totalDates: uniqueDates.length,
+                        peakProfit: avgPeak,
+                        recommendedStop: avgRecommendedStop.toFixed(2)
+                    });
+                }
             }
         }
 
-        // Sort descending by grand total cumulative profit
-        successfulCombos.sort((a, b) => b.cumulativeProfit - a.cumulativeProfit);
+        successfulCombos.sort((a, b) => b.peakProfit - a.peakProfit);
 
         let resultsTableHtml = '';
-        successfulCombos.slice(0, 15).forEach((res, index) => {
-            const isBest = index === 0;
-            let rowStyle = isBest ? 'background-color: rgba(0, 230, 118, 0.08); border-left: 3px solid var(--accent-green);' : '';
-            let bestBadge = isBest ? `<span style="background: var(--accent-green); color: #000; padding: 1px 6px; border-radius: 4px; font-size: 8px; font-weight: bold; margin-left: 6px; vertical-align: middle;">⭐ BEST CUMULATIVE</span>` : '';
-            
-            resultsTableHtml += `
-                <tr style="${rowStyle}">
-                    <td><strong>${res.name}</strong>${bestBadge}</td>
-                    <td><span class="positive">Evaluated across ${uniqueDates.length} Days</span></td>
-                    <td><strong class="${res.cumulativeProfit >= 0 ? 'positive' : 'negative'}">${res.cumulativeProfit >= 0 ? '+' : ''}${res.cumulativeProfit.toFixed(2)}</strong></td>
-                    <td><strong style="color: var(--accent-cyan);">+${res.recommendedStop}</strong></td>
-                </tr>
-            `;
-        });
+        if (successfulCombos.length === 0) {
+            resultsTableHtml = `<tr><td colspan="4" class="no-data">No strategy reached target (${userEnteredTarget}) across ALL ${uniqueDates.length} dates within range. Try lowering your target amount.</td></tr>`;
+        } else {
+            successfulCombos.slice(0, 15).forEach((res, index) => {
+                const isBest = index === 0;
+                let rowStyle = isBest ? 'background-color: rgba(0, 230, 118, 0.08); border-left: 3px solid var(--accent-green);' : '';
+                let bestBadge = isBest ? `<span style="background: var(--accent-green); color: #000; padding: 1px 6px; border-radius: 4px; font-size: 8px; font-weight: bold; margin-left: 6px; vertical-align: middle;">⭐ BEST STRATEGY</span>` : '';
+                
+                resultsTableHtml += `
+                    <tr style="${rowStyle}">
+                        <td><strong>${res.name}</strong>${bestBadge}</td>
+                        <td><span class="positive">${res.datesHitCount} / ${res.totalDates} Dates (100%)</span></td>
+                        <td><strong class="positive">+${res.peakProfit.toFixed(2)}</strong></td>
+                        <td><strong style="color: var(--accent-cyan);">+${res.recommendedStop}</strong></td>
+                    </tr>
+                `;
+            });
+        }
 
         document.getElementById('plCustomResultContent').innerHTML = resultsTableHtml;
 
