@@ -1342,6 +1342,8 @@
                         <tbody id="fpDualBetAllDatesBody">
                             <tr><td colspan="9" class="no-data">Loading data for specific time range across all dates...</td></tr>
                         </tbody>
+                        <tfoot id="fpDualBetAllDatesFoot">
+                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -1821,10 +1823,12 @@
         const userTarget = parseFloat(document.getElementById('fpDualTargetAmt').value) || 0;
 
         const tbody = document.getElementById('fpDualBetAllDatesBody');
+        const tfoot = document.getElementById('fpDualBetAllDatesFoot');
         if (!tbody) return;
 
         if (availableSortedDates.length === 0 || allRowsData.length === 0) {
             tbody.innerHTML = `<tr><td colspan="9" class="no-data">No data available for dates</td></tr>`;
+            if (tfoot) tfoot.innerHTML = '';
             return;
         }
 
@@ -1932,6 +1936,10 @@
         let minCrossAmt = crossedAmounts.length > 0 ? Math.min(...crossedAmounts) : null;
         let maxCrossAmt = crossedAmounts.length > 0 ? Math.max(...crossedAmounts) : null;
 
+        let totalTargetCrossedSum = crossedAmounts.reduce((acc, val) => acc + val, 0);
+        let totalSign = totalTargetCrossedSum >= 0 ? '+' : '';
+        let totalStr = `${totalSign}${formatAmount(totalTargetCrossedSum)}`;
+
         let crossedDDs = computedRows.filter(r => r.hasCrossedTarget).map(r => r.targetCrossDrawdown);
         let minCrossDD = crossedDDs.length > 0 ? Math.min(...crossedDDs) : null;
         let maxCrossDD = crossedDDs.length > 0 ? Math.max(...crossedDDs) : null;
@@ -2004,6 +2012,16 @@
         });
 
         tbody.innerHTML = html;
+
+        if (tfoot) {
+            tfoot.innerHTML = `
+                <tr>
+                    <td colspan="4" style="text-align: right;"><strong>Total Target Amount Crossed:</strong></td>
+                    <td><strong class="${totalTargetCrossedSum >= 0 ? 'positive' : 'negative'}">${totalStr}</strong></td>
+                    <td colspan="4"></td>
+                </tr>
+            `;
+        }
     }
 
     function calculateStreakAnalysis() {
