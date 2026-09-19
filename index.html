@@ -1313,7 +1313,7 @@
                     </div>
                     <div class="filter-group">
                         <label>TARGET AMT</label>
-                        <input type="number" id="fpDualTargetAmt" value="200" min="0" step="any" oninput="applyFilterPL()">
+                        <input type="number" id="fpDualTargetAmt" value="500" min="0" step="any" oninput="applyFilterPL()">
                     </div>
                     <div class="filter-group">
                         <label>&nbsp;</label>
@@ -1342,8 +1342,33 @@
                         <tbody id="fpDualBetAllDatesBody">
                             <tr><td colspan="9" class="no-data">Loading data for specific time range across all dates...</td></tr>
                         </tbody>
-                        <tfoot id="fpDualBetAllDatesFoot">
-                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Newly Created Summary Table Under Peak Combined Profit & Drawdown -->
+            <div class="streak-summary-box" style="display: flex;">
+                <h4>Summary & Adjusted Drawdown Calculation</h4>
+                <div class="dual-bet-toolbar-row" style="margin-bottom: 6px; border-bottom: none; padding-bottom: 0;">
+                    <div class="filter-group">
+                        <label>ADJUSTED DRAWDOWN THRESHOLD (e.g. enter 550, 500...)</label>
+                        <input type="number" id="fpAdjustedThreshold" value="550" min="0" step="any" oninput="applyFilterPL()">
+                    </div>
+                </div>
+                <div class="streak-summary-content">
+                    <table class="dual-summary-table" id="fpSummaryTable">
+                        <thead>
+                            <tr>
+                                <th>Total Number of Days</th>
+                                <th>Total Target Amount Crossed</th>
+                                <th>Total Target Amount Crossed (Adjusted)</th>
+                                <th>Total Max Drawdown Target (Adjusted)</th>
+                                <th>Combined Adjusted Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fpSummaryBody">
+                            <tr><td colspan="5" class="no-data">Loading summary...</td></tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -1431,11 +1456,12 @@
     }
 
     function resetFilterPLInputs() {
-        document.getElementById('fpDualBet1Amt').value = '10';
+        document.getElementById('fpDualBet1Amt').value = '12';
         document.getElementById('fpDualCash1').value = '20';
         document.getElementById('fpDualBet2Amt').value = '10';
-        document.getElementById('fpDualCash2').value = '60';
+        document.getElementById('fpDualCash2').value = '50';
         document.getElementById('fpDualTargetAmt').value = '500';
+        document.getElementById('fpAdjustedThreshold').value = '550';
         
         document.getElementById('fpFromHour').value = "00";
         document.getElementById('fpFromMin').value = "00";
@@ -1526,7 +1552,6 @@
         }
     }
 
-    // Attach click listener for manual update on hover/click card
     document.getElementById('balanceCard').addEventListener('click', () => {
         fetchCurrentBalance();
     });
@@ -1821,14 +1846,17 @@
         const b2Amt = parseFloat(document.getElementById('fpDualBet2Amt').value) || 0;
         const c2Target = parseFloat(document.getElementById('fpDualCash2').value) || 0;
         const userTarget = parseFloat(document.getElementById('fpDualTargetAmt').value) || 0;
+        const adjThreshold = parseFloat(document.getElementById('fpAdjustedThreshold').value) || 550;
 
         const tbody = document.getElementById('fpDualBetAllDatesBody');
-        const tfoot = document.getElementById('fpDualBetAllDatesFoot');
+        const summaryBody = document.getElementById('fpSummaryBody');
         if (!tbody) return;
 
         if (availableSortedDates.length === 0 || allRowsData.length === 0) {
             tbody.innerHTML = `<tr><td colspan="9" class="no-data">No data available for dates</td></tr>`;
-            if (tfoot) tfoot.innerHTML = '';
+            if (summaryBody) {
+                summaryBody.innerHTML = `<tr><td colspan="5" class="no-data">No data available</td></tr>`;
+            }
             return;
         }
 
@@ -1937,12 +1965,31 @@
         let maxCrossAmt = crossedAmounts.length > 0 ? Math.max(...crossedAmounts) : null;
 
         let totalTargetCrossedSum = crossedAmounts.reduce((acc, val) => acc + val, 0);
-        let totalSign = totalTargetCrossedSum >= 0 ? '+' : '';
-        let totalStr = `${totalSign}${formatAmount(totalTargetCrossedSum)}`;
+        let totalStr = `${totalTargetCrossedSum >= 0 ? '+' : ''}${formatAmount(totalTargetCrossedSum)}`;
 
         let crossedDDs = computedRows.filter(r => r.hasCrossedTarget).map(r => r.targetCrossDrawdown);
         let minCrossDD = crossedDDs.length > 0 ? Math.min(...crossedDDs) : null;
         let maxCrossDD = crossedDDs.length > 0 ? Math.max(...crossedDDs) : null;
+
+        let totalAdjustedTargetCrossed = 0;
+        let totalAdjustedDD = 0;
+        computedRows.forEach(r => {
+            if (r.hasCrossedTarget) {
+                let dd = r.targetCrossDrawdown;
+                if (dd >= -adjThreshold) {
+                    totalAdjustedTargetCrossed += r.targetCrossAmount;
+                }
+                if (dd < -adjThreshold) {
+                    totalAdjustedDD += (-adjThreshold);
+                } else {
+                    totalAdjustedDD += 0;
+                }
+            }
+        });
+
+        let totalAdjCrossedStr = `${totalAdjustedTargetCrossed >= 0 ? '+' : ''}${formatAmount(totalAdjustedTargetCrossed)}`;
+        let sumAdjustedVal = totalAdjustedTargetCrossed + totalAdjustedDD;
+        let sumAdjustedStr = `${sumAdjustedVal >= 0 ? '+' : ''}${formatAmount(sumAdjustedVal)}`;
 
         let cumulativeProfits = computedRows.map(r => r.cumulativeProfit);
         let minCum = cumulativeProfits.length > 0 ? Math.min(...cumulativeProfits) : null;
@@ -2013,12 +2060,14 @@
 
         tbody.innerHTML = html;
 
-        if (tfoot) {
-            tfoot.innerHTML = `
+        if (summaryBody) {
+            summaryBody.innerHTML = `
                 <tr>
-                    <td colspan="4" style="text-align: right;"><strong>Total Target Amount Crossed:</strong></td>
+                    <td><strong>${computedRows.length}</strong></td>
                     <td><strong class="${totalTargetCrossedSum >= 0 ? 'positive' : 'negative'}">${totalStr}</strong></td>
-                    <td colspan="4"></td>
+                    <td><strong class="${totalAdjustedTargetCrossed >= 0 ? 'positive' : 'negative'}">${totalAdjCrossedStr}</strong></td>
+                    <td><strong class="negative">${formatAmount(totalAdjustedDD)}</strong></td>
+                    <td><strong class="${sumAdjustedVal >= 0 ? 'positive' : 'negative'}">${sumAdjustedStr}</strong></td>
                 </tr>
             `;
         }
@@ -2912,7 +2961,7 @@
     fetchCurrentBalance();
 
     setInterval(fetchCSVData, 5000);
-    setInterval(fetchCurrentBalance, 3000); // Updated to 3 seconds auto-refresh interval
+    setInterval(fetchCurrentBalance, 3000);
 </script>
 
 </body>
